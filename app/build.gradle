@@ -1,0 +1,61 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'io.mironov.smuggler'
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId "io.jarvis"
+        minSdkVersion 23
+        targetSdkVersion 28
+        versionCode 1
+        manifestPlaceholders = [HOCKEYAPP_APP_ID: "$hockeyAppQaAppId"]
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    dataBinding {
+        enabled = true
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    buildToolsVersion '27.0.3'
+}
+
+dependencies {
+    compile 'com.android.support:appcompat-v7:28.0.0-alpha3'
+    compile 'com.android.support.constraint:constraint-layout:1.1.2'
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    // Android Data Binding
+    kapt 'com.android.databinding:compiler:3.1.3'
+    // Dagger
+    compile 'com.google.dagger:dagger:2.11'
+    kapt 'com.google.dagger:dagger-compiler:2.11'
+    // Tensorflow
+    compile 'org.tensorflow:tensorflow-android:1.8.0'
+    // EventBus
+    compile 'org.greenrobot:eventbus:3.1.1'
+    // HockeyApp(for crash log)
+    implementation 'net.hockeyapp.android:HockeySDK:5.1.0'
+    // RX2
+    compile 'io.reactivex.rxjava2:rxjava:2.1.4'
+    compile 'io.reactivex.rxjava2:rxandroid:2.0.0'
+    // Charts
+    compile 'com.github.PhilJay:MPAndroidChart:v3.0.3'
+    // Retrofit2
+    compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    compile "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
+    compile "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    compile "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
+
+    //implementation project(':myoaar')
+    implementation fileTree(dir: 'libs', include: ['*.aar'])
+}

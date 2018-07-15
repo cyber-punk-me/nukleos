@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hockey_app_meta_data_name">net.hockeyapp.android.appIdentifier</string>
+</resources>
