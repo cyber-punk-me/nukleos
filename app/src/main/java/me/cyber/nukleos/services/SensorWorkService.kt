@@ -7,11 +7,12 @@ import android.support.annotation.IntDef
 import android.util.Log
 import com.thalmic.myo.Hub
 import me.cyber.nukleos.App
-import io.kyr.jarvis.R
+import me.cyber.nukleos.R
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.extensions.*
+import me.cyber.nukleos.sensor.Sensor
 import org.greenrobot.eventbus.Subscribe
 import java.util.concurrent.TimeUnit
 
@@ -32,7 +33,9 @@ class SensorWorkService : IBussed, Service() {
     private val mHub by lazy {
         Hub.getInstance()
     }
-
+    private val mSensor by lazy {
+        Sensor.getInstance()
+    }
     private var mHubSubscriber: Disposable? = null
     private @ActionType
     var mActionType = UNDEFINED
@@ -41,22 +44,36 @@ class SensorWorkService : IBussed, Service() {
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         connectBus()
-
-        if (!mHub.init(App.appComponent.getAppContext(), R.string.application_identifier.getString())) {
+        if (!mSensor.init()) {
             SensorEvent(null).dispatch()
         } else {
-            with(mHub) {
-                mHubSubscriber = setRXListener()
-                        .doOnNext { Log.e("--", "-----${it.byteArray.get(1)}----") }
-                        .subscribeOn(Schedulers.computation())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .sample(300, TimeUnit.MILLISECONDS)
-                        .subscribe({
-                            SensorEvent(it.byteArray.toTypedArray()).dispatch()
-                        }, { Log.e("--", "-----${it.message}----") })
-            }
+            mHubSubscriber =  mSensor.setRXListener()
+                    .doOnNext { Log.e("--", "-----${it.byteArray.get(1)}----") }
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .sample(300, TimeUnit.MILLISECONDS)
+                    .subscribe({
+                        SensorEvent(it.byteArray.toTypedArray()).dispatch()
+                    }, { Log.e("--", "-----${it.message}----") })
         }
+//        if (!mHub.init(App.appComponent.getAppContext(), R.string.application_identifier.getString())) {
+//            SensorEvent(null).dispatch()
+//        } else {
+//                mHubSubscriber =  mHub.setRXListener()
+//                        .doOnNext { Log.e("--", "-----${it.byteArray.get(1)}----") }
+//                        .subscribeOn(Schedulers.computation())
+//                        .observeOn(AndroidSchedulers.mainThread())
+//                        .sample(300, TimeUnit.MILLISECONDS)
+//                        .subscribe({
+//                            SensorEvent(it.byteArray.toTypedArray()).dispatch()
+//                        }, { Log.e("--", "-----${it.message}----") })
+//        }
         return Service.START_NOT_STICKY
+    }
+
+    override fun stopService(name: Intent?): Boolean {
+        disconnectBus()
+        return super.stopService(name)
     }
 
     @Subscribe
@@ -66,8 +83,7 @@ class SensorWorkService : IBussed, Service() {
     }
 
     override fun onDestroy() {
-        disconnectBus()
-        mHub.shutdown()
+        mSensor.shutdown()
         mHubSubscriber.safeDispose()
     }
 }

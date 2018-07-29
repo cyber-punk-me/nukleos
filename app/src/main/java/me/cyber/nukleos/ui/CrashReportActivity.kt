@@ -1,13 +1,13 @@
 package me.cyber.nukleos.ui
 
-import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Bundle
-import io.kyr.jarvis.R
+import android.support.v7.app.AppCompatActivity
+import me.cyber.nukleos.R
 import net.hockeyapp.android.CrashManager
 import net.hockeyapp.android.CrashManager.register
 
-open class CrashReportActivity : Activity() {
+open class CrashReportActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()

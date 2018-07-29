@@ -6,6 +6,8 @@ buildscript {
         hockeyAppQaAppId = '64af1f402a744a78b499b7cc6711ea3c'
         okhttpVersion = '3.9.1'
         retrofitVersion = '2.2.0'
+        lastAdapterVersion = "2.3.0"
+        supportLibVersion = "27.1.1"
         smugglerVersion = '0.12.17'
     }
     repositories {

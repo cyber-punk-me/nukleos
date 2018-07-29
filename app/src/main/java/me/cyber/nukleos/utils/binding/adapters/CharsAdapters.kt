@@ -11,3 +11,9 @@ fun setDataForChart(lineChart: LineChart, data: LineDataSet) =
             setData(LineData(data));
             invalidate()
         }
+
+@BindingAdapter("setAnimationForChar")
+fun setAnimation(lineChart: LineChart, duration: Int){
+    lineChart.animateY(1000)
+    lineChart.animateX(1000)
+}
