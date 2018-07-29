@@ -6,8 +6,8 @@
     <data>
 
         <variable
-            name="vm"
-            type="me.cyber.nukleos.ui.ChartsActivityViewModel" />
+            name="viewModel"
+            type="me.cyber.nukleos.ui.LearningViewModel" />
 
     </data>
 
@@ -17,14 +17,14 @@
         android:layout_height="match_parent"
         android:gravity="left"
         android:orientation="vertical"
-        tools:context="me.cyber.nukleos.ui.ChartsActivity">
+        tools:context=".ui.ChartsActivity">
 
         <TextView
             android:id="@+id/lock_state"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="top|center_horizontal"
-            android:text="@{vm.mActionTypeText}"
+            android:text="@{viewModel.mActionTypeText}"
             android:textSize="20sp" />
 
         <LinearLayout
@@ -43,7 +43,7 @@
                 style="@style/sensorValueText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{vm.mFirstSensorValue}"
+                android:text="@{viewModel.mFirstSensorValue}"
                 tools:text="Some asdfasdf" />
         </LinearLayout>
 
@@ -63,7 +63,7 @@
                 style="@style/sensorValueText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{vm.mSecondSensorValue}" />
+                android:text="@{viewModel.mSecondSensorValue}" />
         </LinearLayout>
 
         <LinearLayout
@@ -82,7 +82,7 @@
                 style="@style/sensorValueText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{vm.mThirdSensorValue}" />
+                android:text="@{viewModel.mThirdSensorValue}" />
         </LinearLayout>
 
         <LinearLayout
@@ -101,7 +101,7 @@
                 style="@style/sensorValueText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{vm.mFourthSensorValue}" />
+                android:text="@{viewModel.mFourthSensorValue}" />
         </LinearLayout>
 
         <LinearLayout
@@ -120,7 +120,7 @@
                 style="@style/sensorValueText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{vm.mFifthSensorValue}" />
+                android:text="@{viewModel.mFifthSensorValue}" />
         </LinearLayout>
 
         <LinearLayout
@@ -139,7 +139,7 @@
                 style="@style/sensorValueText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{vm.mSixthSensorValue}" />
+                android:text="@{viewModel.mSixthSensorValue}" />
         </LinearLayout>
 
         <LinearLayout
@@ -158,7 +158,7 @@
                 style="@style/sensorValueText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{vm.mSeventhSensorValue}" />
+                android:text="@{viewModel.mSeventhSensorValue}" />
         </LinearLayout>
 
         <LinearLayout
@@ -177,7 +177,7 @@
                 style="@style/sensorValueText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{vm.mEighthSensorValue}" />
+                android:text="@{viewModel.mEighthSensorValue}" />
         </LinearLayout>
 
         <TextView
@@ -186,14 +186,14 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="20dp"
-            android:text="@{vm.mScanStateText}" />
+            android:text="@{viewModel.mScanStateText}" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="10dp"
-            android:onClick="@{()->vm.startExtension()}"
+            android:onClick="@{()->viewModel.startExtension()}"
             android:text="START EXTENSION" />
 
         <Button
@@ -201,7 +201,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="10dp"
-            android:onClick="@{()->vm.startFlexion()}"
+            android:onClick="@{()->viewModel.startFlexion()}"
             android:text="START FLEXION" />
 
         <Button
@@ -209,7 +209,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="10dp"
-            android:onClick="@{()->vm.initSensor()}"
+            android:onClick="@{()->viewModel.initSensor()}"
             android:text="INIT SENSOR" />
 
         <Button
@@ -217,7 +217,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="10dp"
-            android:onClick="@{()->vm.stopScan()}"
+            android:onClick="@{()->viewModel.stopScan()}"
             android:text="STOP" />
 
     </LinearLayout>

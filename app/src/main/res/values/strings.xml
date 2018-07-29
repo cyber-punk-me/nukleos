@@ -17,5 +17,8 @@
     <string name="locked">Locked</string>
     <string name="device_disable">You didn\'t swich on your device!</string>
     <string name="value">value</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="learning">Learning</string>
+    <string name="about">About</string>
 
 </resources>

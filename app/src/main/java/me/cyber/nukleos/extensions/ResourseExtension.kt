@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.support.annotation.ColorRes
 import me.cyber.nukleos.App
 import me.cyber.nukleos.utils.EMPTY_STRING
+import java.util.*
 
 private val mContext by lazy {
     App.appComponent.getAppContext()
@@ -32,3 +33,5 @@ fun Int.getColor(default: Int = Color.BLACK): Int {
     }
     return res
 }
+
+fun ClosedRange<Int>.randomFloat(random: Random) = (random.nextInt((endInclusive + 1) - start) +  start).toFloat()

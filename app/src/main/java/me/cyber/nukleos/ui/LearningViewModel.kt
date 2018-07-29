@@ -2,11 +2,13 @@ package me.cyber.nukleos.ui
 
 import android.content.Intent
 import android.databinding.ObservableField
+import android.databinding.ObservableFloat
+import android.databinding.ObservableInt
 import com.thalmic.myo.Hub
 import com.thalmic.myo.scanner.Scanner
 import me.cyber.nukleos.App
-import io.kyr.jarvis.R
-import io.kyr.jarvis.extensions.*
+import me.cyber.nukleos.R
+import me.cyber.nukleos.extensions.*
 import me.cyber.nukleos.services.ActionTypeEvent
 import me.cyber.nukleos.services.SensorEvent
 import me.cyber.nukleos.services.SensorWorkService
@@ -15,11 +17,10 @@ import me.cyber.nukleos.services.SensorWorkService.Companion.EXTENSION
 import me.cyber.nukleos.services.SensorWorkService.Companion.FLEXION
 import me.cyber.nukleos.services.SensorWorkService.Companion.UNDEFINED
 import me.cyber.nukleos.utils.EMPTY_STRING
-import me.cyber.nukleos.extensions.*
 import org.greenrobot.eventbus.Subscribe
 
 
-class ChartsActivityViewModel : IBussed {
+class LearningViewModel : IBussed {
 
     val mScanStateText = ObservableField<String>("Scan state")
 
@@ -104,7 +105,10 @@ class ChartsActivityViewModel : IBussed {
 
     fun showConnectionError(errorMessage: String) = errorMessage.makeShortToast()
 
-    fun release() = disconnectBus()
+    fun release() {
+        disconnectBus()
+        mContext.stopService(mSensorWorkService)
+    }
 
     fun shutDown() {
         mScanStateText.set("Scanning is complete. Send data to server.")

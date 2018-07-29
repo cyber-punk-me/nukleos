@@ -3,7 +3,7 @@ package me.cyber.nukleos
 import android.app.Application
 import android.content.Context
 import me.cyber.nukleos.di.components.AppComponent
-import io.kyr.jarvis.di.components.DaggerAppComponent
+import me.cyber.nukleos.di.components.DaggerAppComponent
 import me.cyber.nukleos.di.modules.AppModule
 
 class App : Application() {
