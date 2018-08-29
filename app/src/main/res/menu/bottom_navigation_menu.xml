@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/item_scan"
+        android:icon="@drawable/abc_ic_search_api_material"
+        android:title="@string/find" />
+    <item android:id="@+id/item_control"
+        android:icon="@drawable/ic_control"
+        android:title="@string/sensor_control" />
+    <item android:id="@+id/item_graph"
+        android:icon="@drawable/ic_charts"
+        android:title="@string/sensor_charts" />
+    <item android:id="@+id/item_export"
+        android:icon="@drawable/ic_download"
+        android:title="@string/learning" />
+
+</menu>

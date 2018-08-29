@@ -1,24 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="application_identifier">me.cyber.nukleos</string>
 
-    <string name="application_identifier">io.kyr.jarvis</string>
+    <string name="app_name">Nukleos</string>
+    <string name="sensor_is_not_found">Sensor not found!</string>
+    <string name="first_do_a_scan">Please, find sensor for start</string>
 
-    <string name="app_name">Jarvis</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="scan">Scan</string>
-    <string name="pose_fist">Fist</string>
-    <string name="pose_wavein">Wave In</string>
-    <string name="pose_waveout">Wave Out</string>
-    <string name="pose_fingersspread">Fingers Spread</string>
-    <string name="pose_rest">Rest</string>
-    <string name="arm_left">Left Arm</string>
-    <string name="arm_right">Right Arm</string>
-    <string name="unlocked">Unlocked</string>
-    <string name="locked">Locked</string>
-    <string name="device_disable">You didn\'t swich on your device!</string>
-    <string name="value">value</string>
-    <string name="dashboard">Dashboard</string>
-    <string name="learning">Learning</string>
-    <string name="about">About</string>
+    <string name="description">Hello! This is a Nukleos! Miroslav Bulgakov and Kirill Yashuk was here!</string>
+    <string name="author">Miroslav Bulgakov</string>
+
+    <!--TABS-->
+    <string name="find">Find sensor</string>
+    <string name="sensor_control">Sensor control</string>
+    <string name="sensor_charts">Charts</string>
+    <string name="learning">NN Learning</string>
+    <string name="unknown_stuff">Unknown Stuff</string>
+
+    <!--Sensor control tab-->
+    <string name="current_device">Current device</string>
+    <string name="name">Name</string>
+    <string name="device_status">Status</string>
+    <string name="select">Select</string>
+    <string name="address">Address</string>
+    <string name="connect">Connect</string>
+    <string name="connecting">Connecting…</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="connected">Connected</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="waiting_for_scan">Waiting for scan</string>
+    <string name="device_control">Device Control</string>
+    <string name="stop">Stop</string>
+    <string name="start">Start</string>
+    <string name="sensor_frequency">Sensor Frequency</string>
+    <string name="vibration">Vibrate it</string>
+    <string name="short_vibration">Short</string>
+    <string name="normal_vibration">Normal</string>
+    <string name="long_vibration">PLEASE, STOP!</string>
+    <string name="currently_streaming">Current streaming…</string>
+    <string name="frequency_max">200Hz</string>
+    <string name="hz_step">%1$dhz</string>
+    <string name="location_permission_denied">We need location permission!</string>
+    <string name="write_permission_denied_message">We need Write permission!</string>
+    <string name="onboarding_title_0">Welcome to Myo EMG Visualizer</string>
+    <string name="onboarding_description_0">You can use this app to collect EMG data from your MYO</string>
+    <string name="onboarding_description_1">Search for your Myo form the \'Scan\' page and Select your Myo from the list. In order to perform a scan we need the \'Location\' permission</string>
+    <string name="onboarding_description_2">Select the frequency e start streaming form the \'Control\' page</string>
+    <string name="onboarding_description_3">Visualize your data in the \'Graph\' page</string>
+    <string name="onboarding_description_4">Export the collected data as a CSV in the \'Export page</string>
+    <string name="zero">0</string>
+    <string name="data_to_export">Values to Export</string>
+    <string name="save_export">Save Export</string>
+    <string name="reset">Reset</string>
+    <string name="send">Send</string>
+    <string name="save">Save</string>
+    <string name="save_info_message">asd</string>
+    <string name="export_points">Learning data</string>
+    <string name="stop_collecting">Stop Collecting</string>
+    <string name="start_collecting">Start Collecting</string>
+    <string name="scan_failed">Scan Failed</string>
+    <string name="scan_completed">Scan Completed!</string>
+    <string name="switch_on_scaninig">Switch on SCANNING, for look at the charts </string>
 
 </resources>

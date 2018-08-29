@@ -2,8 +2,38 @@
 <resources>
     <color name="colorPrimary">#2d365d</color>
     <color name="colorPrimaryDark">#25314a</color>
-    <color name="colorAccent">#FF4081</color>
     <color name="toolbar_title_color">#2d365d</color>
     <color name="white">#ffffff</color>
     <color name="gray">#ececec</color>
+    <color name="primaryColor">#444444</color>
+    <color name="primaryLightColor">#000000</color>
+    <color name="primaryDarkColor">#272727</color>
+    <color name="secondaryColor">#e644a400</color>
+    <color name="secondaryLightColor">#a9d184</color>
+    <color name="secondaryDarkColor">#15610b</color>
+    <color name="screenBackground">#919694</color>
+    <color name="primaryTextColor">#000000</color>
+    <color name="secondaryTextColor">#ffffff</color>
+    <color name="colorBackground">#f5f5f6</color>
+
+    <!--CHART COLORS-->
+    <array name="charts_colors">
+        <item>@color/first_chart</item>
+        <item>@color/second_chart</item>
+        <item>@color/third_chart</item>
+        <item>@color/fourth_chart</item>
+        <item>@color/fifth_chart</item>
+        <item>@color/sixth_chart</item>
+        <item>@color/seventh_chart</item>
+        <item>@color/eight_chart</item>
+    </array>
+    <color name="first_chart">#3f62b5</color>
+    <color name="second_chart">#FF9c27b0</color>
+    <color name="third_chart">#FF009688</color>
+    <color name="fourth_chart">#FF8bc34a</color>
+    <color name="fifth_chart">#FFffc107</color>
+    <color name="sixth_chart">#FF795548</color>
+    <color name="seventh_chart">#FFe51c23</color>
+    <color name="eight_chart">#FFcddc39</color>
+    <color name="chart_info">#1976D2</color>
 </resources>
