@@ -7,16 +7,15 @@ import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
-
 import dagger.android.AndroidInjection
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.support.HasSupportFragmentInjector
+import kotlinx.android.synthetic.main.activity_main.*
+import me.cyber.nukleos.ui.charts.ChartsFragment
 import me.cyber.nukleos.ui.control.SensorControlFragment
 import me.cyber.nukleos.ui.export.ExportFragment
-import me.cyber.nukleos.ui.charts.ChartsFragment
 import me.cyber.nukleos.ui.find.FindSensorFragment
-import kotlinx.android.synthetic.main.activity_main.*
 import me.cyber.nukleus.R
 import javax.inject.Inject
 
@@ -35,13 +34,6 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
-
-//        // Checking if we should on-board the user the first time.
-//        val prefs = getSharedPreferences(PREFS_GLOBAL, Context.MODE_PRIVATE)
-//        if (!prefs.getBoolean(KEY_COMPLETED_ONBOARDING, false)) {
-//            finish()
-//            startActivity(Intent(this, IntroActivity::class.java))
-//        }
 
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.new_toolbar))
@@ -87,7 +79,6 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
         view_pager.currentItem = pageId
     }
 
-
     inner class MyAdapter(fm: FragmentManager, private val fragmentList: List<Fragment>) : FragmentPagerAdapter(fm) {
         override fun getCount(): Int {
             return fragmentList.size
@@ -97,5 +88,4 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
             return fragmentList[position]
         }
     }
-
 }
