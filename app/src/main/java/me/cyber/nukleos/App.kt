@@ -1,25 +1,37 @@
 package me.cyber.nukleos
 
+import android.app.Activity
 import android.app.Application
-import android.content.Context
-import me.cyber.nukleos.di.components.AppComponent
-import io.kyr.jarvis.di.components.DaggerAppComponent
-import me.cyber.nukleos.di.modules.AppModule
+import dagger.android.AndroidInjector
+import dagger.android.DispatchingAndroidInjector
+import dagger.android.HasActivityInjector
+import me.cyber.nukleos.dagger.ApplicationComponent
+import me.cyber.nukleos.dagger.ContextModule
+import me.cyber.nukleos.dagger.DaggerApplicationComponent
+import javax.inject.Inject
 
-class App : Application() {
+class App : Application(), HasActivityInjector {
+
+    @Inject
+    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Activity>
+
 
     companion object {
-        lateinit var appComponent: AppComponent
+        @JvmStatic lateinit var applicationComponent : ApplicationComponent
     }
-
-    private lateinit var mContext: Context
 
     override fun onCreate() {
         super.onCreate()
-        mContext = applicationContext
-        appComponent = DaggerAppComponent.builder()
-                .appModule(AppModule(mContext))
+        applicationComponent = DaggerApplicationComponent
+                .builder()
+                .contextModule(ContextModule(applicationContext))
                 .build()
+
+        applicationComponent.inject(this)
+    }
+
+    override fun activityInjector(): AndroidInjector<Activity> {
+        return dispatchingAndroidInjector
     }
 }
 

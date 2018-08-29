@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/device_information"
+        style="@style/TextAppearance.AppCompat.Subhead"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_margin"
+        android:text="@string/current_device"
+        android:textColor="@color/colorPrimary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/device_name"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_margin"
+        app:layout_constraintTop_toBottomOf="@+id/device_information"
+        tools:text="Nicola's Myo" />
+
+    <TextView
+        android:id="@+id/device_name_subtitle"
+        style="@style/TextAppearance.AppCompat.Caption"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/default_margin"
+        android:layout_marginStart="@dimen/default_margin"
+        android:text="@string/name"
+        app:layout_constraintTop_toBottomOf="@+id/device_name" />
+
+    <TextView
+        android:id="@+id/device_address"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_margin"
+        app:layout_constraintTop_toBottomOf="@+id/device_name_subtitle"
+        tools:text="11:22:33:44:55:66" />
+
+    <TextView
+        android:id="@+id/device_address_subtitle"
+        style="@style/TextAppearance.AppCompat.Caption"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/default_margin"
+        android:layout_marginStart="@dimen/default_margin"
+        android:text="@string/address"
+        app:layout_constraintTop_toBottomOf="@+id/device_address" />
+
+    <View
+        android:id="@+id/info_divider"
+        android:layout_width="wrap_content"
+        android:layout_height="2dp"
+        android:layout_marginTop="@dimen/default_margin"
+        android:background="@color/secondaryLightColor"
+        app:layout_constraintTop_toBottomOf="@id/device_address_subtitle" />
+
+    <TextView
+        android:id="@+id/sensor_status_title"
+        style="@style/TextAppearance.AppCompat.Subhead"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_margin"
+        android:text="@string/device_status"
+        android:textColor="@color/primaryColor"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/info_divider" />
+
+    <TextView
+        android:id="@+id/device_status"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_margin"
+        android:text="@string/disconnected"
+        app:layout_constraintEnd_toStartOf="@+id/connection_loader"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sensor_status_title" />
+
+    <android.support.design.button.MaterialButton
+        android:id="@+id/button_connect"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/ten_grid_size"
+        android:layout_margin="@dimen/default_margin"
+        android:enabled="false"
+        android:minWidth="120dp"
+        android:text="@string/connect"
+        app:layout_constraintBottom_toTopOf="@+id/device_status"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/device_status" />
+
+    <ProgressBar
+        android:id="@+id/connection_loader"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/ten_grid_size"
+        android:alpha="0"
+        android:indeterminate="true"
+        app:layout_constraintBottom_toTopOf="@+id/button_connect"
+        app:layout_constraintEnd_toStartOf="@+id/button_connect"
+        app:layout_constraintTop_toBottomOf="@+id/button_connect" />
+
+    <View
+        android:id="@+id/status_divider"
+        android:layout_width="wrap_content"
+        android:layout_height="2dp"
+        android:layout_marginTop="@dimen/default_margin"
+        android:background="@color/secondaryLightColor"
+        app:layout_constraintTop_toBottomOf="@id/button_connect" />
+
+    <TextView
+        android:id="@+id/sensor_control"
+        style="@style/TextAppearance.AppCompat.Subhead"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_margin"
+        android:text="@string/device_control"
+        android:textColor="@color/primaryColor"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/status_divider" />
+
+    <TextView
+        android:id="@+id/scan_status"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_margin"
+        android:text="@string/waiting_for_scan"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sensor_control" />
+
+    <android.support.design.button.MaterialButton
+        android:id="@+id/start_scan_btn"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/ten_grid_size"
+        android:layout_margin="@dimen/default_margin"
+        android:enabled="false"
+        android:minWidth="120dp"
+        android:text="@string/start"
+        app:layout_constraintBottom_toTopOf="@+id/scan_status"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scan_status" />
+
+    <TextView
+        android:id="@+id/sensor_frequency_title"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_margin"
+        android:text="@string/sensor_frequency"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/start_scan_btn" />
+
+    <TextView
+        android:id="@+id/device_frequency_value"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_margin"
+        android:text="@string/frequency_max"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/start_scan_btn" />
+
+    <SeekBar
+        android:id="@+id/sensor_frequency_seekbar"
+        style="@style/Widget.AppCompat.SeekBar.Discrete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/default_margin"
+        android:layout_marginLeft="@dimen/base_grid_size"
+        android:layout_marginRight="@dimen/base_grid_size"
+        android:layout_marginTop="@dimen/default_margin"
+        android:max="4"
+        android:progress="4"
+        app:layout_constraintTop_toBottomOf="@id/sensor_frequency_title" />
+
+    <TextView
+        android:id="@+id/vibration_title"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_margin"
+        android:text="@string/vibration"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sensor_frequency_seekbar" />
+
+    <android.support.design.button.MaterialButton
+        android:id="@+id/vibro_button_1"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/ten_grid_size"
+        android:layout_margin="@dimen/default_margin"
+        android:enabled="false"
+        android:text="@string/short_vibration"
+        app:layout_constraintEnd_toStartOf="@id/vibro_button_2"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/vibration_title" />
+
+    <android.support.design.button.MaterialButton
+        android:id="@+id/vibro_button_2"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/ten_grid_size"
+        android:layout_margin="@dimen/default_margin"
+        android:enabled="false"
+        android:text="@string/normal_vibration"
+        app:layout_constraintEnd_toStartOf="@id/vibro_button_3"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintStart_toEndOf="@id/vibro_button_1"
+        app:layout_constraintTop_toBottomOf="@+id/vibration_title" />
+
+    <android.support.design.button.MaterialButton
+        android:id="@+id/vibro_button_3"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/ten_grid_size"
+        android:layout_margin="@dimen/default_margin"
+        android:enabled="false"
+        android:text="@string/long_vibration"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintStart_toEndOf="@+id/vibro_button_2"
+        app:layout_constraintTop_toBottomOf="@+id/vibration_title" />
+
+
+</android.support.constraint.ConstraintLayout>
