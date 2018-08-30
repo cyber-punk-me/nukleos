@@ -4,7 +4,7 @@ import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import me.cyber.nukleos.ui.MainActivity
 import me.cyber.nukleos.ui.control.SensorControlFragment
-import me.cyber.nukleos.ui.export.ExportFragment
+import me.cyber.nukleos.ui.export.NNLearningFragment
 import me.cyber.nukleos.ui.charts.ChartsFragment
 import me.cyber.nukleos.ui.find.FindSensorFragment
 
@@ -25,5 +25,5 @@ abstract class BuildersModule {
     abstract fun bindGraphFragment(): ChartsFragment
 
     @ContributesAndroidInjector(modules = [NNLearningViewModule::class, NNLearningModule::class])
-    abstract fun bindExportFragment(): ExportFragment
+    abstract fun bindExportFragment(): NNLearningFragment
 }
