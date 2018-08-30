@@ -1,6 +1,6 @@
 # Nukleos
 
-Useful application for work with MYO(just now), and for other EMG sensors(soon)
+A useful application for working with MYO(just now), and for other EMG sensors(soon)
 
 ### Tech
 
