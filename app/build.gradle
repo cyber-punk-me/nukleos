@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'io.mironov.smuggler'
 
 android {
     compileSdkVersion 28
@@ -48,6 +49,11 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    // Retrofit2
+    compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    compile "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
+    compile "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    compile "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
     // RX2
     implementation 'io.reactivex.rxjava2:rxjava:2.2.1'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
@@ -63,9 +69,8 @@ dependencies {
     implementation 'org.greenrobot:eventbus:3.1.1'
     // HockeyApp(for crash log)
     implementation 'net.hockeyapp.android:HockeySDK:5.1.0'
-    implementation 'com.android.support:multidex:1.0.3'
-
     compile 'net.hockeyapp.android:HockeySDK:5.1.0'
-
+    // MultiDEX
+    implementation 'com.android.support:multidex:1.0.3'
     implementation fileTree(include: ['*.aar'], dir: 'libs')
 }

@@ -9,16 +9,17 @@ import android.view.ViewGroup
 import android.widget.Toast
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.layout_export.*
+import me.cyber.nukleos.App
 import me.cyber.nukleos.BaseFragment
 import me.cyber.nukleus.R
 import javax.inject.Inject
 
 
 
-class ExportFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLearningInterface.View {
+class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLearningInterface.View {
 
     companion object {
-        fun newInstance() = ExportFragment()
+        fun newInstance() = NNLearningFragment()
         private const val REQUEST_WRITE_EXTERNAL_CODE = 2
     }
 
@@ -45,7 +46,7 @@ class ExportFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLearning
     }
 
     override fun hideSaveArea() {
-       /* button_save.visibility = View.INVISIBLE
+        /* button_save.visibility = View.INVISIBLE
         button_share.visibility = View.INVISIBLE
         save_export_title.visibility = View.INVISIBLE
         save_export_subtitle.visibility = View.INVISIBLE*/

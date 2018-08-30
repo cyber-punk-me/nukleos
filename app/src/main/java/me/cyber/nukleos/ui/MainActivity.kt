@@ -14,13 +14,10 @@ import dagger.android.support.HasSupportFragmentInjector
 import kotlinx.android.synthetic.main.activity_main.*
 import me.cyber.nukleos.ui.charts.ChartsFragment
 import me.cyber.nukleos.ui.control.SensorControlFragment
-import me.cyber.nukleos.ui.export.ExportFragment
+import me.cyber.nukleos.ui.export.NNLearningFragment
 import me.cyber.nukleos.ui.find.FindSensorFragment
 import me.cyber.nukleus.R
 import javax.inject.Inject
-
-private const val PREFS_GLOBAL = "global"
-private const val KEY_COMPLETED_ONBOARDING = "completed_onboarding"
 
 class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
 
@@ -42,7 +39,7 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
                 FindSensorFragment.newInstance(),
                 SensorControlFragment.newInstance(),
                 ChartsFragment.newInstance(),
-                ExportFragment.newInstance()
+                NNLearningFragment.newInstance()
         )
 
         view_pager.adapter = MyAdapter(supportFragmentManager, fragmentList)
