@@ -19,6 +19,7 @@ interface NNLearningInterface {
         fun hideSaveArea()
         fun showSaveArea()
         fun saveDataFile(content: String)
+        fun saveDataStop(content: String)
         fun sendData(content: String)
     }
 
@@ -28,6 +29,8 @@ interface NNLearningInterface {
         abstract fun onResetPressed()
         abstract fun onSavePressed()
         abstract fun onSendPressed()
+        abstract fun onStateButtonStartPressed()
+        abstract fun onStateButtonStopPressed()
 
     }
 }
