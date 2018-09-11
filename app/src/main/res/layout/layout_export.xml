@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:animateLayoutChanges="true"
     android:orientation="vertical">
 
@@ -51,7 +52,31 @@
         android:enabled="false"
         android:text="@string/reset" />
 
+    <!--<me.cyber.nukleos.views.PowerfulStateButton-->
+        <!--android:id="@+id/powerful_state_btn_start"-->
+        <!--android:layout_gravity="center"-->
+        <!--android:layout_width="228dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--app:resetAfterFailed_PowStBtn="true"-->
+        <!--app:btnRippleColor_PowStBtn="@color/secondaryColor"-->
+        <!--app:btnDisabledColor_PowStBtn="@color/secondaryLightColor"-->
+        <!--app:btnColor_PowStBtn="@color/secondaryDarkColor"-->
+        <!--app:cornerRadius_PowStBtn="12"-->
+        <!--app:btnText_PowStBtn="START"/>-->
+
+    <!--<me.cyber.nukleos.views.PowerfulStateButton-->
+        <!--android:id="@+id/powerful_state_btn_stop"-->
+        <!--android:layout_gravity="center"-->
+        <!--android:layout_width="228dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--app:resetAfterFailed_PowStBtn="true"-->
+        <!--app:btnRippleColor_PowStBtn="#e644a400"-->
+        <!--app:btnDisabledColor_PowStBtn="#a9d184"-->
+        <!--app:btnColor_PowStBtn="@color/secondaryDarkColor"-->
+        <!--app:cornerRadius_PowStBtn="8"-->
+        <!--app:btnText_PowStBtn="STOP"/>-->
  <!--   <TextView
+
         android:id="@+id/save_export_title"
         style="@style/TextAppearance.AppCompat.Subhead"
         android:layout_width="wrap_content"

@@ -3,13 +3,13 @@ package me.cyber.nukleos.ui.export
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.layout_export.*
-import me.cyber.nukleos.App
 import me.cyber.nukleos.BaseFragment
 import me.cyber.nukleus.R
 import javax.inject.Inject
@@ -40,6 +40,8 @@ class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLear
         with(exportPresenter) {
             button_start_collecting.setOnClickListener { onBufferDataPressed() }
             button_reset_collecting.setOnClickListener { onResetPressed() }
+//            powerful_state_btn_start.setOnClickListener{onStateButtonStartPressed()}
+//            powerful_state_btn_stop.setOnClickListener{onStateButtonStopPressed()}
           /*  button_share.setOnClickListener { onSendPressed() }
             button_save.setOnClickListener { onSavePressed() }*/
         }
@@ -69,6 +71,12 @@ class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLear
 
     override fun saveDataFile(content: String) {
    // TODO Сделай отправку. Не будь говном
+                Log.e("---","========   уууууу   =======")
+//                powerful_state_btn_start.startLoading()
+    }
+
+    override fun saveDataStop(content: String) {
+//        powerful_state_btn_start.loadingFailed()
     }
 
     override fun enableStartCollectingButton() {

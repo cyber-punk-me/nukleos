@@ -77,6 +77,14 @@ class NNLearningPresenter(override val view: NNLearningInterface.View, private v
         view.sendData(createStringFromData(mDataBuffer))
     }
 
+    override fun onStateButtonStartPressed() {
+        view.saveDataFile("sdasdasasdasd")
+    }
+
+    override fun onStateButtonStopPressed(){
+        view.saveDataStop("sdasdasasdasd")
+    }
+
     private fun createStringFromData(buffer: ArrayList<FloatArray>) = StringBuilder().apply {
         buffer.forEach {
             it.forEach {

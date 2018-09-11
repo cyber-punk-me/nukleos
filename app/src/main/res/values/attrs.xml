@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="PowerfulStateButton">
+        <attr name="resetAfterFailed_PowStBtn" format="boolean" />
+        <attr name="cornerRadius_PowStBtn" format="float" />
+        <attr name="disabledTextColor_PowStBtn" format="reference|string" />
+        <attr name="textColor_PowStBtn" format="reference|string" />
+        <attr name="btnText_PowStBtn" format="reference|string" />
+        <attr name="btnColor_PowStBtn" format="reference|color" />
+        <attr name="btnRippleColor_PowStBtn" format="reference|color" />
+        <attr name="btnRippleAlpha_PowStBtn" format="float" />
+        <attr name="btnDisabledColor_PowStBtn" format="reference|color" />
+    </declare-styleable>
+</resources>
