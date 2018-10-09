@@ -18,7 +18,6 @@ class NNLearningPresenter(override val view: NNLearningInterface.View, private v
 
     override fun start() {
         with(view) {
-            showCollectedData(mValuesCounter.get())
             mSensorStuffManager.myo?.apply {
                 if (this.isStreaming()) {
                     enableStartCollectingButton()
@@ -41,10 +40,7 @@ class NNLearningPresenter(override val view: NNLearningInterface.View, private v
                                     showCollectionStarted()
                                     disableResetButton()
                                 }
-                                .subscribe {
-                                    mDataBuffer.add(it)
-                                    showCollectedData(mValuesCounter.incrementAndGet())
-                                }
+                                .subscribe { mDataBuffer.add(it) }
                     } else {
                         mDataSubscription?.dispose()
                         enableResetButton()
@@ -62,35 +58,27 @@ class NNLearningPresenter(override val view: NNLearningInterface.View, private v
         with(view) {
             mValuesCounter.set(0)
             mDataBuffer.clear()
-            showCollectedData(0)
             mDataSubscription?.dispose()
             hideSaveArea()
             disableResetButton()
         }
     }
 
-    override fun onSavePressed() {
-        view.saveDataFile(createStringFromData(mDataBuffer))
+    override fun onSavePressed(dataType: Int) {
+        view.saveDataFile(createStringFromData(mDataBuffer, dataType))
     }
 
-    override fun onSendPressed() {
-        view.sendData(createStringFromData(mDataBuffer))
+    override fun onSendPressed(dataType: Int) {
+        view.sendData(createStringFromData(mDataBuffer, dataType))
     }
 
-    override fun onStateButtonStartPressed() {
-        view.saveDataFile("sdasdasasdasd")
-    }
-
-    override fun onStateButtonStopPressed(){
-        view.saveDataStop("sdasdasasdasd")
-    }
-
-    private fun createStringFromData(buffer: ArrayList<FloatArray>) = StringBuilder().apply {
+    private fun createStringFromData(buffer: ArrayList<FloatArray>, dataType: Int) = StringBuilder().apply {
         buffer.forEach {
             it.forEach {
                 append(it)
-                append(";")
+                append(",")
             }
+            append(" $dataType;")
             append("\n")
         }
     }.toString()

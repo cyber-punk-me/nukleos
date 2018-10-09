@@ -14,25 +14,6 @@
         android:text="@string/export_points"
         android:textColor="@color/primaryColor" />
 
-    <TextView
-        android:id="@+id/points_count"
-        style="@style/TextAppearance.AppCompat.Headline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/default_margin"
-        android:layout_marginRight="@dimen/default_margin"
-        android:text="@string/zero"
-        android:textColor="@color/primaryColor" />
-
-    <TextView
-        android:id="@+id/points_count_subtitle"
-        style="@style/TextAppearance.AppCompat.Caption"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/default_margin"
-        android:layout_marginEnd="@dimen/default_margin"
-        android:text="@string/data_to_export" />
-
     <android.support.design.button.MaterialButton
         android:id="@+id/button_start_collecting"
         android:layout_width="match_parent"
@@ -44,13 +25,43 @@
         android:text="@string/start_collecting" />
 
     <android.support.design.button.MaterialButton
-        android:id="@+id/button_reset_collecting"
+        android:id="@+id/extention_save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/default_margin"
+        android:layout_marginTop="@dimen/default_margin"
+        android:layout_marginRight="@dimen/default_margin"
+        android:enabled="false"
+        android:text="@string/extension" />
+
+    <android.support.design.button.MaterialButton
+        android:id="@+id/flexion_save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/default_margin"
+        android:layout_marginTop="@dimen/default_margin"
+        android:layout_marginRight="@dimen/default_margin"
+        android:enabled="false"
+        android:text="@string/flexion" />
+
+    <android.support.design.button.MaterialButton
+        android:id="@+id/adduction_save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/default_margin"
+        android:layout_marginTop="@dimen/default_margin"
+        android:layout_marginRight="@dimen/default_margin"
+        android:enabled="false"
+        android:text="@string/adduction" />
+
+    <android.support.design.button.MaterialButton
+        android:id="@+id/abduction_save"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/default_margin"
         android:layout_marginRight="@dimen/default_margin"
         android:enabled="false"
-        android:text="@string/reset" />
+        android:text="@string/abduction" />
 
     <!--<me.cyber.nukleos.views.PowerfulStateButton-->
         <!--android:id="@+id/powerful_state_btn_start"-->
@@ -75,8 +86,7 @@
         <!--app:btnColor_PowStBtn="@color/secondaryDarkColor"-->
         <!--app:cornerRadius_PowStBtn="8"-->
         <!--app:btnText_PowStBtn="STOP"/>-->
- <!--   <TextView
-
+  <TextView
         android:id="@+id/save_export_title"
         style="@style/TextAppearance.AppCompat.Subhead"
         android:layout_width="wrap_content"
@@ -93,7 +103,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/default_margin"
         android:layout_marginEnd="@dimen/default_margin"
-        android:text="@string/save_info_message"
+        android:text="igustring/save_info_message"
         android:visibility="invisible" />
 
     <android.support.design.button.MaterialButton
@@ -103,7 +113,7 @@
         android:layout_marginLeft="@dimen/default_margin"
         android:layout_marginTop="@dimen/default_margin"
         android:layout_marginRight="@dimen/default_margin"
-        android:text="@string/share"
+        android:text="ОТПРАВИТЬ"
         android:visibility="invisible" />
 
     <android.support.design.button.MaterialButton
@@ -114,5 +124,5 @@
         android:layout_marginLeft="@dimen/default_margin"
         android:layout_marginRight="@dimen/default_margin"
         android:text="@string/save"
-        android:visibility="invisible" />-->
+        android:visibility="invisible" />
 </LinearLayout>
