@@ -2,9 +2,36 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:animateLayoutChanges="true"
     android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/countdown_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#b7ffffff"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/countdown_title_text"
+            style="@style/TextAppearance.AppCompat.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Learning starts in ..."
+            android:textSize="26sp" />
+
+        <TextView
+            android:id="@+id/countdown_text"
+            style="@style/TextAppearance.AppCompat.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textSize="56sp" />
+
+    </LinearLayout>
 
     <TextView
         style="@style/TextAppearance.AppCompat.Subhead"
@@ -31,7 +58,7 @@
         android:layout_marginLeft="@dimen/default_margin"
         android:layout_marginTop="@dimen/default_margin"
         android:layout_marginRight="@dimen/default_margin"
-        android:enabled="false"
+        android:enabled="true"
         android:text="@string/extension" />
 
     <android.support.design.button.MaterialButton
@@ -41,7 +68,7 @@
         android:layout_marginLeft="@dimen/default_margin"
         android:layout_marginTop="@dimen/default_margin"
         android:layout_marginRight="@dimen/default_margin"
-        android:enabled="false"
+        android:enabled="true"
         android:text="@string/flexion" />
 
     <android.support.design.button.MaterialButton
@@ -51,7 +78,7 @@
         android:layout_marginLeft="@dimen/default_margin"
         android:layout_marginTop="@dimen/default_margin"
         android:layout_marginRight="@dimen/default_margin"
-        android:enabled="false"
+        android:enabled="true"
         android:text="@string/adduction" />
 
     <android.support.design.button.MaterialButton
@@ -60,69 +87,58 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/default_margin"
         android:layout_marginRight="@dimen/default_margin"
-        android:enabled="false"
+        android:enabled="true"
         android:text="@string/abduction" />
 
     <!--<me.cyber.nukleos.views.PowerfulStateButton-->
-        <!--android:id="@+id/powerful_state_btn_start"-->
-        <!--android:layout_gravity="center"-->
-        <!--android:layout_width="228dp"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--app:resetAfterFailed_PowStBtn="true"-->
-        <!--app:btnRippleColor_PowStBtn="@color/secondaryColor"-->
-        <!--app:btnDisabledColor_PowStBtn="@color/secondaryLightColor"-->
-        <!--app:btnColor_PowStBtn="@color/secondaryDarkColor"-->
-        <!--app:cornerRadius_PowStBtn="12"-->
-        <!--app:btnText_PowStBtn="START"/>-->
+    <!--android:id="@+id/powerful_state_btn_start"-->
+    <!--android:layout_gravity="center"-->
+    <!--android:layout_width="228dp"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--app:resetAfterFailed_PowStBtn="true"-->
+    <!--app:btnRippleColor_PowStBtn="@color/secondaryColor"-->
+    <!--app:btnDisabledColor_PowStBtn="@color/secondaryLightColor"-->
+    <!--app:btnColor_PowStBtn="@color/secondaryDarkColor"-->
+    <!--app:cornerRadius_PowStBtn="12"-->
+    <!--app:btnText_PowStBtn="START"/>-->
 
     <!--<me.cyber.nukleos.views.PowerfulStateButton-->
-        <!--android:id="@+id/powerful_state_btn_stop"-->
-        <!--android:layout_gravity="center"-->
-        <!--android:layout_width="228dp"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--app:resetAfterFailed_PowStBtn="true"-->
-        <!--app:btnRippleColor_PowStBtn="#e644a400"-->
-        <!--app:btnDisabledColor_PowStBtn="#a9d184"-->
-        <!--app:btnColor_PowStBtn="@color/secondaryDarkColor"-->
-        <!--app:cornerRadius_PowStBtn="8"-->
-        <!--app:btnText_PowStBtn="STOP"/>-->
-  <TextView
+    <!--android:id="@+id/powerful_state_btn_stop"-->
+    <!--android:layout_gravity="center"-->
+    <!--android:layout_width="228dp"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--app:resetAfterFailed_PowStBtn="true"-->
+    <!--app:btnRippleColor_PowStBtn="#e644a400"-->
+    <!--app:btnDisabledColor_PowStBtn="#a9d184"-->
+    <!--app:btnColor_PowStBtn="@color/secondaryDarkColor"-->
+    <!--app:cornerRadius_PowStBtn="8"-->
+    <!--app:btnText_PowStBtn="STOP"/>-->
+    <TextView
         android:id="@+id/save_export_title"
         style="@style/TextAppearance.AppCompat.Subhead"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/default_margin"
         android:text="@string/save_export"
-        android:textColor="@color/primaryColor"
-        android:visibility="invisible" />
+        android:textColor="@color/primaryColor" />
 
-    <TextView
-        android:id="@+id/save_export_subtitle"
-        style="@style/TextAppearance.AppCompat.Body1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/default_margin"
-        android:layout_marginEnd="@dimen/default_margin"
-        android:text="igustring/save_info_message"
-        android:visibility="invisible" />
 
-    <android.support.design.button.MaterialButton
-        android:id="@+id/button_share"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/default_margin"
-        android:layout_marginTop="@dimen/default_margin"
-        android:layout_marginRight="@dimen/default_margin"
-        android:text="ОТПРАВИТЬ"
-        android:visibility="invisible" />
+    <!--<android.support.design.button.MaterialButton-->
+        <!--android:id="@+id/button_share"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginLeft="@dimen/default_margin"-->
+        <!--android:layout_marginTop="@dimen/default_margin"-->
+        <!--android:layout_marginRight="@dimen/default_margin"-->
+        <!--android:text="ОТПРАВИТЬ"-->
+        <!--android:visibility="invisible" />-->
 
     <android.support.design.button.MaterialButton
-        android:id="@+id/button_save"
+        android:id="@+id/button_save_and_send"
         style="@style/Widget.MaterialComponents.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/default_margin"
         android:layout_marginRight="@dimen/default_margin"
-        android:text="@string/save"
-        android:visibility="invisible" />
+        android:text="SAVE AND SEND"/>
 </LinearLayout>

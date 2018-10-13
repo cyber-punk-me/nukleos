@@ -27,11 +27,13 @@ interface NNLearningInterface {
         fun showCollectionStarted()
         fun showCollectionStopped()
 
+        fun showCoundtown()
+
         fun enableResetButton()
         fun disableResetButton()
         fun hideSaveArea()
         fun showSaveArea()
-        fun saveDataFile(data: String, dataType: Int = 0)
+        fun saveDataFile(data: String)
         fun saveDataStop(content: String)
         fun sendData(content: String)
 
@@ -41,9 +43,9 @@ interface NNLearningInterface {
 
     abstract class Presenter(override val view: BaseView) : BasePresenter<BaseView>(view) {
 
-        abstract fun onBufferDataPressed()
+        abstract fun onBufferDataPressed(dataType: Int)
         abstract fun onResetPressed()
-        abstract fun onSavePressed(dataType: Int)
-        abstract fun onSendPressed(dataType: Int)
+        abstract fun onSavePressed()
+        abstract fun onSendPressed()
     }
 }

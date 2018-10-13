@@ -47,7 +47,6 @@
     <string name="onboarding_description_2">Select the frequency e start streaming form the \'Control\' page</string>
     <string name="onboarding_description_3">Visualize your data in the \'Graph\' page</string>
     <string name="onboarding_description_4">Export the collected data as a CSV in the \'Export page</string>
-    <string name="zero">0</string>
     <string name="data_to_export">Values to Export</string>
     <string name="save_export">Save Export</string>
     <string name="reset">Reset</string>
