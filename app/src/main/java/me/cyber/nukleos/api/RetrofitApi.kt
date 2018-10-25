@@ -14,6 +14,8 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.POST
+import retrofit2.http.Path
+import java.util.*
 
 private const val VERSION = "v1"
 
@@ -33,13 +35,9 @@ class RetrofitApi(private val mUrl: String) : IApi {
 
     override fun <T> sendDirect(request: Any): Single<T> = Single.create({ emitter: SingleEmitter<T> ->
 
-        val authData = null  /*App.appComponent.getSharedPrefenceHelper().getToken()*/
-
         ApiGraph.graph.find { it.requestClass == request::class.java }?.let { link ->
-            val responseClass = link.responseClass
-            val r = gson.toJsonTree(ApiRequest((Math.random() * 100000f).toString(), link.method, authData))
-                    .asJsonObject.apply { add("data", gson.toJsonTree(request)) }
-            mRequest.get(r).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({ result ->
+            val r = gson.toJsonTree(request).asJsonObject
+            mRequest.get(link.method, UUID.randomUUID(), r).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({ result ->
                 val resData: Any? = null
                 val error: ApiError? = null
                 when {
@@ -59,8 +57,8 @@ class RetrofitApi(private val mUrl: String) : IApi {
 private class ServerThrowable(val error: ApiError) : Throwable()
 
 private interface IRetrofitRequests {
-    @POST("/${VERSION}/")
-    fun get(@Body body: JsonObject): Single<ApiResponse>
+    @POST("/{method}/{uuid}/")
+    fun get(@Path("method") method: String, @Path("uuid") uuid: UUID, @Body body: JsonObject): Single<ApiResponse>
 }
 
 private fun <T> Single<T>.processError(): Single<T> = this.retryWhen { errors ->

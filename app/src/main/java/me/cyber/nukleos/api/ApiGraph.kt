@@ -4,6 +4,6 @@ data class ApiLink(val method: String, val requestClass: Class<*>, val responseC
 
 object ApiGraph {
     val graph = listOf(
-            ApiLink("model.get", DataRequest::class.java, CompleteResponse::class.java)
+            ApiLink("data", DataRequest::class.java, CompleteResponse::class.java)
     )
 }

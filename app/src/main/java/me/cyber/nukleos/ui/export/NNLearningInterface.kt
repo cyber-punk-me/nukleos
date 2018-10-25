@@ -12,18 +12,6 @@ interface NNLearningInterface {
         fun disableStartCollectingButton()
         fun showNotStreamingErrorMessage()
 
-        fun flexionStart()
-        fun flexionStop()
-
-        fun extensionStart()
-        fun extensionStop()
-
-        fun adductionStart()
-        fun adductionStop()
-
-        fun abductionStart()
-        fun abductionStop()
-
         fun showCollectionStarted()
         fun showCollectionStopped()
 
@@ -31,13 +19,9 @@ interface NNLearningInterface {
 
         fun enableResetButton()
         fun disableResetButton()
-        fun hideSaveArea()
         fun showSaveArea()
         fun saveDataFile(data: String)
         fun saveDataStop(content: String)
-        fun sendData(content: String)
-
-        fun saveCsvFile(content: String)
         fun sharePlainText(content: String)
     }
 
@@ -46,6 +30,5 @@ interface NNLearningInterface {
         abstract fun onBufferDataPressed(dataType: Int)
         abstract fun onResetPressed()
         abstract fun onSavePressed()
-        abstract fun onSendPressed()
     }
 }

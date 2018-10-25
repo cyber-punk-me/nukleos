@@ -1,15 +1,9 @@
 package me.cyber.nukleos.ui.export
 
-import android.Manifest
-import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.content.Context.MODE_PRIVATE
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.os.Environment
-import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -21,13 +15,18 @@ import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.layout_export.*
 import me.cyber.nukleos.App
 import me.cyber.nukleos.BaseFragment
+import me.cyber.nukleos.api.CompleteResponse
+import me.cyber.nukleos.api.DataRequest
 import me.cyber.nukleus.R
-import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
+import java.io.OutputStreamWriter
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
+
 private const val REQUEST_WRITE_EXTERNAL_CODE = 2
+
 class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLearningInterface.View {
 
 
@@ -51,7 +50,6 @@ class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLear
 
     @Inject
     lateinit var exportPresenter: NNLearningPresenter
-    private var fileContentToSave: String? = null
 
     override fun onAttach(context: Context?) {
         AndroidSupportInjection.inject(this)
@@ -65,12 +63,8 @@ class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLear
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         with(exportPresenter) {
-            //            button_start_collecting.setOnClickListener { onBufferDataPressed() }
-//            button_reset_collecting.setOnClickListener { onResetPressed() }
-//            button_share.setOnClickListener { onSendPressed() }
-//            button_save.setOnClickListener { onSavePressed() }
-            button_save_and_send.setOnClickListener { onSavePressed() }
 
+            button_save_and_send.setOnClickListener { onSavePressed() }
 
             extention_save.setOnClickListener { onBufferDataPressed(EXTENSION) }
             flexion_save.setOnClickListener { onBufferDataPressed(FLEXION) }
@@ -79,86 +73,42 @@ class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLear
         }
     }
 
-    override fun hideSaveArea() {
-//        button_save.visibility = View.INVISIBLE
-//        button_share.visibility = View.INVISIBLE
-//        save_export_title.visibility = View.INVISIBLE
-//        save_export_subtitle.visibility = View.INVISIBLE
-    }
 
     override fun showSaveArea() {
-//        button_save.visibility = View.VISIBLE
-//        button_share.visibility = View.VISIBLE
         save_export_title.visibility = View.VISIBLE
-//        save_export_subtitle.visibility = View.VISIBLE
     }
 
-    override fun sendData(content: String) =
-            startActivity(Intent().apply {
-                action = Intent.ACTION_SEND
-                putExtra(Intent.CATEGORY_APP_MESSAGING, content)
-                type = "text/plain"
-            })
-
-
-    override fun saveCsvFile(content: String) {
-        context?.apply {
-            val hasPermission = (ContextCompat.checkSelfPermission(this,
-                    WRITE_EXTERNAL_STORAGE) == PERMISSION_GRANTED)
-            if (hasPermission) {
-                saveDataFile(content)
-            } else {
-                fileContentToSave = content
-                requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                        REQUEST_WRITE_EXTERNAL_CODE)
-            }
-        }
-    }
 
     override fun saveDataFile(data: String) {
-        val storageDir =
-                File("${Environment.getExternalStorageDirectory().absolutePath}/myo_emg")
-        storageDir.mkdir()
-        val outfile = File(storageDir, "myo_emg_export_${System.currentTimeMillis()}.csv")
-        val fileOutputStream = FileOutputStream(outfile)
-        fileOutputStream.write(data.toByteArray())
-        fileOutputStream.close()
-        Toast.makeText(activity, "Saved to: ${outfile.path}", Toast.LENGTH_LONG).show()
+        var fos: FileOutputStream? = null
+        try {
+            fos = activity?.openFileOutput("huihuihui.csv", MODE_PRIVATE)
+            with(OutputStreamWriter(fos)) {
+                write(data)
+                flush()
+                close()
+                Log.e("----", "===  ввсе ок")
+                App.applicationComponent.getApiHelper().api.sendDirect<CompleteResponse>(DataRequest(data))
+                        .subscribe({
+                            Log.e("=-=-=-=", "---------Все окушки----------")
+                        }, {
+                            Log.e("=-=-=-=", "---------Все пизда----------")
+                            Log.e("=-=-=-=", "---------${it.localizedMessage}---------")
+                        })
+            }
+        } catch (ex: IOException) {
+            Log.e("----", "====  ${ex.localizedMessage}")
+        } finally {
+            try {
+                fos?.close()
+            } catch (ex: IOException) {
+                Log.e("----", "====  ${ex.localizedMessage}")
+
+            }
+
+        }
 
     }
-
-    override fun flexionStart() {
-        TODO("СГИБАНИЕ")
-    }
-
-    override fun flexionStop() {
-        TODO("СГИБАНИЕ СТОП")
-    }
-
-    override fun extensionStart() {
-        TODO("РАЗГИБАНИЕ")
-    }
-
-    override fun extensionStop() {
-        TODO("РАЗГИБАНИЕ СТОП")
-    }
-
-    override fun adductionStart() {
-        TODO("Приведение")
-    }
-
-    override fun adductionStop() {
-        TODO("Приведение стоп")
-    }
-
-    override fun abductionStart() {
-        TODO("Отведение")
-    }
-
-    override fun abductionStop() {
-        TODO("Отведение")
-    }
-
 
     override fun saveDataStop(content: String) {
         button_start_collecting.isEnabled = false
@@ -208,20 +158,5 @@ class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLear
                         TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(minutes))
             }
         }.apply { countdown_layout.visibility = VISIBLE }.start()
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        when (requestCode) {
-            REQUEST_WRITE_EXTERNAL_CODE -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    fileContentToSave?.apply { saveDataFile(this) }
-                } else {
-                    Log.e("notPErmission", "     grantResults.isNotEmpty()= ${grantResults.isNotEmpty()}")
-                    Log.e("notPErmission", "     grantResults[0] == PackageManager.PERMISSION_GRANTED= ${grantResults[0] == PackageManager.PERMISSION_GRANTED}")
-                    Log.e("notPErmission", "     grantResults=  ${grantResults[0].toString()}")
-                    Toast.makeText(activity, "ТОБИ ПИЗДА", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
     }
 }

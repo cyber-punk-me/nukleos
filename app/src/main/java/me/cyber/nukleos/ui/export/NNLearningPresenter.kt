@@ -70,18 +70,14 @@ class NNLearningPresenter(override val view: NNLearningInterface.View, private v
         with(view) {
             mDataBuffer.clear()
             mDataSubscription?.dispose()
-            hideSaveArea()
             disableResetButton()
         }
     }
 
     override fun onSavePressed() {
-        view.saveCsvFile(createStringFromData(mDataBuffer))
+        view.saveDataFile(createStringFromData(mDataBuffer))
     }
 
-    override fun onSendPressed() {
-        view.sendData(createStringFromData(mDataBuffer))
-    }
 
     private fun createStringFromData(buffer: ArrayList<FloatArray>) = StringBuilder().apply {
         buffer.forEach {
