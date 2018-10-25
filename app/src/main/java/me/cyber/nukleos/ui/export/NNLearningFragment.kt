@@ -18,9 +18,11 @@ import me.cyber.nukleos.BaseFragment
 import me.cyber.nukleos.api.CompleteResponse
 import me.cyber.nukleos.api.DataRequest
 import me.cyber.nukleus.R
+import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.OutputStreamWriter
+import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -28,7 +30,6 @@ import javax.inject.Inject
 private const val REQUEST_WRITE_EXTERNAL_CODE = 2
 
 class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLearningInterface.View {
-
 
     companion object {
         fun newInstance() = NNLearningFragment()
@@ -38,6 +39,7 @@ class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLear
         const val LEARNING_TIME = 3
         private const val REQUEST_WRITE_EXTERNAL_CODE = 2
         private const val DIR_NAME = "/nukleos"
+        private const val FILE = "huihuihui.csv"
         private const val FILE_NAME = "myo_emg_export_"
         private const val EXTENSION = 0
         private const val FLEXION = 1
@@ -78,36 +80,32 @@ class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLear
         save_export_title.visibility = View.VISIBLE
     }
 
+    @Throws(IOException::class)
+    private fun writeFile(stringToSave: String) {
+        var outStream: FileOutputStream? = null
+        try {
+            outStream = activity?.openFileOutput(FILE, Context.MODE_PRIVATE)
+            outStream!!.write(stringToSave.toByteArray())
+            val file  = getFile()
+            if (file.exists()) {
+                Log.e("======", "                   ${file.absolutePath}                     File saved.")
+                sendData(getFile())
+            } else {
+                Log.e("======", "                                        File NOT      saved.")
+            }
+        } catch (e: Exception) {
+            Log.e("======", "                   PIZDOSSS              ${e.localizedMessage}")
+        } finally {
+            outStream!!.close()
+        }
+    }
+
+    private fun getFile() =  File(activity?.filesDir, FILE)
+
+    private fun sendData(file:File) = App.applicationComponent.getApiHelper().api.uploadProfilePhoto(file, UUID.randomUUID())
 
     override fun saveDataFile(data: String) {
-        var fos: FileOutputStream? = null
-        try {
-            fos = activity?.openFileOutput("huihuihui.csv", MODE_PRIVATE)
-            with(OutputStreamWriter(fos)) {
-                write(data)
-                flush()
-                close()
-                Log.e("----", "===  ввсе ок")
-                App.applicationComponent.getApiHelper().api.sendDirect<CompleteResponse>(DataRequest(data))
-                        .subscribe({
-                            Log.e("=-=-=-=", "---------Все окушки----------")
-                        }, {
-                            Log.e("=-=-=-=", "---------Все пизда----------")
-                            Log.e("=-=-=-=", "---------${it.localizedMessage}---------")
-                        })
-            }
-        } catch (ex: IOException) {
-            Log.e("----", "====  ${ex.localizedMessage}")
-        } finally {
-            try {
-                fos?.close()
-            } catch (ex: IOException) {
-                Log.e("----", "====  ${ex.localizedMessage}")
-
-            }
-
-        }
-
+                writeFile(data)
     }
 
     override fun saveDataStop(content: String) {
