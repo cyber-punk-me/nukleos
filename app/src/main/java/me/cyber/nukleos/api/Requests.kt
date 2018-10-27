@@ -1,6 +1,5 @@
 package me.cyber.nukleos.api
 
-import io.mironov.smuggler.AutoParcelable
-import me.cyber.nukleos.api.Data
 // send Data
-data class DataRequest(val data: Data) : AutoParcelable
+//data class DataRequest(val data: ArrayList<Int> = arrayListOf())
+data class DataRequest(val data: String)

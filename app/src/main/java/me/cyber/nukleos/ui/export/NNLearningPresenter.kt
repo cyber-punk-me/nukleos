@@ -1,16 +1,19 @@
 package me.cyber.nukleos.ui.export
 
+import android.util.Log
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.dagger.SensorStuffManager
+import me.cyber.nukleos.ui.export.NNLearningFragment.Companion.LEARNING_TIME
+import me.cyber.nukleos.ui.export.NNLearningFragment.Companion.TIMER_COUNT
 import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.TimeUnit
 
 class NNLearningPresenter(override val view: NNLearningInterface.View, private val mSensorStuffManager: SensorStuffManager) : NNLearningInterface.Presenter(view) {
 
-    private val mValuesCounter: AtomicInteger = AtomicInteger()
     private val mDataBuffer: ArrayList<FloatArray> = arrayListOf()
+    private var mDataType: Int = -1
 
     private var mDataSubscription: Disposable? = null
 
@@ -18,7 +21,6 @@ class NNLearningPresenter(override val view: NNLearningInterface.View, private v
 
     override fun start() {
         with(view) {
-            showCollectedData(mValuesCounter.get())
             mSensorStuffManager.myo?.apply {
                 if (this.isStreaming()) {
                     enableStartCollectingButton()
@@ -29,27 +31,33 @@ class NNLearningPresenter(override val view: NNLearningInterface.View, private v
         }
     }
 
-    override fun onBufferDataPressed() {
+    override fun onBufferDataPressed(dataType: Int) {
+        mDataType = dataType
         with(view) {
+            showCoundtown()
             mSensorStuffManager.myo?.apply {
                 if (this.isStreaming()) {
                     if (mDataSubscription == null || mDataSubscription?.isDisposed == true) {
-                        mDataSubscription = this.dataFlowable()
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .doOnSubscribe {
-                                    showCollectionStarted()
-                                    disableResetButton()
-                                }
-                                .subscribe {
-                                    mDataBuffer.add(it)
-                                    showCollectedData(mValuesCounter.incrementAndGet())
-                                }
+                        mDataSubscription =
+                                this.dataFlowable()
+                                        .skip(TIMER_COUNT, TimeUnit.SECONDS)
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .doOnSubscribe {
+                                            showCollectionStarted()
+                                            disableResetButton()
+                                        }
+                                        .take(TIMER_COUNT + LEARNING_TIME, TimeUnit.SECONDS)
+                                        .doOnComplete {
+                                            //todo отправить  закончено накопление говна. предложить отправить
+                                            Log.e("-----", "===============VSE=======$dataType=========")
+                                        }
+                                        .subscribe {
+                                            //todo отправить накопление говна
+                                            mDataBuffer.add(it)
+                                        }
                     } else {
                         mDataSubscription?.dispose()
-                        enableResetButton()
-                        showSaveArea()
-                        showCollectionStopped()
                     }
                 } else {
                     showNotStreamingErrorMessage()
@@ -60,11 +68,8 @@ class NNLearningPresenter(override val view: NNLearningInterface.View, private v
 
     override fun onResetPressed() {
         with(view) {
-            mValuesCounter.set(0)
             mDataBuffer.clear()
-            showCollectedData(0)
             mDataSubscription?.dispose()
-            hideSaveArea()
             disableResetButton()
         }
     }
@@ -73,26 +78,15 @@ class NNLearningPresenter(override val view: NNLearningInterface.View, private v
         view.saveDataFile(createStringFromData(mDataBuffer))
     }
 
-    override fun onSendPressed() {
-        view.sendData(createStringFromData(mDataBuffer))
-    }
-
-    override fun onStateButtonStartPressed() {
-        view.saveDataFile("sdasdasasdasd")
-    }
-
-    override fun onStateButtonStopPressed(){
-        view.saveDataStop("sdasdasasdasd")
-    }
 
     private fun createStringFromData(buffer: ArrayList<FloatArray>) = StringBuilder().apply {
         buffer.forEach {
             it.forEach {
                 append(it)
-                append(";")
+                append(",")
             }
-            append("\n")
         }
+        append("$mDataType")
     }.toString()
 
     override fun destroy() {

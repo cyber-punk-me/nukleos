@@ -1,5 +1,6 @@
 package me.cyber.nukleos.dagger
 
+import android.content.Context
 import dagger.Component
 import dagger.android.AndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule
@@ -19,4 +20,5 @@ import javax.inject.Singleton
 ])
 interface ApplicationComponent : AndroidInjector<App>{
     fun getApiHelper(): ApiHelper
+    fun getAppContext(): Context
 }
