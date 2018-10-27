@@ -3,12 +3,14 @@ package me.cyber.nukleos.ui.find
 import android.content.Context
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.layout_scan_device.*
+import me.cyber.nukleos.App
 import me.cyber.nukleos.BaseFragment
 import me.cyber.nukleos.ui.MainActivity
 import me.cyber.nukleos.ui.model.SensorStuff
@@ -16,6 +18,7 @@ import me.cyber.nukleos.utils.DeviceAdapter
 import me.cyber.nukleos.utils.DeviceSelectedListener
 import me.cyber.nukleos.utils.RecyclerItemFadeAnimator
 import me.cyber.nukleus.R
+import java.util.*
 import javax.inject.Inject
 
 class FindSensorFragment : BaseFragment<FindSensorInterface.Presenter>(), FindSensorInterface.View {
@@ -46,6 +49,17 @@ class FindSensorFragment : BaseFragment<FindSensorInterface.Presenter>(), FindSe
             itemAnimator = RecyclerItemFadeAnimator()
             adapter = mListDeviceAdapter
         }
+
+    }
+
+    init {
+        val data = "0,-1,-5,-3,0,-1,-2,-8,-4,-13,-11,-3,-3,-1,0,-11,-1,19,-2,-2,-2,-3,0,-5,-1,-1,5,-2,0,-2,3,21,2,3,11,4,-1,0,-2,2,2,17,-5,-3,0,-3,-1,1,-2,-15,-31,-3,-2,0,-2,1,-2,-25,3,-2,-3,0,-3,-3,0\n" +
+                "0,-1,-5,-3,0,-1,-2,-8,-4,-13,-11,-3,-3,-1,0,-11,-1,19,-2,-2,-2,-3,0,-5,-1,-1,5,-2,0,-2,3,21,2,3,11,4,-1,0,-2,2,2,17,-5,-3,0,-3,-1,1,-2,-15,-31,-3,-2,0,-2,1,-2,-25,3,-2,-3,0,-3,-3,0\n" +
+                "0,-1,-5,-3,0,-1,-2,-8,-4,-13,-11,-3,-3,-1,0,-11,-1,19,-2,-2,-2,-3,0,-5,-1,-1,5,-2,0,-2,3,21,2,3,11,4,-1,0,-2,2,2,17,-5,-3,0,-3,-1,1,-2,-15,-31,-3,-2,0,-2,1,-2,-25,3,-2,-3,0,-3,-3,0\n"
+
+        App.applicationComponent.getApiHelper().api.postData(UUID.randomUUID(), data, "csv")
+                .subscribe({ Log.e("-----", "======${it.dataId}") }
+                        , { Log.e("=Error=", "=============${it.message}============") })
     }
 
     override fun onAttach(context: Context?) {

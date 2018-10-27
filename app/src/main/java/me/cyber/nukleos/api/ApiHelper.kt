@@ -7,5 +7,5 @@ class ApiHelper {
     }
 
     fun getApiUrl() = DEFAULT_LOCAL_URL
-    val api: IApi by lazy { RetrofitApi(getApiUrl()) }
+    val api: RetrofitApi by lazy { RetrofitApi(getApiUrl()) }
 }
