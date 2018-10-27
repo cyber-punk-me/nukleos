@@ -32,13 +32,10 @@ class RetrofitApi(private val mUrl: String) : IApi {
 
     private val mRequest by lazy { mRetrofit.create(IRetrofitRequests::class.java) }
 
-    private val mFileRequest by lazy { mRetrofit.create(IFileUploadService::class.java) }
 
-    override fun <T> sendDirect(request: Any): Single<T> = Single.create({ emitter: SingleEmitter<T> ->
-
+    override fun <T> sendDirect(request: Any, data: String): Single<T> = Single.create({ emitter: SingleEmitter<T> ->
         ApiGraph.graph.find { it.requestClass == request::class.java }?.let { link ->
-            val r = gson.toJsonTree(request).asJsonObject
-            mRequest.get(link.method, UUID.randomUUID(), r).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({ result ->
+            mRequest.get(link.method, UUID.randomUUID(), data).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({ result ->
                 val resData: Any? = null
                 val error: ApiError? = null
                 when {
@@ -51,35 +48,13 @@ class RetrofitApi(private val mUrl: String) : IApi {
 
     //todo use this onError and custom in api handling
     private val onError: (Throwable) -> Unit = { Log.d("---", "Api error $it") }
-
-    override fun uploadProfilePhoto(file: File, uuid: UUID) {
-        val reqFile = RequestBody.create(MediaType.parse("text/csv"), file)
-        // Выполняем запрос
-        mFileRequest.upload(MultipartBody.Part.createFormData("huiaad", file.name, reqFile), uuid)
-                ?.enqueue(object : retrofit2.Callback<ResponseBody> {
-                    override fun onFailure(call: Call<ResponseBody>?, t: Throwable?) {
-                        Log.e("|||||||||||", "---------fail-----------${t?.message}------------------")
-                    }
-
-                    override fun onResponse(call: Call<ResponseBody>?, response: Response<ResponseBody>?) {
-                        Log.e("|||||||||||", "-----------ok---------${response.toString()}------------------")
-                    }
-                })
-    }
-
 }
 
 private class ServerThrowable(val error: ApiError) : Throwable()
 
 private interface IRetrofitRequests {
-    @POST("/{method}/{uuid}/")
-    fun get(@Path("method") method: String, @Path("uuid") uuid: UUID, @Body body: JsonObject): Single<ApiResponse>
-}
-
-private interface IFileUploadService {
-    @Multipart
-    @POST("/data/{uuid}/")
-    fun upload(@Part file: MultipartBody.Part, @Path("uuid") uuid: UUID): Call<ResponseBody>
+    @POST("/{method}/{uuid}")
+    fun get(@Path("method") method: String, @Path("uuid") uuid: UUID, @Body body: String): Single<ApiResponse>
 }
 
 private fun <T> Single<T>.processError(): Single<T> = this.retryWhen { errors ->

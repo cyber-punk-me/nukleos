@@ -85,9 +85,8 @@ class NNLearningPresenter(override val view: NNLearningInterface.View, private v
                 append(it)
                 append(",")
             }
-            append(" $mDataType;")
-            append("\n")
         }
+        append("$mDataType")
     }.toString()
 
     override fun destroy() {

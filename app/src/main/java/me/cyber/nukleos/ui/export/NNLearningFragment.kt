@@ -86,10 +86,11 @@ class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLear
         try {
             outStream = activity?.openFileOutput(FILE, Context.MODE_PRIVATE)
             outStream!!.write(stringToSave.toByteArray())
-            val file  = getFile()
+            sendData(stringToSave)
+            val file = getFile()
             if (file.exists()) {
                 Log.e("======", "                   ${file.absolutePath}                     File saved.")
-                sendData(getFile())
+//                sendCSVfile(getFile())
             } else {
                 Log.e("======", "                                        File NOT      saved.")
             }
@@ -100,12 +101,14 @@ class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLear
         }
     }
 
-    private fun getFile() =  File(activity?.filesDir, FILE)
+    private fun getFile() = File(activity?.filesDir, FILE)
 
-    private fun sendData(file:File) = App.applicationComponent.getApiHelper().api.uploadProfilePhoto(file, UUID.randomUUID())
+    private fun sendData(data: String) = App.applicationComponent.getApiHelper().api.sendDirect<DataRequest>(DataRequest(data), data)
+            .subscribe({ Log.e("-----", "======${it.data}") }
+                    , { Log.e("=Error=", "=============${it.message}============") })
 
     override fun saveDataFile(data: String) {
-                writeFile(data)
+        writeFile(data)
     }
 
     override fun saveDataStop(content: String) {

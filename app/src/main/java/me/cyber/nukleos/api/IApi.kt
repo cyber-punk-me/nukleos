@@ -5,6 +5,5 @@ import java.io.File
 import java.util.*
 
 interface IApi {
-    fun <T> sendDirect(request: Any): Single<T>
-    fun uploadProfilePhoto(file: File, uuid: UUID)
+    fun <T> sendDirect(request: Any, data: String): Single<T>
 }
