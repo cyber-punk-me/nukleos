@@ -4,6 +4,7 @@ import android.util.Log
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import me.cyber.nukleos.App
 import me.cyber.nukleos.dagger.SensorStuffManager
 import me.cyber.nukleos.ui.export.NNLearningFragment.Companion.LEARNING_TIME
 import me.cyber.nukleos.ui.export.NNLearningFragment.Companion.TIMER_COUNT
@@ -16,6 +17,7 @@ class NNLearningPresenter(override val view: NNLearningInterface.View, private v
     private var mDataType: Int = -1
 
     private var mDataSubscription: Disposable? = null
+    private val mLearningSessId = UUID.randomUUID()
 
     override fun create() {}
 
@@ -49,11 +51,10 @@ class NNLearningPresenter(override val view: NNLearningInterface.View, private v
                                         }
                                         .take(TIMER_COUNT + LEARNING_TIME, TimeUnit.SECONDS)
                                         .doOnComplete {
-                                            //todo отправить  закончено накопление говна. предложить отправить
-                                            Log.e("-----", "===============VSE=======$dataType=========")
+                                            sendData(convertData(mDataBuffer, dataType, 64, 8), mLearningSessId)
+                                            mDataBuffer.clear()
                                         }
                                         .subscribe {
-                                            //todo отправить накопление говна
                                             mDataBuffer.add(it)
                                         }
                     } else {
@@ -65,6 +66,26 @@ class NNLearningPresenter(override val view: NNLearningInterface.View, private v
             }
         }
     }
+
+    private fun convertData(data: List<FloatArray>, dataType: Int, window: Int = 64, slide : Int = 64): String {
+        val result = StringBuffer()
+        val floats = data.flatMap { d -> d.asList() }
+        var start = 0
+        var end = window
+        while (end <= floats.size) {
+            for (i in start until end) {
+                result.append("${floats[i]},")
+            }
+            result.append("$dataType\n")
+            start += slide
+            end += slide
+        }
+        return result.toString()
+    }
+
+    private fun sendData(data: String, learningSessId: UUID) = App.applicationComponent.getApiHelper().api.postData(learningSessId, data, "csv")
+            .subscribe({ Log.e("-----", "======${it.dataId}") }
+                    , { Log.e("=Error=", "=============${it.message}============") })
 
     override fun onResetPressed() {
         with(view) {

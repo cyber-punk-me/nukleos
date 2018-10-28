@@ -36,7 +36,7 @@ class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLear
         private const val THE_END_OF_TIME = "00:00:00"
         private const val TIMER_FORMAT = "%02d:%02d:%02d"
         const val TIMER_COUNT = 5L
-        const val LEARNING_TIME = 3
+        const val LEARNING_TIME = 10
         private const val REQUEST_WRITE_EXTERNAL_CODE = 2
         private const val DIR_NAME = "/nukleos"
         private const val FILE = "huihuihui.csv"
@@ -103,8 +103,8 @@ class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLear
 
     private fun getFile() = File(activity?.filesDir, FILE)
 
-    private fun sendData(data: String) = App.applicationComponent.getApiHelper().api.sendDirect<DataRequest>(DataRequest(data), data)
-            .subscribe({ Log.e("-----", "======${it.data}") }
+    private fun sendData(data: String) = App.applicationComponent.getApiHelper().api.postData(UUID.randomUUID(), data, "csv")
+            .subscribe({ Log.e("-----", "======${it.dataId}") }
                     , { Log.e("=Error=", "=============${it.message}============") })
 
     override fun saveDataFile(data: String) {
