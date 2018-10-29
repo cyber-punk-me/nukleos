@@ -84,7 +84,7 @@ class NNLearningPresenter(override val view: NNLearningInterface.View, private v
     }
 
     private fun sendData(data: String, learningSessId: UUID) = App.applicationComponent.getApiHelper().api.postData(learningSessId, data, "csv")
-            .subscribe({ Log.e("-----", "======${it.dataId}") }
+            .subscribe({ Log.e("-----", "======${it.id}") }
                     , { Log.e("=Error=", "=============${it.message}============") })
 
     override fun onResetPressed() {

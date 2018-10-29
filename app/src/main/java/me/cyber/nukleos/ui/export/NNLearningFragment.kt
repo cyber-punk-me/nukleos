@@ -1,7 +1,6 @@
 package me.cyber.nukleos.ui.export
 
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
@@ -15,19 +14,14 @@ import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.layout_export.*
 import me.cyber.nukleos.App
 import me.cyber.nukleos.BaseFragment
-import me.cyber.nukleos.api.CompleteResponse
-import me.cyber.nukleos.api.DataRequest
 import me.cyber.nukleus.R
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.io.OutputStreamWriter
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-
-private const val REQUEST_WRITE_EXTERNAL_CODE = 2
 
 class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLearningInterface.View {
 
@@ -37,10 +31,7 @@ class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLear
         private const val TIMER_FORMAT = "%02d:%02d:%02d"
         const val TIMER_COUNT = 5L
         const val LEARNING_TIME = 10
-        private const val REQUEST_WRITE_EXTERNAL_CODE = 2
-        private const val DIR_NAME = "/nukleos"
         private const val FILE = "huihuihui.csv"
-        private const val FILE_NAME = "myo_emg_export_"
         private const val EXTENSION = 0
         private const val FLEXION = 1
         private const val ADDUCTION = 2
@@ -101,10 +92,27 @@ class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLear
         }
     }
 
+
+    init {
+        val huial = "ЖОПА  36,-23,2,2,1,-5,7,-14,-17,31,4,-2,1,-3,-1,11,18,-41,-2,0,3,-7,23,-5,2,23,-3,-2,-3,-5,-3,-17,-70,37,-2,-5,-1,16,7,4,7,-70,2,5,-4,-4,-7,1\n" +
+                "19,36,-23,2,2,1,-5,7,-14,-17,31,4,-2,1,-3,-1,11,18,-41,-2,0,3,-7,23,-5,2,23,-3,-2,-3,-5,-3,-17,-70,37,-2,-5,-1,16,7,4,7,-70,2,5,-4,-4,-7,2,2,19,1,-2,-1,-8,6,25,14,26,4,2,3,9,0,1\n" +
+                "11,18,-41,-2,0,3,-7,23,-5,2,23,-3,-2,-3,-5,-3,-17,-70,37,-2,-5,-1,16,7,4,7,-70,2,5,-4,-4,-7,2,2,19,1,-2,-1,-8,6,25,14,26,4,2,3,9,0,-12,11,-9,-1,0,-1,-4,-1,-8,13,17,-4,-1,-1,-11,-18,1\n" +
+                "11,18,-41,-2,0,3,-7,23,-5,2,23,-3,-2,-3,-5,-3,-17,-70,37,-2,-5,-1,16,7,4,7,-70,2,5,-4,-4,-7,2,2,19,1,-2,-1,-8,6,25,14,26,4,2,3,9,0,-12,11,-9,-1,0,-1,-4,-1,-8,13,17,-4,-1,-1,-11,-18,1\n" +
+                "-12,11,-9,-1,0,-1,-4,-1,-8,13,17,-4,-1,-1,-11,-18,3,-2,42,5,0,0,-6,-3,-5,-7,-41,-1,-2,-3,-2,2,4,-2,-17,-8,-2,3,36,13,-16,-23,28,-1,-2,-4,-26,-7,8,19,-2,0,2,-4,-8,-9,-9,-1,-50,1,-2,-2,10,5,1\n" +
+                "3,-2,42,5,0,0,-6,-3,-5,-7,-41,-1,-2,-3,-2,2,4,-2,-17,-8,-2,3,36,13,-16,-23,28,-1,-2,-4,-26,-7,8,19,-2,0,2,-4,-8,-9,-9,-1,-50,1,-2,-2,10,5,-1,-21,-35,-12,-2,1,-29,-26,18,2,22,-1,0,4,13,5,1\n" +
+                "4,-2,-17,-8,-2,3,36,13,-16,-23,28,-1,-2,-4,-26,-7,8,19,-2,0,2,-4,-8,-9,-9,-1,-50,1,-2,-2,10,5,-1,-21,-35,-12,-2,1,-29,-26,18,2,22,-1,0,4,13,5,-14,-4,-9,-6,-8,-7,4,10,4,10,36,0,2,2,1,0,1"
+
+        sendData(huial)
+
+    }
     private fun getFile() = File(activity?.filesDir, FILE)
 
     private fun sendData(data: String) = App.applicationComponent.getApiHelper().api.postData(UUID.randomUUID(), data, "csv")
-            .subscribe({ Log.e("-----", "======${it.dataId}") }
+            .subscribe({ Log.e("-----", "======${it.id}")
+                Log.e("-----", "======${it.path}")
+                Log.e("-----", "======${it.name}")
+                Log.e("-----", "======${it.tags}")
+            }
                     , { Log.e("=Error=", "=============${it.message}============") })
 
     override fun saveDataFile(data: String) {
