@@ -1,7 +1,6 @@
 package me.cyber.nukleos.ui.export
 
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
@@ -15,19 +14,14 @@ import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.layout_export.*
 import me.cyber.nukleos.App
 import me.cyber.nukleos.BaseFragment
-import me.cyber.nukleos.api.CompleteResponse
-import me.cyber.nukleos.api.DataRequest
 import me.cyber.nukleus.R
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.io.OutputStreamWriter
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-
-private const val REQUEST_WRITE_EXTERNAL_CODE = 2
 
 class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLearningInterface.View {
 
@@ -37,10 +31,7 @@ class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLear
         private const val TIMER_FORMAT = "%02d:%02d:%02d"
         const val TIMER_COUNT = 5L
         const val LEARNING_TIME = 10
-        private const val REQUEST_WRITE_EXTERNAL_CODE = 2
-        private const val DIR_NAME = "/nukleos"
         private const val FILE = "huihuihui.csv"
-        private const val FILE_NAME = "myo_emg_export_"
         private const val EXTENSION = 0
         private const val FLEXION = 1
         private const val ADDUCTION = 2
@@ -104,7 +95,11 @@ class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLear
     private fun getFile() = File(activity?.filesDir, FILE)
 
     private fun sendData(data: String) = App.applicationComponent.getApiHelper().api.postData(UUID.randomUUID(), data, "csv")
-            .subscribe({ Log.e("-----", "======${it.dataId}") }
+            .subscribe({ Log.e("-----", "======${it.id}")
+                Log.e("-----", "======${it.path}")
+                Log.e("-----", "======${it.name}")
+                Log.e("-----", "======${it.tags}")
+            }
                     , { Log.e("=Error=", "=============${it.message}============") })
 
     override fun saveDataFile(data: String) {
@@ -144,20 +139,20 @@ class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLear
     }
 
     override fun showCoundtown() {
-        object : CountDownTimer(TIMER_COUNT * 1000, 1000) {
-            override fun onFinish() {
-                countdown_text.text = THE_END_OF_TIME
-                countdown_layout.visibility = GONE
-            }
-
-            override fun onTick(millisUntilFinished: Long) {
-                val minutes = TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)
-                val hours = TimeUnit.MILLISECONDS.toHours(millisUntilFinished)
-                countdown_text.text = String.format(TIMER_FORMAT,
-                        hours,
-                        minutes - TimeUnit.HOURS.toMinutes(hours),
-                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(minutes))
-            }
-        }.apply { countdown_layout.visibility = VISIBLE }.start()
+//        object : CountDownTimer(TIMER_COUNT * 1000, 1000) {
+//            override fun onFinish() {
+//                countdown_text.text = THE_END_OF_TIME
+//                countdown_layout.visibility = GONE
+//            }
+//
+//            override fun onTick(millisUntilFinished: Long) {
+//                val minutes = TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)
+//                val hours = TimeUnit.MILLISECONDS.toHours(millisUntilFinished)
+//                countdown_text.text = String.format(TIMER_FORMAT,
+//                        hours,
+//                        minutes - TimeUnit.HOURS.toMinutes(hours),
+//                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(minutes))
+//            }
+//        }.apply { countdown_layout.visibility = VISIBLE }.start()
     }
 }
