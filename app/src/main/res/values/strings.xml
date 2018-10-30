@@ -49,7 +49,7 @@
     <string name="onboarding_description_4">Export the collected data as a CSV in the \'Export page</string>
     <string name="data_to_export">Values to Export</string>
     <string name="save_export">Save Export</string>
-    <string name="reset">Reset</string>
+    <string name="get_new_data">New collecting</string>
     <string name="send">Send</string>
     <string name="save">Save</string>
     <string name="export_points">Learning data</string>
@@ -62,5 +62,13 @@
     <string name="scan_failed">Scan Failed</string>
     <string name="scan_completed">Scan Completed!</string>
     <string name="switch_on_scaninig">Switch on SCANNING, for look at the charts </string>
+
+    <string-array name="dataTypes">
+        <item>Type</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
 
 </resources>

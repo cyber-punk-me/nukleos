@@ -92,19 +92,6 @@ class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLear
         }
     }
 
-
-    init {
-        val huial = "ЖОПА  36,-23,2,2,1,-5,7,-14,-17,31,4,-2,1,-3,-1,11,18,-41,-2,0,3,-7,23,-5,2,23,-3,-2,-3,-5,-3,-17,-70,37,-2,-5,-1,16,7,4,7,-70,2,5,-4,-4,-7,1\n" +
-                "19,36,-23,2,2,1,-5,7,-14,-17,31,4,-2,1,-3,-1,11,18,-41,-2,0,3,-7,23,-5,2,23,-3,-2,-3,-5,-3,-17,-70,37,-2,-5,-1,16,7,4,7,-70,2,5,-4,-4,-7,2,2,19,1,-2,-1,-8,6,25,14,26,4,2,3,9,0,1\n" +
-                "11,18,-41,-2,0,3,-7,23,-5,2,23,-3,-2,-3,-5,-3,-17,-70,37,-2,-5,-1,16,7,4,7,-70,2,5,-4,-4,-7,2,2,19,1,-2,-1,-8,6,25,14,26,4,2,3,9,0,-12,11,-9,-1,0,-1,-4,-1,-8,13,17,-4,-1,-1,-11,-18,1\n" +
-                "11,18,-41,-2,0,3,-7,23,-5,2,23,-3,-2,-3,-5,-3,-17,-70,37,-2,-5,-1,16,7,4,7,-70,2,5,-4,-4,-7,2,2,19,1,-2,-1,-8,6,25,14,26,4,2,3,9,0,-12,11,-9,-1,0,-1,-4,-1,-8,13,17,-4,-1,-1,-11,-18,1\n" +
-                "-12,11,-9,-1,0,-1,-4,-1,-8,13,17,-4,-1,-1,-11,-18,3,-2,42,5,0,0,-6,-3,-5,-7,-41,-1,-2,-3,-2,2,4,-2,-17,-8,-2,3,36,13,-16,-23,28,-1,-2,-4,-26,-7,8,19,-2,0,2,-4,-8,-9,-9,-1,-50,1,-2,-2,10,5,1\n" +
-                "3,-2,42,5,0,0,-6,-3,-5,-7,-41,-1,-2,-3,-2,2,4,-2,-17,-8,-2,3,36,13,-16,-23,28,-1,-2,-4,-26,-7,8,19,-2,0,2,-4,-8,-9,-9,-1,-50,1,-2,-2,10,5,-1,-21,-35,-12,-2,1,-29,-26,18,2,22,-1,0,4,13,5,1\n" +
-                "4,-2,-17,-8,-2,3,36,13,-16,-23,28,-1,-2,-4,-26,-7,8,19,-2,0,2,-4,-8,-9,-9,-1,-50,1,-2,-2,10,5,-1,-21,-35,-12,-2,1,-29,-26,18,2,22,-1,0,4,13,5,-14,-4,-9,-6,-8,-7,4,10,4,10,36,0,2,2,1,0,1"
-
-        sendData(huial)
-
-    }
     private fun getFile() = File(activity?.filesDir, FILE)
 
     private fun sendData(data: String) = App.applicationComponent.getApiHelper().api.postData(UUID.randomUUID(), data, "csv")
@@ -152,20 +139,20 @@ class NNLearningFragment : BaseFragment<NNLearningInterface.Presenter>(), NNLear
     }
 
     override fun showCoundtown() {
-        object : CountDownTimer(TIMER_COUNT * 1000, 1000) {
-            override fun onFinish() {
-                countdown_text.text = THE_END_OF_TIME
-                countdown_layout.visibility = GONE
-            }
-
-            override fun onTick(millisUntilFinished: Long) {
-                val minutes = TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)
-                val hours = TimeUnit.MILLISECONDS.toHours(millisUntilFinished)
-                countdown_text.text = String.format(TIMER_FORMAT,
-                        hours,
-                        minutes - TimeUnit.HOURS.toMinutes(hours),
-                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(minutes))
-            }
-        }.apply { countdown_layout.visibility = VISIBLE }.start()
+//        object : CountDownTimer(TIMER_COUNT * 1000, 1000) {
+//            override fun onFinish() {
+//                countdown_text.text = THE_END_OF_TIME
+//                countdown_layout.visibility = GONE
+//            }
+//
+//            override fun onTick(millisUntilFinished: Long) {
+//                val minutes = TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished)
+//                val hours = TimeUnit.MILLISECONDS.toHours(millisUntilFinished)
+//                countdown_text.text = String.format(TIMER_FORMAT,
+//                        hours,
+//                        minutes - TimeUnit.HOURS.toMinutes(hours),
+//                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(minutes))
+//            }
+//        }.apply { countdown_layout.visibility = VISIBLE }.start()
     }
 }

@@ -67,21 +67,19 @@ class NNLearningPresenter(override val view: NNLearningInterface.View, private v
         }
     }
 
-    private fun convertData(data: List<FloatArray>, dataType: Int, window: Int = 64, slide : Int = 64): String {
-        val result = StringBuffer()
+    private fun convertData(data: List<FloatArray>, dataType: Int, window: Int = 64, slide: Int = 64) = StringBuffer().apply {
         val floats = data.flatMap { d -> d.asList() }
         var start = 0
         var end = window
         while (end <= floats.size) {
             for (i in start until end) {
-                result.append("${floats[i]},")
+                append("${floats[i]},")
             }
-            result.append("$dataType\n")
+            append("$dataType\n")
             start += slide
             end += slide
         }
-        return result.toString()
-    }
+    }.toString()
 
     private fun sendData(data: String, learningSessId: UUID) = App.applicationComponent.getApiHelper().api.postData(learningSessId, data, "csv")
             .subscribe({ Log.e("-----", "======${it.id}") }

@@ -11,7 +11,18 @@ interface ChartInterface {
         fun startCharts(isRunning: Boolean)
         fun hideNoStreamingMessage()
         fun showNoStreamingMessage()
+
+        fun readyForSending()
+        fun newCollecting()
+        fun getDataType(): Int
+        fun learningIsFinish()
+
+        fun showNotStreamingErrorMessage()
+        fun showCoundtown()
     }
 
-    abstract class Presenter(override val view: BaseView) : BasePresenter<BaseView>(view)
+    abstract class Presenter(override val view: BaseView) : BasePresenter<BaseView>(view){
+        abstract fun onCollectPressed()
+        abstract fun onSavePressed()
+    }
 }

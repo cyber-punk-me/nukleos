@@ -5,33 +5,33 @@
     android:animateLayoutChanges="true"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/countdown_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#b7ffffff"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="gone">
+    <!--<LinearLayout-->
+        <!--android:id="@+id/countdown_layout"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:background="#b7ffffff"-->
+        <!--android:gravity="center"-->
+        <!--android:orientation="vertical"-->
+        <!--android:visibility="gone">-->
 
-        <TextView
-            android:id="@+id/countdown_title_text"
-            style="@style/TextAppearance.AppCompat.Title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Learning starts in ..."
-            android:textSize="26sp" />
+        <!--<TextView-->
+            <!--android:id="@+id/countdown_title_text"-->
+            <!--style="@style/TextAppearance.AppCompat.Title"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center"-->
+            <!--android:text="Learning starts in ..."-->
+            <!--android:textSize="26sp" />-->
 
-        <TextView
-            android:id="@+id/countdown_text"
-            style="@style/TextAppearance.AppCompat.Title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:textSize="56sp" />
+        <!--<TextView-->
+            <!--android:id="@+id/countdown_text"-->
+            <!--style="@style/TextAppearance.AppCompat.Title"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center"-->
+            <!--android:textSize="56sp" />-->
 
-    </LinearLayout>
+    <!--</LinearLayout>-->
 
     <TextView
         style="@style/TextAppearance.AppCompat.Subhead"
@@ -89,6 +89,8 @@
         android:layout_marginRight="@dimen/default_margin"
         android:enabled="true"
         android:text="@string/abduction" />
+
+
 
     <!--<me.cyber.nukleos.views.PowerfulStateButton-->
     <!--android:id="@+id/powerful_state_btn_start"-->
