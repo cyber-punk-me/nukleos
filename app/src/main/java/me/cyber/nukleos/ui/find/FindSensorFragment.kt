@@ -3,14 +3,12 @@ package me.cyber.nukleos.ui.find
 import android.content.Context
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.layout_scan_device.*
-import me.cyber.nukleos.App
 import me.cyber.nukleos.BaseFragment
 import me.cyber.nukleos.ui.MainActivity
 import me.cyber.nukleos.ui.model.SensorStuff
@@ -18,7 +16,6 @@ import me.cyber.nukleos.utils.DeviceAdapter
 import me.cyber.nukleos.utils.DeviceSelectedListener
 import me.cyber.nukleos.utils.RecyclerItemFadeAnimator
 import me.cyber.nukleus.R
-import java.util.*
 import javax.inject.Inject
 
 class FindSensorFragment : BaseFragment<FindSensorInterface.Presenter>(), FindSensorInterface.View {

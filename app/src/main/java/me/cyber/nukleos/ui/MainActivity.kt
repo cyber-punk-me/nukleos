@@ -1,6 +1,5 @@
 package me.cyber.nukleos.ui
 
-import android.Manifest.permission.*
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
@@ -15,7 +14,6 @@ import dagger.android.support.HasSupportFragmentInjector
 import kotlinx.android.synthetic.main.activity_main.*
 import me.cyber.nukleos.ui.charts.ChartsFragment
 import me.cyber.nukleos.ui.control.SensorControlFragment
-import me.cyber.nukleos.ui.export.NNLearningFragment
 import me.cyber.nukleos.ui.find.FindSensorFragment
 import me.cyber.nukleus.R
 import javax.inject.Inject
@@ -39,8 +37,7 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
         val fragmentList = listOf<Fragment>(
                 FindSensorFragment.newInstance(),
                 SensorControlFragment.newInstance(),
-                ChartsFragment.newInstance(),
-                NNLearningFragment.newInstance()
+                ChartsFragment.newInstance()
         )
 
         view_pager.adapter = MyAdapter(supportFragmentManager, fragmentList)
@@ -67,7 +64,6 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
                 R.id.item_scan -> view_pager.currentItem = 0
                 R.id.item_control -> view_pager.currentItem = 1
                 R.id.item_graph -> view_pager.currentItem = 2
-                R.id.item_export -> view_pager.currentItem = 3
             }
             false
         }

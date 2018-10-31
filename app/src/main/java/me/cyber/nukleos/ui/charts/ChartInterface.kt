@@ -3,7 +3,6 @@ package me.cyber.nukleos.ui.charts
 import me.cyber.nukleos.BasePresenter
 import me.cyber.nukleos.BaseView
 
-
 interface ChartInterface {
 
     interface View : BaseView {
@@ -18,10 +17,10 @@ interface ChartInterface {
         fun learningIsFinish()
 
         fun showNotStreamingErrorMessage()
-        fun showCoundtown()
+        fun showCountdown()
     }
 
-    abstract class Presenter(override val view: BaseView) : BasePresenter<BaseView>(view){
+    abstract class Presenter(override val view: BaseView) : BasePresenter<BaseView>(view) {
         abstract fun onCollectPressed()
         abstract fun onSavePressed()
     }

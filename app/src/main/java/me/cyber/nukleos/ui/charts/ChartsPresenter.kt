@@ -44,20 +44,20 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mSenso
 
     override fun onCollectPressed() {
         with(view) {
-            showCoundtown()
+            showCountdown()
             mSensorStuffManager.myo?.apply {
                 if (this.isStreaming()) {
                     if (mDataSubscription == null || mDataSubscription?.isDisposed == true) {
-                        mDataSubscription =  this.dataFlowable()
-                                        .skip(TIMER_COUNT, TimeUnit.SECONDS)
-                                        .subscribeOn(Schedulers.io())
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .take(TIMER_COUNT + LEARNING_TIME, TimeUnit.SECONDS)
-                                        .subscribe {
-                                            mDataBuffer.add(it)
-                                            learningIsFinish()
-                                            readyForSending()
-                                        }
+                        mDataSubscription = this.dataFlowable()
+                                .skip(TIMER_COUNT, TimeUnit.SECONDS)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .take(TIMER_COUNT + LEARNING_TIME, TimeUnit.SECONDS)
+                                .subscribe {
+                                    mDataBuffer.add(it)
+                                    learningIsFinish()
+                                    readyForSending()
+                                }
                     } else {
                         mDataSubscription?.dispose()
                     }
