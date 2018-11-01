@@ -23,12 +23,12 @@ import javax.inject.Inject
 class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.View {
 
     companion object {
-        fun newInstance() = ChartsFragment()
 
-        private const val THE_END_OF_TIME = "00:00:00"
         private const val TIMER_FORMAT = "%02d:%02d:%02d"
         const val TIMER_COUNT = 5L
         const val LEARNING_TIME = 10
+
+        fun newInstance() = ChartsFragment()
     }
 
     @Inject
@@ -86,10 +86,6 @@ class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.
         empty_chat_text.visibility = View.INVISIBLE
     }
 
-    override fun newCollecting() {
-
-    }
-
     override fun getDataType() = mDataType.safeToInt(-1)
 
     override fun readyForSending() {
@@ -97,11 +93,13 @@ class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.
         button_send.isEnabled = true
     }
 
+    override fun newCollecting() {}
+
     override fun showNotStreamingErrorMessage() {
         Toast.makeText(activity, "Please, connect sensor and start scanning", Toast.LENGTH_SHORT).show()
     }
 
-    override fun showCoundtown() {
+    override fun showCountdown() {
         object : CountDownTimer(TIMER_COUNT * 1000, 1000) {
             override fun onFinish() {
                 countdown_text.text = "COLLECTING"
