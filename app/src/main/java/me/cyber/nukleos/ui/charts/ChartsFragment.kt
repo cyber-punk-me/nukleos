@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.Toast
@@ -21,6 +20,43 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.View {
+
+    override fun notifyDataSent() {
+        Toast.makeText(context, "Data sent.", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun notifyDataFailed() {
+        Toast.makeText(context, "Data transfer failed.", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun goToState(state: ChartInterface.State) {
+        when (state) {
+            ChartInterface.State.IDLE -> {
+                countdown_layout.visibility = View.INVISIBLE
+                record_button.isEnabled = true
+                data_type_spinner.isEnabled = true
+                startCharts(true)
+            }
+            ChartInterface.State.COUNTDOWN -> {
+                record_button.isEnabled = false
+                data_type_spinner.isEnabled = false
+                showCountdown()
+                startCharts(false)
+            }
+            ChartInterface.State.RECORDING -> {
+                record_button.isEnabled = false
+                data_type_spinner.isEnabled = false
+                countdown_layout.visibility = View.INVISIBLE
+                startCharts(true)
+            }
+            ChartInterface.State.SENDING -> {
+                record_button.isEnabled = false
+                data_type_spinner.isEnabled = false
+                countdown_layout.visibility = View.INVISIBLE
+                startCharts(false)
+            }
+        }
+    }
 
     companion object {
 
@@ -57,15 +93,13 @@ class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 getResources().getStringArray(R.array.dataTypes).apply {
-                    collecting.setText(R.string.start_collecting)
-                    button_send.isEnabled = false
+                    record_button.setText(R.string.record_data)
                     mDataType = get(position)
                 }
             }
 
         }
-        collecting.setOnClickListener { graphPresenter.onCollectPressed() }
-        button_send.setOnClickListener { graphPresenter.onSavePressed() }
+        record_button.setOnClickListener { graphPresenter.onCollectPressed() }
     }
 
     override fun showData(data: FloatArray) {
@@ -88,23 +122,10 @@ class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.
 
     override fun getDataType() = mDataType.safeToInt(-1)
 
-    override fun readyForSending() {
-        collecting.setText(R.string.get_new_data)
-        button_send.isEnabled = true
-    }
-
-    override fun newCollecting() {}
-
-    override fun showNotStreamingErrorMessage() {
-        Toast.makeText(activity, "Please, connect sensor and start scanning", Toast.LENGTH_SHORT).show()
-    }
-
-    override fun showCountdown() {
+    private fun showCountdown() {
         object : CountDownTimer(TIMER_COUNT * 1000, 1000) {
             override fun onFinish() {
-                countdown_text.text = "COLLECTING"
-                countdown_title_text.text = ""
-                progressbar.visibility = VISIBLE
+                graphPresenter.onCountdownFinished()
             }
 
             override fun onTick(millisUntilFinished: Long) {
@@ -118,8 +139,4 @@ class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.
         }.apply { countdown_layout.visibility = View.VISIBLE }.start()
     }
 
-    override fun learningIsFinish() {
-        countdown_layout.visibility = View.GONE
-        progressbar.visibility = VISIBLE
-    }
 }

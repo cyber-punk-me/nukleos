@@ -24,7 +24,7 @@
             android:entries="@array/dataTypes" />
 
         <android.support.design.button.MaterialButton
-            android:id="@+id/collecting"
+            android:id="@+id/record_button"
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:layout_marginLeft="4dp"
@@ -32,18 +32,7 @@
             android:layout_weight="1"
             android:enabled="true"
             android:gravity="center"
-            android:text="@string/start_collecting" />
-
-        <android.support.design.button.MaterialButton
-            android:id="@+id/button_send"
-            android:layout_width="0dp"
-            android:layout_height="50dp"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="16dp"
-            android:layout_weight="1"
-            android:enabled="false"
-            android:gravity="center"
-            android:text="@string/send" />
+            android:text="@string/record_data" />
 
     </LinearLayout>
 
@@ -55,7 +44,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="100dp"
         android:gravity="center"
-        android:text="@string/switch_on_scaninig"
+        android:text="@string/connect_data_source"
         android:visibility="invisible" />
 
     <me.cyber.nukleos.views.PowerfulChartsView
