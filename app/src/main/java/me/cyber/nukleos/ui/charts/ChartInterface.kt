@@ -5,23 +5,21 @@ import me.cyber.nukleos.BaseView
 
 interface ChartInterface {
 
+    enum class State {
+        IDLE, COUNTDOWN, RECORDING, SENDING
+    }
+
     interface View : BaseView {
         fun showData(data: FloatArray)
         fun startCharts(isRunning: Boolean)
         fun hideNoStreamingMessage()
         fun showNoStreamingMessage()
 
-        fun readyForSending()
-        fun newCollecting()
+        fun goToState(state : State)
         fun getDataType(): Int
-        fun learningIsFinish()
-
-        fun showNotStreamingErrorMessage()
-        fun showCountdown()
     }
 
     abstract class Presenter(override val view: BaseView) : BasePresenter<BaseView>(view) {
         abstract fun onCollectPressed()
-        abstract fun onSavePressed()
     }
 }

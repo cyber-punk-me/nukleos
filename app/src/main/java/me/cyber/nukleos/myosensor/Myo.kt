@@ -69,9 +69,9 @@ class Myo(private val device: BluetoothDevice) : BluetoothGattCallback() {
 
     fun dataFlowable(): Flowable<FloatArray> {
         return if (frequency == 0) {
-            dataProcessor
+            dataProcessor.onBackpressureDrop()
         } else {
-            dataProcessor.sample((1000 / frequency).toLong(), TimeUnit.MILLISECONDS)
+            dataProcessor.sample((1000 / frequency).toLong(), TimeUnit.MILLISECONDS).onBackpressureDrop()
         }
     }
 

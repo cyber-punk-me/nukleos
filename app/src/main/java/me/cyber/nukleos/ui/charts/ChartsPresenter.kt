@@ -1,6 +1,5 @@
 package me.cyber.nukleos.ui.charts
 
-import android.util.Log
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -13,10 +12,9 @@ import java.util.concurrent.TimeUnit
 
 class ChartsPresenter(override val view: ChartInterface.View, private val mSensorStuffManager: SensorStuffManager) : ChartInterface.Presenter(view) {
 
-    private val mDataBuffer: ArrayList<FloatArray> = arrayListOf()
+    private val mLearningSessId = UUID.randomUUID()
 
     private var mDataSubscription: Disposable? = null
-    private val mLearningSessId = UUID.randomUUID()
     private var mChartsDataSubscription: Disposable? = null
     private var mRequestSubscription: Disposable? = null
 
@@ -43,33 +41,38 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mSenso
     }
 
     override fun onCollectPressed() {
+        val dataBuffer: ArrayList<FloatArray> = arrayListOf()
         with(view) {
-            showCountdown()
+            if (mSensorStuffManager.myo == null) {
+                showNoStreamingMessage()
+                return
+            }
             mSensorStuffManager.myo?.apply {
                 if (this.isStreaming()) {
+                    goToState(ChartInterface.State.COUNTDOWN)
+                    hideNoStreamingMessage()
                     if (mDataSubscription == null || mDataSubscription?.isDisposed == true) {
                         mDataSubscription = this.dataFlowable()
                                 .skip(TIMER_COUNT, TimeUnit.SECONDS)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .take(TIMER_COUNT + LEARNING_TIME, TimeUnit.SECONDS)
-                                .subscribe {
-                                    mDataBuffer.add(it)
-                                    learningIsFinish()
-                                    readyForSending()
+                                .doOnComplete {
+                                    goToState(ChartInterface.State.SENDING)
+                                    sendData(convertData(dataBuffer, view.getDataType(), 64, 64), mLearningSessId)
                                 }
+                                .subscribe {
+                                    dataBuffer.add(it)
+                                }
+
                     } else {
                         mDataSubscription?.dispose()
                     }
                 } else {
-                    showNotStreamingErrorMessage()
+                    showNoStreamingMessage()
                 }
             }
         }
-    }
-
-    override fun onSavePressed() {
-        sendData(convertData(mDataBuffer, view.getDataType(), 64, 8), mLearningSessId)
     }
 
     private fun convertData(data: List<FloatArray>, dataType: Int, window: Int = 64, slide: Int = 64) = StringBuffer().apply {
@@ -88,14 +91,24 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mSenso
 
     private fun sendData(data: String, learningSessId: UUID) {
         mRequestSubscription = App.applicationComponent.getApiHelper().api.postData(learningSessId, data, "csv")
-                .doOnDispose { view.newCollecting() }
-                .subscribe({ Log.e("-----", "======${it.id}") }
-                        , { Log.e("=Error=", "=============${it.message}============") })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    view.goToState(ChartInterface.State.IDLE)
+                }
+                        , {
+                    view.goToState(ChartInterface.State.IDLE)
+                })
     }
 
     override fun destroy() {
         view.startCharts(false)
+        mDataSubscription?.dispose()
         mChartsDataSubscription?.dispose()
         mRequestSubscription?.dispose()
+    }
+
+    fun onCountdownFinished() {
+        view.goToState(ChartInterface.State.RECORDING)
     }
 }
