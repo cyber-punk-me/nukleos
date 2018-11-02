@@ -6,10 +6,14 @@ import retrofit2.http.*
 import java.util.*
 
 interface IRetrofitRequests {
-    @POST("/{path}/{uuid}")
+
+    @POST("/data/{dataId}")
     @Headers("Content-Type: plain/text")
-    fun postData(@Path("path") path: String,
-                 @Path("uuid") uuid: UUID,
+    fun postData(@Path("dataId") dataId: UUID,
                  @Body body: RequestBody,
                  @Query("ext") extension: String): Single<Meta>
+
+    @POST("/model/eae583bd-bc4b-4d3b-8fb8-11ac76d18b1e?gpu=true")
+    fun postModel(@Body body: Model): Single<Meta>
+
 }

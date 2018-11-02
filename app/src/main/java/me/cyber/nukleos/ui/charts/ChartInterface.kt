@@ -19,9 +19,13 @@ interface ChartInterface {
         fun getDataType(): Int
         fun notifyDataSent()
         fun notifyDataFailed()
+        fun notifyTrainModelStarted()
+        fun notifyTrainModelFailed()
     }
 
     abstract class Presenter(override val view: BaseView) : BasePresenter<BaseView>(view) {
         abstract fun onCollectPressed()
+        abstract fun onTrainPressed()
+
     }
 }

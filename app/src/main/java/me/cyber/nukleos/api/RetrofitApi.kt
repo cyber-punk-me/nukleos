@@ -29,7 +29,18 @@ class RetrofitApi(private val mUrl: String) {
 
     fun postData(dataId: UUID, rawData: String, extension: String): Single<Meta> = Single.create { emitter: SingleEmitter<Meta> ->
         val data = RequestBody.create(MediaType.parse("text/plain"), rawData)
-        mRequest.postData("data", dataId, data, extension)
+        mRequest.postData(dataId, data, extension)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    emitter.onSuccess(it)
+                }, {
+                    emitter.onError(it) })
+    }
+
+    fun trainModel(dataId: UUID, scriptId: UUID) : Single<Meta> = Single.create { emitter : SingleEmitter<Meta> ->
+        val trainMeta = Model(dataId, scriptId)
+        mRequest.postModel(trainMeta)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({

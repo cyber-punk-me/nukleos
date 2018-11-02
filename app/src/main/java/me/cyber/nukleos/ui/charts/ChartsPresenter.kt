@@ -12,11 +12,14 @@ import java.util.concurrent.TimeUnit
 
 class ChartsPresenter(override val view: ChartInterface.View, private val mSensorStuffManager: SensorStuffManager) : ChartInterface.Presenter(view) {
 
-    private val mLearningSessId = UUID.randomUUID()
+    private val mLearningSessId = UUID.fromString("885d0665-ca5d-46ed-b6dc-ea2c2610a67f")
+            //UUID.randomUUID()
+    private val mScriptId = UUID.fromString("7de76908-d4d9-4ce9-98de-118a4fb3b8f8")
 
     private var mDataSubscription: Disposable? = null
     private var mChartsDataSubscription: Disposable? = null
-    private var mRequestSubscription: Disposable? = null
+    private var mPostDataSubscription: Disposable? = null
+    private var mTrainModelSubscription: Disposable? = null
 
     override fun create() {}
 
@@ -90,7 +93,7 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mSenso
     }.toString()
 
     private fun sendData(data: String, learningSessId: UUID) {
-        mRequestSubscription = App.applicationComponent.getApiHelper().api.postData(learningSessId, data, "csv")
+        mPostDataSubscription = App.applicationComponent.getApiHelper().api.postData(learningSessId, data, "csv")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
@@ -103,11 +106,29 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mSenso
                 })
     }
 
+    override fun onTrainPressed() {
+        trainModel(mLearningSessId, mScriptId)
+    }
+
+    private fun trainModel(dataId: UUID, scriptId: UUID) {
+        mTrainModelSubscription = App.applicationComponent.getApiHelper().api.trainModel(dataId, scriptId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    view.goToState(ChartInterface.State.IDLE)
+                    view.notifyTrainModelStarted()
+                }
+                        , {
+                    view.goToState(ChartInterface.State.IDLE)
+                    view.notifyTrainModelFailed()
+                })
+    }
+
     override fun destroy() {
         view.startCharts(false)
         mDataSubscription?.dispose()
         mChartsDataSubscription?.dispose()
-        mRequestSubscription?.dispose()
+        mPostDataSubscription?.dispose()
     }
 
     fun onCountdownFinished() {
