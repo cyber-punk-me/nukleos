@@ -95,9 +95,11 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mSenso
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     view.goToState(ChartInterface.State.IDLE)
+                    view.notifyDataSent()
                 }
                         , {
                     view.goToState(ChartInterface.State.IDLE)
+                    view.notifyDataFailed()
                 })
     }
 

@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import android.widget.Toast
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.layout_charts.*
 import me.cyber.nukleos.BaseFragment
@@ -19,6 +20,14 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.View {
+
+    override fun notifyDataSent() {
+        Toast.makeText(context, "Data sent.", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun notifyDataFailed() {
+        Toast.makeText(context, "Data transfer failed.", Toast.LENGTH_SHORT).show()
+    }
 
     override fun goToState(state: ChartInterface.State) {
         when (state) {

@@ -17,6 +17,8 @@ interface ChartInterface {
 
         fun goToState(state : State)
         fun getDataType(): Int
+        fun notifyDataSent()
+        fun notifyDataFailed()
     }
 
     abstract class Presenter(override val view: BaseView) : BasePresenter<BaseView>(view) {
