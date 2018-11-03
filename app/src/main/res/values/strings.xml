@@ -59,6 +59,7 @@
     <string name="connect_data_source">Please connect a data source</string>
     <string name="record_starts_in">Record starts in …</string>
     <string name="train">TRAIN</string>
+    <string name="predict">Predict</string>
 
     <string-array name="dataTypes">
         <item>0</item>

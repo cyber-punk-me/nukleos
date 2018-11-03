@@ -10,5 +10,7 @@
     <item android:id="@+id/item_graph"
         android:icon="@drawable/ic_charts"
         android:title="@string/sensor_charts" />
-
+    <item android:id="@+id/item_predict"
+        android:icon="@drawable/ic_charts"
+        android:title="@string/predict" />
 </menu>

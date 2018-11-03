@@ -44,26 +44,38 @@ class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.
                 record_button.isEnabled = true
                 data_type_spinner.isEnabled = true
                 startCharts(true)
+                train_button.isEnabled = true
+                blockNavigation(false)
             }
             ChartInterface.State.COUNTDOWN -> {
                 record_button.isEnabled = false
                 data_type_spinner.isEnabled = false
                 showCountdown()
                 startCharts(false)
+                train_button.isEnabled = false
+                blockNavigation(true)
             }
             ChartInterface.State.RECORDING -> {
                 record_button.isEnabled = false
                 data_type_spinner.isEnabled = false
                 countdown_layout.visibility = View.INVISIBLE
                 startCharts(true)
+                train_button.isEnabled = false
+                blockNavigation(true)
             }
             ChartInterface.State.SENDING -> {
                 record_button.isEnabled = false
                 data_type_spinner.isEnabled = false
                 countdown_layout.visibility = View.INVISIBLE
                 startCharts(false)
+                train_button.isEnabled = false
+                blockNavigation(true)
             }
         }
+    }
+
+    private fun blockNavigation(blocked: Boolean) {
+        //todo
     }
 
     companion object {
@@ -109,6 +121,7 @@ class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.
         }
         record_button.setOnClickListener { graphPresenter.onCollectPressed() }
         train_button.setOnClickListener { graphPresenter.onTrainPressed() }
+        train_button.isEnabled = false
     }
 
     override fun showData(data: FloatArray) {

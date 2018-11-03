@@ -6,6 +6,7 @@ import me.cyber.nukleos.ui.MainActivity
 import me.cyber.nukleos.ui.charts.ChartsFragment
 import me.cyber.nukleos.ui.control.SensorControlFragment
 import me.cyber.nukleos.ui.find.FindSensorFragment
+import me.cyber.nukleos.ui.predict.PredictFragment
 
 
 @Module
@@ -23,4 +24,6 @@ abstract class BuildersModule {
     @ContributesAndroidInjector(modules = [ChartsViewModule::class, ChartsModule::class])
     abstract fun bindGraphFragment(): ChartsFragment
 
+    @ContributesAndroidInjector(modules = [PredictViewModule::class, PredictModule::class])
+    abstract fun bindPredictFragment(): PredictFragment
 }

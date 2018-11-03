@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true">
+
+    <TextView
+        android:id="@+id/connect_device_warning"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="100dp"
+        android:gravity="center"
+        android:text="@string/connect_data_source"
+        android:visibility="invisible" />
+
+    <me.cyber.nukleos.views.PowerfulChartsView
+        android:id="@+id/sensor_charts_predict_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <Switch
+        android:id="@+id/predict_toggle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="10dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginLeft="20dp"
+        android:enabled="true"
+        android:gravity="center"
+        android:text="@string/predict" />
+
+</FrameLayout>
