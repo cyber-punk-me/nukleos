@@ -5,9 +5,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.layout_predict.*
 import me.cyber.nukleos.BaseFragment
+import me.cyber.nukleos.api.PredictResponse
 import me.cyber.nukleos.myosensor.MYO_CHANNELS
 import me.cyber.nukleos.myosensor.MYO_MAX_VALUE
 import me.cyber.nukleos.myosensor.MYO_MIN_VALUE
@@ -16,10 +18,16 @@ import javax.inject.Inject
 
 class PredictFragment : BaseFragment<PredictInterface.Presenter>(), PredictInterface.View {
 
+    override fun notifyPredict(prediction: PredictResponse) {
+        Toast.makeText(context, prediction.toString(), Toast.LENGTH_SHORT).show()
+    }
+
+    override fun notifyPredictError(error: Throwable) {
+        Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
+    }
+
     @Inject
     lateinit var predictPresenter: PredictPresenter
-
-    private var mDataType = ""
 
     override fun onAttach(context: Context?) {
         AndroidSupportInjection.inject(this)

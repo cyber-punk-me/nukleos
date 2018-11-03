@@ -10,3 +10,7 @@ data class Meta(val scriptId: UUID?, val dataId: UUID?, val modelId: UUID? = nul
                 val state: RunState? = null, val startTime: Long? = null, val endTime: Long? = null)
 
 data class Model(val dataId: UUID, val scriptId: UUID)
+
+data class PredictRequest(val instances : List<List<Float>>)
+
+data class PredictResponse(val predictions : List<Int>)

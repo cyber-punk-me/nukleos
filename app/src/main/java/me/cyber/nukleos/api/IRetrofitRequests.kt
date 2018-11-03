@@ -16,4 +16,7 @@ interface IRetrofitRequests {
     @POST("/model/eae583bd-bc4b-4d3b-8fb8-11ac76d18b1e?gpu=true")
     fun postModel(@Body body: Model): Single<Meta>
 
+    @POST("/apply/eae583bd-bc4b-4d3b-8fb8-11ac76d18b1e")
+    fun predict(@Body body: PredictRequest): Single<PredictResponse>
+
 }
