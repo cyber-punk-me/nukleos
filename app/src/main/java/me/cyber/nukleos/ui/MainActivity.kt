@@ -24,6 +24,8 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
     @Inject
     lateinit var fragmentDispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
 
+    private var navigationBlocked = false
+
     override fun supportFragmentInjector(): AndroidInjector<Fragment> {
         return fragmentDispatchingAndroidInjector
     }
@@ -62,11 +64,13 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
 
         })
         bottom_navigation.setOnNavigationItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.item_scan -> view_pager.currentItem = 0
-                R.id.item_control -> view_pager.currentItem = 1
-                R.id.item_graph -> view_pager.currentItem = 2
-                R.id.item_predict -> view_pager.currentItem = 3
+            if (!navigationBlocked) {
+                when (item.itemId) {
+                    R.id.item_scan -> view_pager.currentItem = 0
+                    R.id.item_control -> view_pager.currentItem = 1
+                    R.id.item_graph -> view_pager.currentItem = 2
+                    R.id.item_predict -> view_pager.currentItem = 3
+                }
             }
             false
         }
@@ -74,6 +78,10 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
 
     fun navigateToPage(pageId: Int) {
         view_pager.currentItem = pageId
+    }
+
+    fun blockNavigaion(blocked: Boolean) {
+        navigationBlocked = blocked
     }
 
     inner class MyAdapter(fm: FragmentManager, private val fragmentList: List<Fragment>) : FragmentPagerAdapter(fm) {

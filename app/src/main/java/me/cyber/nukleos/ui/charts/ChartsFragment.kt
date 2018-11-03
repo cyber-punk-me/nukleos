@@ -14,6 +14,7 @@ import me.cyber.nukleos.BaseFragment
 import me.cyber.nukleos.myosensor.MYO_CHANNELS
 import me.cyber.nukleos.myosensor.MYO_MAX_VALUE
 import me.cyber.nukleos.myosensor.MYO_MIN_VALUE
+import me.cyber.nukleos.ui.MainActivity
 import me.cyber.nukleos.utils.safeToInt
 import me.cyber.nukleus.R
 import java.util.concurrent.TimeUnit
@@ -75,7 +76,7 @@ class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.
     }
 
     private fun blockNavigation(blocked: Boolean) {
-        //todo
+        (activity as MainActivity).blockNavigaion(blocked)
     }
 
     companion object {
