@@ -82,6 +82,7 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
 
     fun blockNavigaion(blocked: Boolean) {
         navigationBlocked = blocked
+        view_pager.pagingEnabled = !blocked
     }
 
     inner class MyAdapter(fm: FragmentManager, private val fragmentList: List<Fragment>) : FragmentPagerAdapter(fm) {
