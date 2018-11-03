@@ -2,4 +2,11 @@ package me.cyber.nukleos.api
 
 import java.util.*
 
-data class Meta(val id: UUID, val name: String, val path: String, val tags: String?)
+enum class RunState {
+    NEW, RUNNING, COMPLETE, ERROR
+}
+
+data class Meta(val scriptId: UUID?, val dataId: UUID?, val modelId: UUID? = null,
+                val state: RunState? = null, val startTime: Long? = null, val endTime: Long? = null)
+
+data class Model(val dataId: UUID, val scriptId: UUID)

@@ -52,6 +52,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <android.support.design.button.MaterialButton
+        android:id="@+id/train_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="10dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginLeft="20dp"
+        android:enabled="true"
+        android:gravity="center"
+        android:text="@string/train" />
+
     <LinearLayout
         android:id="@+id/countdown_layout"
         android:layout_width="match_parent"
@@ -74,7 +86,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Learning starts in ..."
+            android:text="@string/record_starts_in"
             android:textSize="26sp" />
 
         <TextView

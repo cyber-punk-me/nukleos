@@ -21,6 +21,14 @@ import javax.inject.Inject
 
 class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.View {
 
+    override fun notifyTrainModelStarted() {
+        Toast.makeText(context, "Model training started.", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun notifyTrainModelFailed() {
+        Toast.makeText(context, "Model training failed.", Toast.LENGTH_SHORT).show()
+    }
+
     override fun notifyDataSent() {
         Toast.makeText(context, "Data sent.", Toast.LENGTH_SHORT).show()
     }
@@ -100,6 +108,7 @@ class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.
 
         }
         record_button.setOnClickListener { graphPresenter.onCollectPressed() }
+        train_button.setOnClickListener { graphPresenter.onTrainPressed() }
     }
 
     override fun showData(data: FloatArray) {
