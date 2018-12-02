@@ -18,8 +18,14 @@ import javax.inject.Inject
 
 class PredictFragment : BaseFragment<PredictInterface.Presenter>(), PredictInterface.View {
 
-    override fun notifyPredict(prediction: PredictResponse) {
-        Toast.makeText(context, prediction.toString(), Toast.LENGTH_SHORT).show()
+    override fun notifyPredict(response: PredictResponse) {
+        val prediction = response.predictions[0]
+        val max = prediction.distr.max()
+        val min = prediction.distr.min()
+        val delta = max!! - min!!
+
+        val normalized = prediction.distr.map { it -> ((it - min) / (delta) * 100).toInt() }
+        Toast.makeText(context, "${prediction.output} | $normalized", Toast.LENGTH_SHORT).show()
     }
 
     override fun notifyPredictError(error: Throwable) {
