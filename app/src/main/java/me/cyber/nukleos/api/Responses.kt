@@ -13,4 +13,7 @@ data class Model(val dataId: UUID, val scriptId: UUID)
 
 data class PredictRequest(val instances : List<List<Float>>)
 
-data class PredictResponse(val predictions : List<Int>)
+data class PredictResponse(val predictions : List<Prediction>)
+
+data class Prediction(val output: Int, val distr: List<Float>)
+

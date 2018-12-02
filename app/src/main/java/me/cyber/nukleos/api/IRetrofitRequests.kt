@@ -13,10 +13,10 @@ interface IRetrofitRequests {
                  @Body body: RequestBody,
                  @Query("ext") extension: String): Single<Meta>
 
-    @POST("/model/eae583bd-bc4b-4d3b-8fb8-11ac76d18b1e?gpu=true")
+    @POST("/model/1d722019-c892-44bc-844b-eb5708d55987")
     fun postModel(@Body body: Model): Single<Meta>
 
-    @POST("/apply/eae583bd-bc4b-4d3b-8fb8-11ac76d18b1e")
+    @POST("/apply/1d722019-c892-44bc-844b-eb5708d55987")
     fun predict(@Body body: PredictRequest): Single<PredictResponse>
 
 }
