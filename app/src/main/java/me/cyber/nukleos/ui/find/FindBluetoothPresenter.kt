@@ -1,24 +1,40 @@
 package me.cyber.nukleos.ui.find
 
 import android.bluetooth.BluetoothDevice
+import com.nilhcem.blefun.common.AwesomenessProfile.SERVICE_UUID
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.dagger.BluetoothStuffManager
 import me.cyber.nukleos.bluetooth.BluetoothConnector
+import me.cyber.nukleos.motors.Motors
 import me.cyber.nukleos.ui.model.SensorStuff
 import java.util.concurrent.TimeUnit
+
 //bt general management
 class FindBluetoothPresenter(override val view: FindSensorInterface.View, private val mBluetoothConnector: BluetoothConnector, private val mBluetoothStuffManager: BluetoothStuffManager
 ) : FindSensorInterface.Presenter(view) {
 
-    internal lateinit var mFindFlowable: Flowable<BluetoothDevice>
+    private var mFindFlowable: Flowable<BluetoothDevice>? = null
+    private var mFindMotorsFlowable: Flowable<BluetoothDevice>? = null
 
     private var mFindSubscription: Disposable? = null
+    private var mFindMotorsSubscription: Disposable? = null
 
     override fun create() {
         mFindFlowable = mBluetoothConnector.startBluetoothScan(10, TimeUnit.SECONDS)
+
+        mFindMotorsFlowable = mBluetoothConnector.startBluetoothScan(10, TimeUnit.SECONDS, SERVICE_UUID)
+        mFindMotorsSubscription = mFindMotorsFlowable?.subscribeOn(Schedulers.io())
+                ?.observeOn(AndroidSchedulers.mainThread())
+                ?.subscribe({
+                    if (mBluetoothStuffManager.motors == null) {
+                        mBluetoothStuffManager.motors = Motors(it)
+                    }
+                }, {
+                }, {
+                })
     }
 
     override fun start() {
@@ -31,11 +47,13 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
                         .foundBTDevicesList
                         .map { it -> SensorStuff(it.name, it.address) })
             }
+
         }
     }
 
     override fun destroy() {
         mFindSubscription?.dispose()
+        mFindMotorsSubscription?.dispose()
         view.hideFindLoader()
     }
 
@@ -56,9 +74,9 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
                 hideEmptyListText()
                 showFindLoader()
                 mFindSubscription = mFindFlowable
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe({
+                        ?.subscribeOn(Schedulers.io())
+                        ?.observeOn(AndroidSchedulers.mainThread())
+                        ?.subscribe({
                             if (it !in mBluetoothStuffManager.foundBTDevicesList) {
                                 addSensorToList(SensorStuff(it.name, it.address))
                                 mBluetoothStuffManager.foundBTDevicesList.add(it)

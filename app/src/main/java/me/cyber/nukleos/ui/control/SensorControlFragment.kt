@@ -40,7 +40,7 @@ class SensorControlFragment : BaseFragment<SensorControlInterface.Presenter>(), 
             vibro_button_2.setOnClickListener { onVibrationClicked(2) }
             vibro_button_3.setOnClickListener { onVibrationClicked(3) }
             button_connect.setOnClickListener { onConnectionButtonClicked() }
-            start_scan_btn.setOnClickListener { onScanButtonClicked() }
+            start_scan_btn.setOnClickListener { onStartButtonClicked() }
             sensor_frequency_seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) { onProgressSelected(progress) }
                 override fun onStartTrackingTouch(p0: SeekBar?) {}

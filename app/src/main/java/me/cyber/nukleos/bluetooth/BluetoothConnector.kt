@@ -31,7 +31,6 @@ class BluetoothConnector(val context: Context) {
             } else {
                 val settings = ScanSettings.Builder()
                         .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                        .setReportDelay(1000)
                         .build()
                 val filters = ArrayList<ScanFilter>()
                 filters.add(ScanFilter.Builder().setServiceUuid(ParcelUuid(serviceUUID)).build())

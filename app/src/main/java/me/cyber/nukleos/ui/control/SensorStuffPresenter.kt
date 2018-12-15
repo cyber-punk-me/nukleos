@@ -95,7 +95,7 @@ class SensorStuffPresenter(override val view: SensorControlInterface.View, priva
         }
     }
 
-    override fun onScanButtonClicked() {
+    override fun onStartButtonClicked() {
         mBluetoothStuffManager.myo?.apply {
             if (!isStreaming()) {
                 sendCommand(CommandList.emgFilteredOnly())
