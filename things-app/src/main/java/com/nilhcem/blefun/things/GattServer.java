@@ -242,7 +242,7 @@ public class GattServer {
                 .build();
 
         AdvertiseData data = new AdvertiseData.Builder()
-                .setIncludeDeviceName(true)
+                .setIncludeDeviceName(false)
                 .setIncludeTxPowerLevel(false)
                 .addServiceUuid(new ParcelUuid(SERVICE_UUID))
                 .build();
