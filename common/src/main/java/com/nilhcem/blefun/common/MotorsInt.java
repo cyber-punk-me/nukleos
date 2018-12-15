@@ -4,15 +4,17 @@ public interface MotorsInt {
 
     int MOTORS_COUNT = 4;
 
-    int FORWARD = 1;
-    int BACKWARD = 2;
-    int BRAKE = 3;
-    int RELEASE = 4;
+    byte FORWARD = 1;
+    byte BACKWARD = 2;
+    byte BRAKE = 3;
+    byte RELEASE = 4;
 
-    int SINGLE = 1;
-    int DOUBLE = 2;
-    int INTERLEAVE = 3;
-    int MICROSTEP = 4;
+    byte SINGLE = 1;
+    byte DOUBLE = 2;
+    byte INTERLEAVE = 3;
+    byte MICROSTEP = 4;
+
+    void connect(Object context);
 
     void spinMotor(byte iMotor, byte direction, byte speed);
 

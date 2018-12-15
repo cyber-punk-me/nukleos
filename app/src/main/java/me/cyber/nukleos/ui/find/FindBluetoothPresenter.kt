@@ -2,6 +2,7 @@ package me.cyber.nukleos.ui.find
 
 import android.bluetooth.BluetoothDevice
 import com.nilhcem.blefun.common.AwesomenessProfile.SERVICE_UUID
+import com.nilhcem.blefun.common.MotorsInt
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -30,7 +31,10 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
                 ?.observeOn(AndroidSchedulers.mainThread())
                 ?.subscribe({
                     if (mBluetoothStuffManager.motors == null) {
-                        mBluetoothStuffManager.motors = Motors(it)
+                        val motors = Motors(it)
+                        motors.connect(mBluetoothConnector.context)
+                        //motors.spinMotor(1, MotorsInt.FORWARD, 100)
+                        mBluetoothStuffManager.motors = motors
                     }
                 }, {
                 }, {
