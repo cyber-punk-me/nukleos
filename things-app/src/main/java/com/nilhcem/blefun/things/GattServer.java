@@ -40,9 +40,9 @@ public class GattServer {
     private static final String TAG = GattServer.class.getSimpleName();
 
     public interface GattServerListener {
-        void onInteractorWritten();
+        void onWriteRequest(byte[] value);
 
-        byte[] onCounterRead();
+        byte[] onReadRequest();
     }
 
     private Context mContext;
@@ -108,7 +108,7 @@ public class GattServer {
         public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattCharacteristic characteristic) {
             if (CHARACTERISTIC_COUNTER_UUID.equals(characteristic.getUuid())) {
                 Log.i(TAG, "Read counter");
-                byte[] value = mListener.onCounterRead();
+                byte[] value = mListener.onReadRequest();
                 mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, value);
             } else {
                 // Invalid characteristic
@@ -123,7 +123,7 @@ public class GattServer {
                 Log.i(TAG, "Write interactor");
 
                 if (mListener != null) {
-                    mListener.onInteractorWritten();
+                    mListener.onWriteRequest(value);
                 }
                 notifyRegisteredDevices();
             } else {
@@ -310,7 +310,7 @@ public class GattServer {
             BluetoothGattCharacteristic counterCharacteristic = mBluetoothGattServer
                     .getService(SERVICE_UUID)
                     .getCharacteristic(CHARACTERISTIC_COUNTER_UUID);
-            byte[] value = mListener.onCounterRead();
+            byte[] value = mListener.onReadRequest();
             counterCharacteristic.setValue(value);
             mBluetoothGattServer.notifyCharacteristicChanged(device, counterCharacteristic, false);
         }
