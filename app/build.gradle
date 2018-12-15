@@ -73,4 +73,6 @@ dependencies {
     // MultiDEX
     implementation 'com.android.support:multidex:1.0.3'
     implementation fileTree(include: ['*.aar'], dir: 'libs')
+
+    implementation project(':common')
 }

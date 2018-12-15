@@ -3,10 +3,11 @@ package me.cyber.nukleos.ui.control
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import me.cyber.nukleos.bluetooth.BluetoothConnector
 import me.cyber.nukleos.dagger.SensorStuffManager
 import me.cyber.nukleos.myosensor.*
 
-class SensorStuffPresenter(override val view: SensorControlInterface.View, private val mMyoConnector: MyoConnector,
+class SensorStuffPresenter(override val view: SensorControlInterface.View, private val mBluetoothConnector: BluetoothConnector,
                            private val mSensorStuffManager: SensorStuffManager) : SensorControlInterface.Presenter(view) {
 
     private var mSensorStatusSubscription: Disposable? = null
@@ -25,7 +26,7 @@ class SensorStuffPresenter(override val view: SensorControlInterface.View, priva
             showSensorStuffInformation(currentSensorStuff.name, currentSensorStuff.address)
             enableConnectButton()
             if (mSensorStuffManager.myo == null) {
-                mSensorStuffManager.myo = mMyoConnector.getMyo(currentSensorStuff)
+                mSensorStuffManager.myo = mBluetoothConnector.getMyo(currentSensorStuff)
             }
 
             mSensorStuffManager.myo?.apply {
@@ -73,7 +74,7 @@ class SensorStuffPresenter(override val view: SensorControlInterface.View, priva
     override fun onConnectionButtonClicked() {
         mSensorStuffManager.myo?.apply {
             if (!isConnected()) {
-                connect(mMyoConnector.context)
+                connect(mBluetoothConnector.context)
             } else {
                 disconnect()
             }

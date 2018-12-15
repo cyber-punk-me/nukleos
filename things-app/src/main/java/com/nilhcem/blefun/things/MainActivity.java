@@ -4,15 +4,13 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import com.nilhcem.blefun.common.Ints;
+import com.nilhcem.blefun.common.MotorsInt;
 import com.zugaldia.adafruit.motorhat.library.AdafruitDCMotor;
 import com.zugaldia.adafruit.motorhat.library.AdafruitMotorHat;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends Activity {
 
-    private final int MOTOR_COUNT = 4;
     private AwesomenessCounter mAwesomenessCounter;
     private final LuckyCat mLuckyCat = new LuckyCat();
     private final AdafruitMotorHat motorHat = new AdafruitMotorHat();
@@ -36,7 +34,7 @@ public class MainActivity extends Activity {
             public void onWriteRequest(byte[] value) {
                 int count = mAwesomenessCounter.incrementCounterValue();
                 if (count % 2 == 0) {
-                    spinMotor((byte) 1, (byte) AdafruitMotorHat.FORWARD, (byte) 100);
+                    spinMotor((byte) 1, (byte) MotorsInt.FORWARD, (byte) 100);
                 } else {
                     spinMotor((byte) 0, (byte) 0, (byte) 0);
                 }
@@ -60,8 +58,8 @@ public class MainActivity extends Activity {
     }
 
     private void stopMotors() {
-        for (int i = 1; i <= MOTOR_COUNT; i++) {
-            motorHat.getMotor(i).run(AdafruitMotorHat.RELEASE);
+        for (int i = 1; i <= MotorsInt.MOTORS_COUNT; i++) {
+            motorHat.getMotor(i).run(MotorsInt.RELEASE);
         }
     }
 

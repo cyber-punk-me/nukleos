@@ -6,11 +6,11 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.dagger.SensorStuffManager
-import me.cyber.nukleos.myosensor.MyoConnector
+import me.cyber.nukleos.bluetooth.BluetoothConnector
 import me.cyber.nukleos.ui.model.SensorStuff
 import java.util.concurrent.TimeUnit
 
-class FindSensorPresenter(override val view: FindSensorInterface.View, private val mMyoConnector: MyoConnector, private val mSensorStuffManager: SensorStuffManager
+class FindSensorPresenter(override val view: FindSensorInterface.View, private val mBluetoothConnector: BluetoothConnector, private val mSensorStuffManager: SensorStuffManager
 ) : FindSensorInterface.Presenter(view) {
 
     internal lateinit var mFindFlowable: Flowable<BluetoothDevice>
@@ -18,7 +18,7 @@ class FindSensorPresenter(override val view: FindSensorInterface.View, private v
     private var mFindSubscription: Disposable? = null
 
     override fun create() {
-        mFindFlowable = mMyoConnector.startMyoScan(10, TimeUnit.SECONDS)
+        mFindFlowable = mBluetoothConnector.startBluetoothScan(10, TimeUnit.SECONDS)
     }
 
     override fun start() {

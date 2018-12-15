@@ -1,4 +1,4 @@
-package me.cyber.nukleos.myosensor
+package me.cyber.nukleos.bluetooth
 
 import android.app.Activity
 import android.bluetooth.BluetoothDevice
@@ -12,27 +12,28 @@ import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import io.reactivex.FlowableEmitter
 import io.reactivex.Single
+import me.cyber.nukleos.myosensor.Myo
 import java.util.concurrent.TimeUnit
 
-class MyoConnector(val context: Context) {
+class BluetoothConnector(val context: Context) {
 
     private val mBTLowEnergyScanner = (context.getSystemService(Activity.BLUETOOTH_SERVICE) as BluetoothManager).adapter.bluetoothLeScanner
 
-    private var mMyoConnectorScanCallback: MyoConnectorScanCallback? = null
+    private var mBluetoothScanCallback: BluetoothScanCallback? = null
 
     // scan.
-    fun startMyoScan() = Flowable.create<BluetoothDevice>({
-        mMyoConnectorScanCallback = MyoConnectorScanCallback(it)
-        mBTLowEnergyScanner.startScan(mMyoConnectorScanCallback)
+    fun startBluetoothScan() = Flowable.create<BluetoothDevice>({
+        mBluetoothScanCallback = BluetoothScanCallback(it)
+        mBTLowEnergyScanner.startScan(mBluetoothScanCallback)
     }, BackpressureStrategy.BUFFER).apply {
-        doOnCancel { mBTLowEnergyScanner.stopScan(mMyoConnectorScanCallback) }
+        doOnCancel { mBTLowEnergyScanner.stopScan(mBluetoothScanCallback) }
     }
 
 
     // scan with timeout
-    fun startMyoScan(interval: Long, timeUnit: TimeUnit) = startMyoScan().takeUntil(Flowable.timer(interval, timeUnit))
+    fun startBluetoothScan(interval: Long, timeUnit: TimeUnit) = startBluetoothScan().takeUntil(Flowable.timer(interval, timeUnit))
 
-    fun getMyo(bluetoothDevice: BluetoothDevice) =Myo(bluetoothDevice)
+    fun getMyo(bluetoothDevice: BluetoothDevice) = Myo(bluetoothDevice)
 
     fun getMyo(myoAddress: String) = Single.create<Myo> {
             mBTLowEnergyScanner.startScan(listOf(ScanFilter.Builder()
@@ -54,7 +55,7 @@ class MyoConnector(val context: Context) {
         }
 
 
-    inner class MyoConnectorScanCallback(private val emitter: FlowableEmitter<BluetoothDevice>) : ScanCallback() {
+    inner class BluetoothScanCallback(private val emitter: FlowableEmitter<BluetoothDevice>) : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult?) {
             super.onScanResult(callbackType, result)
             result?.let {
