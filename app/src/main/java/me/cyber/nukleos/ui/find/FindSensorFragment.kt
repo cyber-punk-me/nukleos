@@ -25,7 +25,7 @@ class FindSensorFragment : BaseFragment<FindSensorInterface.Presenter>(), FindSe
     }
 
     @Inject
-    lateinit var scanDevicePresenter: FindSensorPresenter
+    lateinit var scanDevicePresenter: FindBluetoothPresenter
 
     private val mListDeviceAdapter by lazy {
         DeviceAdapter(object : DeviceSelectedListener {

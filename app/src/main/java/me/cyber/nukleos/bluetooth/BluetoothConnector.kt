@@ -8,32 +8,44 @@ import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.content.Context
+import android.os.ParcelUuid
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import io.reactivex.FlowableEmitter
-import io.reactivex.Single
-import me.cyber.nukleos.myosensor.Myo
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 class BluetoothConnector(val context: Context) {
 
     private val mBTLowEnergyScanner = (context.getSystemService(Activity.BLUETOOTH_SERVICE) as BluetoothManager).adapter.bluetoothLeScanner
 
-    private var mBluetoothScanCallback: BluetoothScanCallback? = null
+    private class BTCallbackHolder(var mBluetoothScanCallback: BluetoothScanCallback? = null)
 
     // scan.
-    fun startBluetoothScan() = Flowable.create<BluetoothDevice>({
-        mBluetoothScanCallback = BluetoothScanCallback(it)
-        mBTLowEnergyScanner.startScan(mBluetoothScanCallback)
-    }, BackpressureStrategy.BUFFER).apply {
-        doOnCancel { mBTLowEnergyScanner.stopScan(mBluetoothScanCallback) }
+    fun startBluetoothScan(serviceUUID: UUID?): Flowable<BluetoothDevice> {
+        val btCallHolder = BTCallbackHolder()
+        return Flowable.create<BluetoothDevice>({
+            btCallHolder.mBluetoothScanCallback = BluetoothScanCallback(it)
+            if (serviceUUID == null) {
+                mBTLowEnergyScanner.startScan(btCallHolder.mBluetoothScanCallback)
+            } else {
+                val settings = ScanSettings.Builder()
+                        .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                        .setReportDelay(1000)
+                        .build()
+                val filters = ArrayList<ScanFilter>()
+                filters.add(ScanFilter.Builder().setServiceUuid(ParcelUuid(serviceUUID)).build())
+                mBTLowEnergyScanner.startScan(filters, settings, btCallHolder.mBluetoothScanCallback)
+            }
+        }, BackpressureStrategy.BUFFER).apply {
+            doOnCancel { mBTLowEnergyScanner.stopScan(btCallHolder.mBluetoothScanCallback) }
+        }
     }
 
-
     // scan with timeout
-    fun startBluetoothScan(interval: Long, timeUnit: TimeUnit) = startBluetoothScan().takeUntil(Flowable.timer(interval, timeUnit))
+    fun startBluetoothScan(interval: Long, timeUnit: TimeUnit, serviceUUID: UUID? = null) = startBluetoothScan(serviceUUID).takeUntil(Flowable.timer(interval, timeUnit))
 
-    fun getMyo(bluetoothDevice: BluetoothDevice) = Myo(bluetoothDevice)
+/*    fun getMyo(bluetoothDevice: BluetoothDevice) = Myo(bluetoothDevice)
 
     fun getMyo(myoAddress: String) = Single.create<Myo> {
             mBTLowEnergyScanner.startScan(listOf(ScanFilter.Builder()
@@ -52,7 +64,7 @@ class BluetoothConnector(val context: Context) {
                     it.onError(RuntimeException())
                 }
             })
-        }
+        }*/
 
 
     inner class BluetoothScanCallback(private val emitter: FlowableEmitter<BluetoothDevice>) : ScanCallback() {

@@ -5,12 +5,12 @@ import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import me.cyber.nukleos.dagger.SensorStuffManager
+import me.cyber.nukleos.dagger.BluetoothStuffManager
 import me.cyber.nukleos.bluetooth.BluetoothConnector
 import me.cyber.nukleos.ui.model.SensorStuff
 import java.util.concurrent.TimeUnit
-
-class FindSensorPresenter(override val view: FindSensorInterface.View, private val mBluetoothConnector: BluetoothConnector, private val mSensorStuffManager: SensorStuffManager
+//bt general management
+class FindBluetoothPresenter(override val view: FindSensorInterface.View, private val mBluetoothConnector: BluetoothConnector, private val mBluetoothStuffManager: BluetoothStuffManager
 ) : FindSensorInterface.Presenter(view) {
 
     internal lateinit var mFindFlowable: Flowable<BluetoothDevice>
@@ -24,11 +24,11 @@ class FindSensorPresenter(override val view: FindSensorInterface.View, private v
     override fun start() {
         with(view) {
             clearSensorList()
-            if (mSensorStuffManager.findedSensorList.isEmpty()) {
+            if (mBluetoothStuffManager.foundBTDevicesList.isEmpty()) {
                 showPreparingText()
             } else {
-                populateSensorList(mSensorStuffManager
-                        .findedSensorList
+                populateSensorList(mBluetoothStuffManager
+                        .foundBTDevicesList
                         .map { it -> SensorStuff(it.name, it.address) })
             }
         }
@@ -40,7 +40,7 @@ class FindSensorPresenter(override val view: FindSensorInterface.View, private v
     }
 
     override fun onSensorSelected(index: Int) {
-        mSensorStuffManager.selectedIndex = index
+        mBluetoothStuffManager.selectedIndex = index
         view.goToSensorControl()
     }
 
@@ -49,7 +49,7 @@ class FindSensorPresenter(override val view: FindSensorInterface.View, private v
             if (mFindSubscription?.isDisposed == false) {
                 mFindSubscription?.dispose()
                 hideFindLoader()
-                if (mSensorStuffManager.findedSensorList.isEmpty()) {
+                if (mBluetoothStuffManager.foundBTDevicesList.isEmpty()) {
                     showEmptyListText()
                 }
             } else {
@@ -59,20 +59,20 @@ class FindSensorPresenter(override val view: FindSensorInterface.View, private v
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe({
-                            if (it !in mSensorStuffManager.findedSensorList) {
+                            if (it !in mBluetoothStuffManager.foundBTDevicesList) {
                                 addSensorToList(SensorStuff(it.name, it.address))
-                                mSensorStuffManager.findedSensorList.add(it)
+                                mBluetoothStuffManager.foundBTDevicesList.add(it)
                             }
                         }, {
                             hideFindLoader()
                             showFindError()
-                            if (mSensorStuffManager.findedSensorList.isEmpty()) {
+                            if (mBluetoothStuffManager.foundBTDevicesList.isEmpty()) {
                                 showEmptyListText()
                             }
                         }, {
                             hideFindLoader()
                             showFindSuccess()
-                            if (mSensorStuffManager.findedSensorList.isEmpty()) {
+                            if (mBluetoothStuffManager.foundBTDevicesList.isEmpty()) {
                                 showEmptyListText()
                             }
                         })

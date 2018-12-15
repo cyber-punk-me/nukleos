@@ -3,7 +3,7 @@ import dagger.Module
 import dagger.Provides
 import me.cyber.nukleos.bluetooth.BluetoothConnector
 import me.cyber.nukleos.ui.find.FindSensorInterface
-import me.cyber.nukleos.ui.find.FindSensorPresenter
+import me.cyber.nukleos.ui.find.FindBluetoothPresenter
 
 @Module
 class FindSensorModule {
@@ -12,9 +12,9 @@ class FindSensorModule {
     fun provideScanDevicePresenter(
             findSensorView: FindSensorInterface.View,
             bluetoothConnector: BluetoothConnector,
-            sensorStuffManager: SensorStuffManager
-    ): FindSensorPresenter {
-        return FindSensorPresenter(findSensorView, bluetoothConnector, sensorStuffManager)
+            bluetoothStuffManager: BluetoothStuffManager
+    ): FindBluetoothPresenter {
+        return FindBluetoothPresenter(findSensorView, bluetoothConnector, bluetoothStuffManager)
     }
 
 }

@@ -3,7 +3,7 @@ import android.bluetooth.BluetoothDevice
 import com.nilhcem.blefun.common.MotorsInt
 import me.cyber.nukleos.myosensor.Myo
 
-class SensorStuffManager {
+class BluetoothStuffManager {
 
     var selectedIndex: Int = -1
         set(value) {
@@ -11,7 +11,7 @@ class SensorStuffManager {
             field = value
         }
 
-    var findedSensorList: MutableList<BluetoothDevice> = mutableListOf()
+    var foundBTDevicesList: MutableList<BluetoothDevice> = mutableListOf()
 
     var myo: Myo? = null
 
