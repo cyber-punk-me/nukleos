@@ -10,13 +10,17 @@ import me.cyber.nukleos.myosensor.TAG
 class Motors(private val device: BluetoothDevice) : MotorsInt, BluetoothGattCallback() {
 
     private var gatt: BluetoothGatt? = null
+    private var servicesDiscovered = false;
 
     override fun connect(context: Any?) {
-        gatt = device.connectGatt(context as Context, false, this)
+        if (gatt == null) {
+            gatt = device.connectGatt(context as Context, false, this)
+        }
     }
 
     fun disconnect() {
         gatt?.close()
+        gatt = null//todo servicesdiscovered = false
     }
 
     override fun spinMotor(iMotor: Byte, direction: Byte, speed: Byte) {
@@ -32,6 +36,7 @@ class Motors(private val device: BluetoothDevice) : MotorsInt, BluetoothGattCall
     }
 
     fun writeInteractor() {
+        Thread.sleep(3000)
         val interactor = gatt
                 ?.getService(SERVICE_UUID)
                 ?.getCharacteristic(CHARACTERISTIC_INTERACTOR_UUID)
@@ -42,7 +47,7 @@ class Motors(private val device: BluetoothDevice) : MotorsInt, BluetoothGattCall
     override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
         super.onConnectionStateChange(gatt, status, newState)
         Log.d(TAG, "onConnectionStateChange: $status -> $newState")
-        if (newState == BluetoothProfile.STATE_CONNECTED) {
+        if (newState != status && newState == BluetoothProfile.STATE_CONNECTED) {
             Log.d(TAG, "Motors Connected")
             //spinMotor(1, MotorsInt.FORWARD, 100)
             gatt.discoverServices()
@@ -54,8 +59,9 @@ class Motors(private val device: BluetoothDevice) : MotorsInt, BluetoothGattCall
     }
 
 
+    @Synchronized
     override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
-        if (status == BluetoothGatt.GATT_SUCCESS) {
+        if (status == BluetoothGatt.GATT_SUCCESS && !servicesDiscovered) {
             var connected = false
 
             val service = gatt.getService(SERVICE_UUID)
@@ -71,8 +77,9 @@ class Motors(private val device: BluetoothDevice) : MotorsInt, BluetoothGattCall
                     }
                 }
             }
-            Log.d(TAG,"Motors connected : $connected")
+            Log.d(TAG, "Motors connected : $connected")
             if (connected) {
+                servicesDiscovered = true
                 writeInteractor()
             }
         } else {
@@ -82,10 +89,6 @@ class Motors(private val device: BluetoothDevice) : MotorsInt, BluetoothGattCall
 
     override fun stopMotors() {
         spinMotor(0, 0, 0)
-    }
-
-    companion object {
-        private val MOTOR_COUNT: Int = 4
     }
 
 }

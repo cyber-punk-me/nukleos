@@ -17,6 +17,6 @@ class BluetoothStuffManager {
 
     var connected = myo?.isConnected() ?: false
 
-    var motors : MotorsInt? = null
+    @Volatile var motors : MotorsInt? = null
 
 }

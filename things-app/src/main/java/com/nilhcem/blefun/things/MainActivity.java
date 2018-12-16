@@ -2,6 +2,7 @@ package com.nilhcem.blefun.things;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.nilhcem.blefun.common.Ints;
 import com.nilhcem.blefun.common.MotorsInt;
@@ -12,7 +13,7 @@ import com.zugaldia.adafruit.motorhat.library.AdafruitMotorHat;
 public class MainActivity extends Activity {
 
     private AwesomenessCounter mAwesomenessCounter;
-    private final LuckyCat mLuckyCat = new LuckyCat();
+    //private final LuckyCat mLuckyCat = new LuckyCat();
     private final AdafruitMotorHat motorHat = new AdafruitMotorHat();
     private final GattServer mGattServer = new GattServer();
 
@@ -21,8 +22,8 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         mAwesomenessCounter = new AwesomenessCounter(this);
 
-        mLuckyCat.onCreate();
-        mLuckyCat.updateCounter(mAwesomenessCounter.getCounterValue());
+        //mLuckyCat.onCreate();
+        //mLuckyCat.updateCounter(mAwesomenessCounter.getCounterValue());
 
         mGattServer.onCreate(this, new GattServer.GattServerListener() {
             @Override
@@ -48,6 +49,7 @@ public class MainActivity extends Activity {
      * @param speed
      */
     private void spinMotor(byte iMotor, byte direction, byte speed) {
+        Log.w("Motors", "trying to spin motors.");
         if (iMotor == 0 && direction == 0 && speed == 0) {
             stopMotors();
         } else {
@@ -67,6 +69,6 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         mGattServer.onDestroy();
-        mLuckyCat.onDestroy();
+        //mLuckyCat.onDestroy();
     }
 }

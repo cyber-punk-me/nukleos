@@ -31,10 +31,13 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
                 ?.observeOn(AndroidSchedulers.mainThread())
                 ?.subscribe({
                     if (mBluetoothStuffManager.motors == null) {
-                        val motors = Motors(it)
-                        motors.connect(mBluetoothConnector.context)
-                        //motors.spinMotor(1, MotorsInt.FORWARD, 100)
-                        mBluetoothStuffManager.motors = motors
+                        synchronized(mBluetoothStuffManager) {
+                            if (mBluetoothStuffManager.motors == null) {
+                                val motors = Motors(it)
+                                mBluetoothStuffManager.motors = motors
+                                motors.connect(mBluetoothConnector.context)
+                            }
+                        }
                     }
                 }, {
                 }, {
