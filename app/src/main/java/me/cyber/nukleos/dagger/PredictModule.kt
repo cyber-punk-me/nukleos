@@ -10,5 +10,5 @@ class PredictModule {
 
     @Provides
     fun providePredictPresenter(chartsView: PredictInterface.View,
-                                sensorStuffManager: SensorStuffManager): PredictPresenter = PredictPresenter(chartsView, sensorStuffManager)
+                                bluetoothStuffManager: BluetoothStuffManager): PredictPresenter = PredictPresenter(chartsView, bluetoothStuffManager)
 }

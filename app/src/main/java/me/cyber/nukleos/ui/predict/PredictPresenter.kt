@@ -5,10 +5,10 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.App
 import me.cyber.nukleos.api.PredictRequest
-import me.cyber.nukleos.dagger.SensorStuffManager
+import me.cyber.nukleos.dagger.BluetoothStuffManager
 import me.cyber.nukleos.utils.LimitedQueue
 
-class PredictPresenter(override val view: PredictInterface.View, private val mSensorStuffManager: SensorStuffManager) : PredictInterface.Presenter(view) {
+class PredictPresenter(override val view: PredictInterface.View, private val mBluetoothStuffManager: BluetoothStuffManager) : PredictInterface.Presenter(view) {
 
     private var mChartsDataSubscription: Disposable? = null
     private var mPostPredict: Disposable? = null
@@ -21,7 +21,7 @@ class PredictPresenter(override val view: PredictInterface.View, private val mSe
 
     override fun start() {
         with(view) {
-            mSensorStuffManager.myo?.apply {
+            mBluetoothStuffManager.myo?.apply {
                 if (this.isStreaming()) {
                     hideNoStreamingMessage()
                     mChartsDataSubscription?.apply {

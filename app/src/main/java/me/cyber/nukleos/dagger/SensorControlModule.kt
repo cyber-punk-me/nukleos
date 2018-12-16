@@ -1,6 +1,6 @@
 package me.cyber.nukleos.dagger
 
-import me.cyber.nukleos.myosensor.MyoConnector
+import me.cyber.nukleos.bluetooth.BluetoothConnector
 import dagger.Module
 import dagger.Provides
 import me.cyber.nukleos.ui.control.SensorControlInterface
@@ -12,10 +12,10 @@ class SensorControlModule {
     @Provides
     fun provideControlDevicePresenter(
             sensorControlView: SensorControlInterface.View,
-            myoConnector: MyoConnector,
-            sensorStuffManager: SensorStuffManager
+            bluetoothConnector: BluetoothConnector,
+            bluetoothStuffManager: BluetoothStuffManager
     ): SensorStuffPresenter {
-        return SensorStuffPresenter(sensorControlView, myoConnector, sensorStuffManager)
+        return SensorStuffPresenter(sensorControlView, bluetoothConnector, bluetoothStuffManager)
     }
 
 }

@@ -4,13 +4,13 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.App
-import me.cyber.nukleos.dagger.SensorStuffManager
+import me.cyber.nukleos.dagger.BluetoothStuffManager
 import me.cyber.nukleos.ui.charts.ChartsFragment.Companion.LEARNING_TIME
 import me.cyber.nukleos.ui.charts.ChartsFragment.Companion.TIMER_COUNT
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class ChartsPresenter(override val view: ChartInterface.View, private val mSensorStuffManager: SensorStuffManager) : ChartInterface.Presenter(view) {
+class ChartsPresenter(override val view: ChartInterface.View, private val mBluetoothStuffManager: BluetoothStuffManager) : ChartInterface.Presenter(view) {
 
     private val mLearningSessId = UUID.fromString("885d0665-ca5d-46ed-b6dc-ea2c2610a67f")
             //UUID.randomUUID()
@@ -25,7 +25,7 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mSenso
 
     override fun start() {
         with(view) {
-            mSensorStuffManager.myo?.apply {
+            mBluetoothStuffManager.myo?.apply {
                 if (this.isStreaming()) {
                     hideNoStreamingMessage()
                     mChartsDataSubscription?.apply {
@@ -46,11 +46,11 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mSenso
     override fun onCollectPressed() {
         val dataBuffer: ArrayList<FloatArray> = arrayListOf()
         with(view) {
-            if (mSensorStuffManager.myo == null) {
+            if (mBluetoothStuffManager.myo == null) {
                 showNoStreamingMessage()
                 return
             }
-            mSensorStuffManager.myo?.apply {
+            mBluetoothStuffManager.myo?.apply {
                 if (this.isStreaming()) {
                     goToState(ChartInterface.State.COUNTDOWN)
                     hideNoStreamingMessage()
