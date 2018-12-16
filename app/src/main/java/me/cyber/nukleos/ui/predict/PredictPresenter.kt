@@ -4,8 +4,10 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.App
+import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.api.PredictRequest
 import me.cyber.nukleos.dagger.BluetoothStuffManager
+import me.cyber.nukleos.motors.MotorsHttp
 import me.cyber.nukleos.utils.LimitedQueue
 
 class PredictPresenter(override val view: PredictInterface.View, private val mBluetoothStuffManager: BluetoothStuffManager) : PredictInterface.Presenter(view) {
@@ -16,6 +18,7 @@ class PredictPresenter(override val view: PredictInterface.View, private val mBl
     private var predictBuffer = LimitedQueue<FloatArray>(8)
     private var iUpdate = 0
     private val updatesUntilPredict = 256
+    private val mMotors : IMotors = MotorsHttp()
 
     override fun create() {}
 
@@ -43,6 +46,18 @@ class PredictPresenter(override val view: PredictInterface.View, private val mBl
                 }
             }
         }
+    }
+
+    override fun connect(context: Any) {
+        mMotors.connect(context)
+    }
+
+    override fun spinMotor(iMotor: Byte, direction: Byte, speed: Byte) {
+        mMotors.spinMotor(iMotor, direction, speed)
+    }
+
+    override fun stopMotors() {
+        mMotors.stopMotors()
     }
 
     private fun predict() {
