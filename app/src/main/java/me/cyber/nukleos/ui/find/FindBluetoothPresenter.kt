@@ -1,15 +1,14 @@
 package me.cyber.nukleos.ui.find
 
 import android.bluetooth.BluetoothDevice
-import com.nilhcem.blefun.common.AwesomenessProfile.SERVICE_UUID
-import com.nilhcem.blefun.common.MotorsInt
+import me.cyber.nukleos.IMotors
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.dagger.BluetoothStuffManager
 import me.cyber.nukleos.bluetooth.BluetoothConnector
-import me.cyber.nukleos.motors.Motors
+import me.cyber.nukleos.motors.MotorsBlueTooth
 import me.cyber.nukleos.ui.model.SensorStuff
 import java.util.concurrent.TimeUnit
 
@@ -26,14 +25,14 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
     override fun create() {
         mFindFlowable = mBluetoothConnector.startBluetoothScan(10, TimeUnit.SECONDS)
 
-        mFindMotorsFlowable = mBluetoothConnector.startBluetoothScan(10, TimeUnit.SECONDS, SERVICE_UUID)
+        mFindMotorsFlowable = mBluetoothConnector.startBluetoothScan(10, TimeUnit.SECONDS, IMotors.SERVICE_UUID)
         mFindMotorsSubscription = mFindMotorsFlowable?.subscribeOn(Schedulers.io())
                 ?.observeOn(AndroidSchedulers.mainThread())
                 ?.subscribe({
                     if (mBluetoothStuffManager.motors == null) {
                         synchronized(mBluetoothStuffManager) {
                             if (mBluetoothStuffManager.motors == null) {
-                                val motors = Motors(it)
+                                val motors = MotorsBlueTooth(it)
                                 mBluetoothStuffManager.motors = motors
                                 motors.connect(mBluetoothConnector.context)
                             }

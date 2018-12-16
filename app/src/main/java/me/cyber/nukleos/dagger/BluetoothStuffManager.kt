@@ -1,6 +1,6 @@
 package me.cyber.nukleos.dagger
 import android.bluetooth.BluetoothDevice
-import com.nilhcem.blefun.common.MotorsInt
+import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.myosensor.Myo
 
 class BluetoothStuffManager {
@@ -17,6 +17,6 @@ class BluetoothStuffManager {
 
     var connected = myo?.isConnected() ?: false
 
-    @Volatile var motors : MotorsInt? = null
+    @Volatile var motors : IMotors? = null
 
 }

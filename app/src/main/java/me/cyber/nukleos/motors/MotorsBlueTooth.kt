@@ -3,16 +3,15 @@ package me.cyber.nukleos.motors
 import android.bluetooth.*
 import android.content.Context
 import android.util.Log
-import com.nilhcem.blefun.common.AwesomenessProfile.*
-import com.nilhcem.blefun.common.MotorsInt
+import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.myosensor.TAG
 
-class Motors(private val device: BluetoothDevice) : MotorsInt, BluetoothGattCallback() {
+class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothGattCallback() {
 
     private var gatt: BluetoothGatt? = null
-    private var servicesDiscovered = false;
+    var servicesDiscovered = false
 
-    override fun connect(context: Any?) {
+    override fun connect(context: Any) {
         if (gatt == null) {
             gatt = device.connectGatt(context as Context, false, this)
         }
@@ -20,35 +19,27 @@ class Motors(private val device: BluetoothDevice) : MotorsInt, BluetoothGattCall
 
     fun disconnect() {
         gatt?.close()
-        gatt = null//todo servicesdiscovered = false
+        gatt = null
+        servicesDiscovered = false
     }
 
     override fun spinMotor(iMotor: Byte, direction: Byte, speed: Byte) {
         val characteristic = gatt
-                ?.getService(SERVICE_UUID)
-                ?.getCharacteristic(CHARACTERISTIC_INTERACTOR_UUID)
+                ?.getService(IMotors.SERVICE_UUID)
+                ?.getCharacteristic(IMotors.CHAR_MOTOR_UUID)
         val command = ByteArray(3)
         command[0] = iMotor
         command[1] = direction
         command[2] = speed
-        characteristic?.setValue("!")//command
+        characteristic?.value = command
         gatt?.writeCharacteristic(characteristic)
-    }
-
-    fun writeInteractor() {
-        Thread.sleep(3000)
-        val interactor = gatt
-                ?.getService(SERVICE_UUID)
-                ?.getCharacteristic(CHARACTERISTIC_INTERACTOR_UUID)
-        interactor?.setValue("!")
-        gatt?.writeCharacteristic(interactor)
     }
 
     override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
         super.onConnectionStateChange(gatt, status, newState)
         Log.d(TAG, "onConnectionStateChange: $status -> $newState")
         if (newState != status && newState == BluetoothProfile.STATE_CONNECTED) {
-            Log.d(TAG, "Motors Connected")
+            Log.d(TAG, "MotorsBlueTooth Connected")
             //spinMotor(1, MotorsInt.FORWARD, 100)
             gatt.discoverServices()
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
@@ -62,26 +53,17 @@ class Motors(private val device: BluetoothDevice) : MotorsInt, BluetoothGattCall
     @Synchronized
     override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
         if (status == BluetoothGatt.GATT_SUCCESS && !servicesDiscovered) {
-            var connected = false
 
-            val service = gatt.getService(SERVICE_UUID)
+            val service = gatt.getService(IMotors.SERVICE_UUID)
             if (service != null) {
-                val characteristic = service.getCharacteristic(CHARACTERISTIC_COUNTER_UUID)
+                val characteristic = service.getCharacteristic(IMotors.CHAR_MOTOR_STATE_UUID)
                 if (characteristic != null) {
                     gatt.setCharacteristicNotification(characteristic, true)
-
-                    val descriptor = characteristic.getDescriptor(DESCRIPTOR_CONFIG)
-                    if (descriptor != null) {
-                        descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-                        connected = gatt.writeDescriptor(descriptor)
-                    }
+                    servicesDiscovered = true
                 }
             }
-            Log.d(TAG, "Motors connected : $connected")
-            if (connected) {
-                servicesDiscovered = true
-                writeInteractor()
-            }
+            Log.d(TAG, "MotorsBlueTooth connected : $servicesDiscovered")
+
         } else {
             Log.w(TAG, "onServicesDiscovered received: $status")
         }
