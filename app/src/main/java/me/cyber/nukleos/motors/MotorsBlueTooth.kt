@@ -40,7 +40,6 @@ class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothG
         Log.d(TAG, "onConnectionStateChange: $status -> $newState")
         if (newState != status && newState == BluetoothProfile.STATE_CONNECTED) {
             Log.d(TAG, "MotorsBlueTooth Connected")
-            //
             gatt.discoverServices()
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
             // Calling disconnect() here will cause to release the GATT resources.
