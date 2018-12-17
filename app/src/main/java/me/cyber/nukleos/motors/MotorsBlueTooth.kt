@@ -40,7 +40,7 @@ class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothG
         Log.d(TAG, "onConnectionStateChange: $status -> $newState")
         if (newState != status && newState == BluetoothProfile.STATE_CONNECTED) {
             Log.d(TAG, "MotorsBlueTooth Connected")
-            //spinMotor(1, MotorsInt.FORWARD, 100)
+            //
             gatt.discoverServices()
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
             // Calling disconnect() here will cause to release the GATT resources.
@@ -53,15 +53,19 @@ class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothG
     @Synchronized
     override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
         if (status == BluetoothGatt.GATT_SUCCESS && !servicesDiscovered) {
+            servicesDiscovered = true
+            Log.d(TAG, "Spinning motor..")
 
-            val service = gatt.getService(IMotors.SERVICE_UUID)
+            Thread{
+                spinMotor(1, IMotors.FORWARD, 100)
+            }.start()
+/*            val service = gatt.getService(IMotors.SERVICE_UUID)
             if (service != null) {
-                val characteristic = service.getCharacteristic(IMotors.CHAR_MOTOR_STATE_UUID)
+                val characteristic = service.getCharacteristic(IMotors.CHAR_MOTOR_UUID)
                 if (characteristic != null) {
                     gatt.setCharacteristicNotification(characteristic, true)
-                    servicesDiscovered = true
                 }
-            }
+            }*/
             Log.d(TAG, "MotorsBlueTooth connected : $servicesDiscovered")
 
         } else {
