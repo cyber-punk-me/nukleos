@@ -363,7 +363,6 @@ class GattServerActivity : Activity() {
         //        ?: Log.w(TAG, "Unable to create GATT server")
 
         bluetoothGattServer?.addService(MotorsProfile.createMotorsService())
-
                 ?: Log.w(TAG, "Unable to create GATT server")
 
         // Initialize the local UI
