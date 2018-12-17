@@ -20,16 +20,71 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <Switch
-        android:id="@+id/predict_toggle"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="140dp"
         android:layout_gravity="bottom"
-        android:layout_marginBottom="10dp"
-        android:layout_marginRight="20dp"
         android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
         android:enabled="true"
-        android:gravity="center"
-        android:text="@string/predict" />
+        android:orientation="vertical"
+        android:text="@string/predict">
+
+
+
+            <Switch
+                android:id="@+id/predict_toggle"
+                android:layout_width="160dp"
+                android:layout_height="20dp"
+                android:layout_marginBottom="20dp"
+                android:enabled="true"
+                android:gravity="center"
+                android:text="@string/predict" />
+
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="horizontal">
+
+            <Switch
+                android:id="@+id/motor_toggle"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:enabled="true"
+                android:gravity="center"
+                android:text="@string/motor" />
+
+            <Switch
+                android:id="@+id/direction_toggle"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:enabled="true"
+                android:gravity="center"
+                android:text="@string/direction" />
+
+            <Switch
+                android:id="@+id/speed_toggle"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:enabled="true"
+                android:gravity="center"
+                android:text="@string/speed" />
+        </LinearLayout>
+
+        <android.support.design.button.MaterialButton
+            android:id="@+id/button_connect"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_margin="@dimen/default_margin"
+            android:enabled="false"
+            android:minWidth="120dp"
+            android:text="@string/send" />
+
+
+    </LinearLayout>
 
 </FrameLayout>

@@ -72,7 +72,7 @@ object TimeProfile {
      */
     fun createTimeService(): BluetoothGattService {
         val service = BluetoothGattService(TIME_SERVICE,
-                BluetoothGattService.SERVICE_TYPE_PRIMARY)
+                BluetoothGattService.SERVICE_TYPE_SECONDARY)
 
         // Current Time characteristic
         val currentTime = BluetoothGattCharacteristic(CURRENT_TIME,

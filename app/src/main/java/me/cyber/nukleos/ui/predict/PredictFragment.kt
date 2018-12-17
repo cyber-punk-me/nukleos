@@ -18,6 +18,10 @@ import javax.inject.Inject
 
 class PredictFragment : BaseFragment<PredictInterface.Presenter>(), PredictInterface.View {
 
+    override fun updateMotors(iMotor: Int, direction: Int, speed: Int) {
+        Toast.makeText(context, "motor $iMotor moving $direction at $speed", Toast.LENGTH_SHORT).show()
+    }
+
     override fun notifyPredict(response: PredictResponse) {
         val prediction = response.predictions[0]
         val max = prediction.distr.max()

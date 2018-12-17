@@ -129,6 +129,7 @@ class GattServerActivity : Activity() {
                 //Remove device from any active subscriptions
                 registeredDevices.remove(device)
                 //todo fix advertising disappears after client disconnects
+                stopMotors()
                 stopAdvertising()
                 startAdvertising()
             }
@@ -163,6 +164,22 @@ class GattServerActivity : Activity() {
                             0,
                             null)
                 }
+            }
+        }
+
+        override fun onCharacteristicWriteRequest(device: BluetoothDevice, requestId: Int,
+                                              characteristic: BluetoothGattCharacteristic,
+                                              preparedWrite: Boolean, responseNeeded: Boolean,
+                                              offset: Int, value: ByteArray) {
+            if (IMotors.CHAR_MOTOR_UUID == characteristic.uuid) {
+                Log.d(TAG, "Motor charateristic write")
+                spinMotor(value[0], value[1], value[2])
+            }
+            if (responseNeeded) {
+                bluetoothGattServer?.sendResponse(device,
+                        requestId,
+                        BluetoothGatt.GATT_SUCCESS,
+                        0, null)
             }
         }
 
@@ -316,7 +333,8 @@ class GattServerActivity : Activity() {
             val data = AdvertiseData.Builder()
                     .setIncludeDeviceName(false)//some device names are too long
                     .setIncludeTxPowerLevel(false)
-                    .addServiceUuid(ParcelUuid(TimeProfile.TIME_SERVICE))
+                    //.addServiceUuid(ParcelUuid(TimeProfile.TIME_SERVICE))
+                    .addServiceUuid(ParcelUuid(IMotors.SERVICE_UUID))
                     .build()
 
             it.startAdvertising(settings, data, advertiseCallback)
@@ -341,7 +359,11 @@ class GattServerActivity : Activity() {
     private fun startServer() {
         bluetoothGattServer = bluetoothManager.openGattServer(this, gattServerCallback)
 
-        bluetoothGattServer?.addService(TimeProfile.createTimeService())
+        //bluetoothGattServer?.addService(TimeProfile.createTimeService())
+        //        ?: Log.w(TAG, "Unable to create GATT server")
+
+        bluetoothGattServer?.addService(MotorsProfile.createMotorsService())
+
                 ?: Log.w(TAG, "Unable to create GATT server")
 
         // Initialize the local UI
@@ -386,7 +408,7 @@ class GattServerActivity : Activity() {
         localTimeView.text = "$displayDate\n$displayTime"
     }
 
-        /**
+    /**
      * @param iMotor
      * @param direction
      * @param speed

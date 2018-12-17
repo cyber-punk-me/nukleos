@@ -2,6 +2,7 @@ package me.cyber.nukleos.ui.predict
 
 import me.cyber.nukleos.BasePresenter
 import me.cyber.nukleos.BaseView
+import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.api.PredictResponse
 
 interface PredictInterface {
@@ -13,6 +14,7 @@ interface PredictInterface {
         fun showNoStreamingMessage()
         fun notifyPredict(prediction: PredictResponse)
         fun notifyPredictError(error: Throwable)
+        fun updateMotors(iMotor: Int, direction: Int, speed: Int)
     }
 
     abstract class Presenter(override val view: BaseView) : BasePresenter<BaseView>(view) {
