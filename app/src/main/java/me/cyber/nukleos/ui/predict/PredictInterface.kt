@@ -17,7 +17,7 @@ interface PredictInterface {
         fun updateMotors(iMotor: Int, direction: Int, speed: Int)
     }
 
-    abstract class Presenter(override val view: BaseView) : BasePresenter<BaseView>(view), IMotors {
+    abstract class Presenter(override val view: BaseView) : BasePresenter<BaseView>(view) {
         abstract fun onPredictSwitched(on: Boolean)
     }
 
