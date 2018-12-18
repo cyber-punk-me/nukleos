@@ -3,6 +3,10 @@ package me.cyber.nukleos.motors
 import me.cyber.nukleos.IMotors
 
 class MotorsHttp : IMotors {
+    override fun getState(): ByteArray {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     override fun connect(context: Any) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }

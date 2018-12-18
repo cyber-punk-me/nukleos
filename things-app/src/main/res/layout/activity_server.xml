@@ -21,12 +21,12 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/text_time"
+        android:id="@+id/text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center"
         android:textSize="56dp"
-        tools:text="01/01/1970\n12:00"/>
+        tools:text="Hello motors"/>
 
 </FrameLayout>

@@ -37,23 +37,21 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.ParcelUuid
-import android.text.format.DateFormat
 import android.util.Log
 import android.view.WindowManager
 import android.widget.TextView
-import com.zugaldia.adafruit.motorhat.library.AdafruitDCMotor
 import com.zugaldia.adafruit.motorhat.library.AdafruitMotorHat
 import me.cyber.nukleos.IMotors
 
 import java.util.Arrays
-import java.util.Date
 
 private const val TAG = "GattServerActivity"
 
-class GattServerActivity : Activity() {
+class GattServerActivity : IMotors, Activity() {
+
 
     /* Local UI */
-    private lateinit var localTimeView: TextView
+    private lateinit var textView: TextView
     /* Bluetooth API */
     private lateinit var bluetoothManager: BluetoothManager
     private var bluetoothGattServer: BluetoothGattServer? = null
@@ -62,24 +60,6 @@ class GattServerActivity : Activity() {
 
     private val motorHat = AdafruitMotorHat()
 
-
-    /**
-     * Listens for system time changes and triggers a notification to
-     * Bluetooth subscribers.
-     */
-    private val timeReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            val adjustReason = when (intent.action) {
-                Intent.ACTION_TIME_CHANGED -> TimeProfile.ADJUST_MANUAL
-                Intent.ACTION_TIMEZONE_CHANGED -> TimeProfile.ADJUST_TIMEZONE
-                Intent.ACTION_TIME_TICK -> TimeProfile.ADJUST_NONE
-                else -> TimeProfile.ADJUST_NONE
-            }
-            val now = System.currentTimeMillis()
-            notifyRegisteredDevices(now, adjustReason)
-            updateLocalUi(now)
-        }
-    }
 
     /**
      * Listens for Bluetooth adapter events to enable/disable
@@ -128,7 +108,7 @@ class GattServerActivity : Activity() {
                 Log.i(TAG, "BluetoothDevice DISCONNECTED: $device")
                 //Remove device from any active subscriptions
                 registeredDevices.remove(device)
-                //todo fix advertising disappears after client disconnects
+                //todo fix "advertising disappears after client disconnects"
                 stopMotors()
                 stopAdvertising()
                 startAdvertising()
@@ -137,23 +117,14 @@ class GattServerActivity : Activity() {
 
         override fun onCharacteristicReadRequest(device: BluetoothDevice, requestId: Int, offset: Int,
                                                  characteristic: BluetoothGattCharacteristic) {
-            val now = System.currentTimeMillis()
             when {
-                TimeProfile.CURRENT_TIME == characteristic.uuid -> {
-                    Log.i(TAG, "Read CurrentTime")
+                IMotors.CHAR_MOTOR_STATE_UUID == characteristic.uuid -> {
+                    Log.i(TAG, "Read motors state")
                     bluetoothGattServer?.sendResponse(device,
                             requestId,
                             BluetoothGatt.GATT_SUCCESS,
                             0,
-                            TimeProfile.getExactTime(now, TimeProfile.ADJUST_NONE))
-                }
-                TimeProfile.LOCAL_TIME_INFO == characteristic.uuid -> {
-                    Log.i(TAG, "Read LocalTimeInfo")
-                    bluetoothGattServer?.sendResponse(device,
-                            requestId,
-                            BluetoothGatt.GATT_SUCCESS,
-                            0,
-                            TimeProfile.getLocalTimeInfo(now))
+                            getState())
                 }
                 else -> {
                     // Invalid characteristic
@@ -171,7 +142,7 @@ class GattServerActivity : Activity() {
                                               characteristic: BluetoothGattCharacteristic,
                                               preparedWrite: Boolean, responseNeeded: Boolean,
                                               offset: Int, value: ByteArray) {
-            if (IMotors.CHAR_MOTOR_UUID == characteristic.uuid) {
+            if (IMotors.CHAR_MOTOR_CONTROL_UUID == characteristic.uuid) {
                 Log.d(TAG, "Motor charateristic write")
                 spinMotor(value[0], value[1], value[2])
             }
@@ -181,11 +152,13 @@ class GattServerActivity : Activity() {
                         BluetoothGatt.GATT_SUCCESS,
                         0, null)
             }
+            //todo check if this thread is ok
+            notifyRegisteredDevices()
         }
 
         override fun onDescriptorReadRequest(device: BluetoothDevice, requestId: Int, offset: Int,
                                              descriptor: BluetoothGattDescriptor) {
-            if (TimeProfile.CLIENT_CONFIG == descriptor.uuid) {
+            if (IMotors.CLIENT_CONFIG_DESCRIPTOR == descriptor.uuid) {
                 Log.d(TAG, "Config descriptor read")
                 val returnValue = if (registeredDevices.contains(device)) {
                     BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
@@ -210,7 +183,7 @@ class GattServerActivity : Activity() {
                                               descriptor: BluetoothGattDescriptor,
                                               preparedWrite: Boolean, responseNeeded: Boolean,
                                               offset: Int, value: ByteArray) {
-            if (TimeProfile.CLIENT_CONFIG == descriptor.uuid) {
+            if (IMotors.CLIENT_CONFIG_DESCRIPTOR == descriptor.uuid) {
                 if (Arrays.equals(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE, value)) {
                     Log.d(TAG, "Subscribe device to notifications: $device")
                     registeredDevices.add(device)
@@ -241,7 +214,7 @@ class GattServerActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_server)
 
-        localTimeView = findViewById(R.id.text_time)
+        textView = findViewById(R.id.text)
 
         // Devices with a display should not go to sleep
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -264,23 +237,6 @@ class GattServerActivity : Activity() {
             startAdvertising()
             startServer()
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        // Register for system clock events
-        val filter = IntentFilter().apply {
-            addAction(Intent.ACTION_TIME_TICK)
-            addAction(Intent.ACTION_TIME_CHANGED)
-            addAction(Intent.ACTION_TIMEZONE_CHANGED)
-        }
-
-        registerReceiver(timeReceiver, filter)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        unregisterReceiver(timeReceiver)
     }
 
     override fun onDestroy() {
@@ -316,7 +272,7 @@ class GattServerActivity : Activity() {
 
     /**
      * Begin advertising over Bluetooth that this device is connectable
-     * and supports the Current Time Service.
+     * and supports the Motors Service.
      */
     private fun startAdvertising() {
         val bluetoothLeAdvertiser: BluetoothLeAdvertiser? =
@@ -333,7 +289,6 @@ class GattServerActivity : Activity() {
             val data = AdvertiseData.Builder()
                     .setIncludeDeviceName(false)//some device names are too long
                     .setIncludeTxPowerLevel(false)
-                    //.addServiceUuid(ParcelUuid(TimeProfile.TIME_SERVICE))
                     .addServiceUuid(ParcelUuid(IMotors.SERVICE_UUID))
                     .build()
 
@@ -354,19 +309,13 @@ class GattServerActivity : Activity() {
 
     /**
      * Initialize the GATT server instance with the services/characteristics
-     * from the Time Profile.
+     * from the Motors Profile.
      */
     private fun startServer() {
         bluetoothGattServer = bluetoothManager.openGattServer(this, gattServerCallback)
 
-        //bluetoothGattServer?.addService(TimeProfile.createTimeService())
-        //        ?: Log.w(TAG, "Unable to create GATT server")
-
         bluetoothGattServer?.addService(MotorsProfile.createMotorsService())
                 ?: Log.w(TAG, "Unable to create GATT server")
-
-        // Initialize the local UI
-        updateLocalUi(System.currentTimeMillis())
     }
 
     /**
@@ -377,34 +326,22 @@ class GattServerActivity : Activity() {
     }
 
     /**
-     * Send a time service notification to any devices that are subscribed
+     * Send a motor service notification to any devices that are subscribed
      * to the characteristic.
      */
-    private fun notifyRegisteredDevices(timestamp: Long, adjustReason: Byte) {
+    private fun notifyRegisteredDevices() {
         if (registeredDevices.isEmpty()) {
             Log.i(TAG, "No subscribers registered")
             return
         }
-        val exactTime = TimeProfile.getExactTime(timestamp, adjustReason)
-
         Log.i(TAG, "Sending update to ${registeredDevices.size} subscribers")
         for (device in registeredDevices) {
-            val timeCharacteristic = bluetoothGattServer
-                    ?.getService(TimeProfile.TIME_SERVICE)
-                    ?.getCharacteristic(TimeProfile.CURRENT_TIME)
-            timeCharacteristic?.value = exactTime
-            bluetoothGattServer?.notifyCharacteristicChanged(device, timeCharacteristic, false)
+            val motorsStateCharacteristic = bluetoothGattServer
+                    ?.getService(IMotors.SERVICE_UUID)
+                    ?.getCharacteristic(IMotors.CHAR_MOTOR_STATE_UUID)
+            motorsStateCharacteristic?.value = getState()
+            bluetoothGattServer?.notifyCharacteristicChanged(device, motorsStateCharacteristic, false)
         }
-    }
-
-    /**
-     * Update graphical UI on devices that support it with the current time.
-     */
-    private fun updateLocalUi(timestamp: Long) {
-        val date = Date(timestamp)
-        val displayDate = DateFormat.getMediumDateFormat(this).format(date)
-        val displayTime = DateFormat.getTimeFormat(this).format(date)
-        localTimeView.text = "$displayDate\n$displayTime"
     }
 
     /**
@@ -412,20 +349,36 @@ class GattServerActivity : Activity() {
      * @param direction
      * @param speed
      */
-    private fun spinMotor(iMotor: Byte, direction: Byte, speed: Byte) {
+    override fun spinMotor(iMotor: Byte, direction: Byte, speed: Byte) {
         Log.w("Motors", "trying to spin motors.")
-        if (iMotor.toInt() == 0 && direction.toInt() == 0 && speed.toInt() == 0) {
+        val intMotor = iMotor.toInt()
+        if (intMotor == 0 && direction.toInt() == 0 && speed.toInt() == 0) {
             stopMotors()
         } else {
-            val motor = motorHat.getMotor(iMotor.toInt())
+            val motor = motorHat.getMotor(intMotor)
             motor.setSpeed(speed.toInt())
             motor.run(direction.toInt())
+            motorsSpeeds[intMotor] = speed
+            motorsDirs[intMotor] = direction
         }
     }
 
-    private fun stopMotors() {
+    override fun stopMotors() {
         for (i in 1..IMotors.MOTORS_COUNT) {
             motorHat.getMotor(i).run(IMotors.RELEASE.toInt())
         }
+    }
+
+
+    override fun connect(context: Any) {
+        //noop
+    }
+
+    //ada motors are indexed from 1
+    private val motorsSpeeds = ByteArray(IMotors.MOTORS_COUNT + 1)
+    private val motorsDirs = ByteArray(IMotors.MOTORS_COUNT + 1)
+
+    override fun getState(): ByteArray {
+        return motorsSpeeds.sliceArray(1..IMotors.MOTORS_COUNT) + motorsDirs.sliceArray(1..IMotors.MOTORS_COUNT)
     }
 }
