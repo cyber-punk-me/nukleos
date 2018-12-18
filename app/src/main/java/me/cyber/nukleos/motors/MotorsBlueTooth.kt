@@ -5,11 +5,23 @@ import android.content.Context
 import android.util.Log
 import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.myosensor.TAG
+import java.lang.Thread.sleep
 
 class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothGattCallback() {
 
+
     private var gatt: BluetoothGatt? = null
     var servicesDiscovered = false
+    var recievedState: ByteArray? = null
+
+    override fun getState(): ByteArray? {
+        return recievedState
+    }
+
+    override fun stopMotors() {
+        spinMotor(0, 0, 0)
+    }
+
 
     override fun connect(context: Any) {
         if (gatt == null) {
@@ -26,7 +38,7 @@ class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothG
     override fun spinMotor(iMotor: Byte, direction: Byte, speed: Byte) {
         val characteristic = gatt
                 ?.getService(IMotors.SERVICE_UUID)
-                ?.getCharacteristic(IMotors.CHAR_MOTOR_UUID)
+                ?.getCharacteristic(IMotors.CHAR_MOTOR_CONTROL_UUID)
         val command = ByteArray(3)
         command[0] = iMotor
         command[1] = direction
@@ -53,18 +65,31 @@ class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothG
     override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
         if (status == BluetoothGatt.GATT_SUCCESS && !servicesDiscovered) {
             servicesDiscovered = true
-            Log.d(TAG, "Spinning motor..")
 
-            Thread{
-                spinMotor(1, IMotors.FORWARD, 100)
-            }.start()
-/*            val service = gatt.getService(IMotors.SERVICE_UUID)
+            val service = gatt.getService(IMotors.SERVICE_UUID)
             if (service != null) {
-                val characteristic = service.getCharacteristic(IMotors.CHAR_MOTOR_UUID)
+                val characteristic = service.getCharacteristic(IMotors.CHAR_MOTOR_STATE_UUID)
                 if (characteristic != null) {
+                    Log.d(TAG, "Subscribing to motors state...")
                     gatt.setCharacteristicNotification(characteristic, true)
+                    val subscribeDescriptor = characteristic.getDescriptor(IMotors.CLIENT_CONFIG_DESCRIPTOR)
+                    if (subscribeDescriptor == null) {
+                        Log.w(TAG, "Failed to resolve motor state subscription descriptor.")
+                    } else {
+                        subscribeDescriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+                        val subs = gatt.writeDescriptor(subscribeDescriptor)
+                        Log.d(TAG, "Subscribed to motors state : $subs")
+                        Thread {
+                            //has to wait after subscription write
+                            Log.d(TAG, "Spinning motors.")
+                            sleep(1000)
+                            spinMotor(1, IMotors.FORWARD, 100)
+                        }.start()
+                    }
+                } else {
+                    Log.w(TAG, "Failed to subscribe to motor state.")
                 }
-            }*/
+            }
             Log.d(TAG, "MotorsBlueTooth connected : $servicesDiscovered")
 
         } else {
@@ -72,8 +97,16 @@ class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothG
         }
     }
 
-    override fun stopMotors() {
-        spinMotor(0, 0, 0)
+    override fun onCharacteristicChanged(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
+        super.onCharacteristicChanged(gatt, characteristic)
+        recievedState = characteristic.value
+        Log.w(TAG, "onCharacteristicChanged received: $recievedState")
+    }
+
+    override fun onCharacteristicRead(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int) {
+        super.onCharacteristicRead(gatt, characteristic, status)
+        recievedState = characteristic.value
+        Log.w(TAG, "onCharacteristicRead received: $recievedState")
     }
 
 }
