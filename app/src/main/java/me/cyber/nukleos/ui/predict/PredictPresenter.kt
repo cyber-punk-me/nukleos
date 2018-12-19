@@ -5,6 +5,9 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.App
 import me.cyber.nukleos.api.PredictRequest
+import me.cyber.nukleos.api.PredictResponse
+import me.cyber.nukleos.api.Prediction
+import me.cyber.nukleos.control.TryControl
 import me.cyber.nukleos.dagger.BluetoothStuffManager
 import me.cyber.nukleos.utils.LimitedQueue
 
@@ -15,7 +18,8 @@ class PredictPresenter(override val view: PredictInterface.View, private val mBl
     private var predictEnabled = false
     private var predictBuffer = LimitedQueue<FloatArray>(8)
     private var iUpdate = 0
-    private val updatesUntilPredict = 256
+    private val updatesUntilPredict = 4
+    private val control = TryControl()
 
     override fun create() {}
 
@@ -56,13 +60,21 @@ class PredictPresenter(override val view: PredictInterface.View, private val mBl
     private fun doPredict() {
         if (predictBuffer.size == 8) {
             val predictRequest = PredictRequest(ArrayList<List<Float>>()
-                    .also{ it.add(predictBuffer.flatMap { d -> d.asList() }) })
+                    .also { it.add(predictBuffer.flatMap { d -> d.asList() }) })
 
             mPostPredict = App.applicationComponent.getApiHelper().api.predict(predictRequest)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe({
-                        view.notifyPredict(it)
+                        val predClass = it.predictions[0].output
+
+                        val tryControl = control.guess(predClass)
+
+                        if (tryControl >= 0) {
+                            view.notifyPredict(
+                                    PredictResponse(listOf(Prediction(tryControl, it.predictions[0].distr)))
+                            )
+                        }
                     }
                             , {
                         view.notifyPredictError(it)

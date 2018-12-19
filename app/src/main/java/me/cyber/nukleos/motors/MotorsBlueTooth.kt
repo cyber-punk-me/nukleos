@@ -82,8 +82,14 @@ class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothG
                         Thread {
                             //has to wait after subscription write
                             Log.d(TAG, "Spinning motors.")
-                            sleep(1000)
-                            spinMotor(1, IMotors.FORWARD, 100)
+                            for (i in 1..4) {
+                                sleep(1000)
+                                spinMotor(1, IMotors.FORWARD, 100)
+                                sleep(1000)
+                                spinMotor(1, IMotors.RELEASE, 0)
+                                sleep(1000)
+                                spinMotor(1, IMotors.BACKWARD, 100)
+                            }
                         }.start()
                     }
                 } else {
@@ -100,13 +106,7 @@ class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothG
     override fun onCharacteristicChanged(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
         super.onCharacteristicChanged(gatt, characteristic)
         recievedState = characteristic.value
-        Log.w(TAG, "onCharacteristicChanged received: $recievedState")
-    }
-
-    override fun onCharacteristicRead(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int) {
-        super.onCharacteristicRead(gatt, characteristic, status)
-        recievedState = characteristic.value
-        Log.w(TAG, "onCharacteristicRead received: $recievedState")
+        Log.w(TAG, "onCharacteristicChanged received: ${recievedState?.joinToString()}")
     }
 
 }
