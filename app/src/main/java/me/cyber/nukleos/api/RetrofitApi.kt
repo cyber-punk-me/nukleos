@@ -12,6 +12,7 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class RetrofitApi(private val mUrl: String) {
 
@@ -19,7 +20,11 @@ class RetrofitApi(private val mUrl: String) {
         Retrofit.Builder()
                 .baseUrl(mUrl)
                 .client(OkHttpClient.Builder().addInterceptor(HttpLoggingInterceptor()
-                        .apply { level = HttpLoggingInterceptor.Level.BODY }).build())
+                        .apply { level = HttpLoggingInterceptor.Level.BODY })
+                        .connectTimeout(1, TimeUnit.SECONDS)
+                        .readTimeout(1, TimeUnit.SECONDS)
+                        .writeTimeout(1, TimeUnit.SECONDS)
+                        .build())
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build()
