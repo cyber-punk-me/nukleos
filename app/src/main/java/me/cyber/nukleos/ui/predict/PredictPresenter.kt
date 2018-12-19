@@ -18,7 +18,7 @@ class PredictPresenter(override val view: PredictInterface.View, private val mBl
     private var predictEnabled = false
     private var predictBuffer = LimitedQueue<FloatArray>(8)
     private var iUpdate = 0
-    private val updatesUntilPredict = 2
+    private val updatesUntilPredict = 4
     private val control = TryControl()
 
     override fun create() {}

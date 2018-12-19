@@ -23,7 +23,7 @@ class TryControl {
     companion object {
         val COMMAND_SET = 4
         val BUFFER_SIZE = 6
-        val THRESHOLD = 4
+        val THRESHOLD = 5
     }
 
     private fun <E> List<E>.containsAtLeast(aGuess: E, atLeast: Int): Boolean = fold(0) { acc, e ->
@@ -38,7 +38,7 @@ class TryControl {
 
 val TOTAL = 100
 val CORRECT_CHANCE = 90
-val SAME_COMMAND_CHANCE = 80
+val SAME_COMMAND_CHANCE = 90
 val random = Random()
 
 fun randomizeCommand(initial: Int, keepChance : Int): Int {
