@@ -144,6 +144,7 @@ class GattServerActivity : IMotors, Activity() {
                                               offset: Int, value: ByteArray) {
             if (IMotors.CHAR_MOTOR_CONTROL_UUID == characteristic.uuid) {
                 Log.d(TAG, "Motor charateristic write")
+                stopMotors()
                 spinMotor(value[0], value[1], value[2])
             }
             if (responseNeeded) {

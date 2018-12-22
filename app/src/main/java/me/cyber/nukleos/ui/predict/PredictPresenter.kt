@@ -4,6 +4,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.App
+import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.api.PredictRequest
 import me.cyber.nukleos.api.PredictResponse
 import me.cyber.nukleos.api.Prediction
@@ -72,8 +73,17 @@ class PredictPresenter(override val view: PredictInterface.View, private val mBl
 
                         if (tryControl >= 0) {
                             view.notifyPredict(
-                                    PredictResponse(listOf(Prediction(tryControl, it.predictions[0].distr)))
-                            )
+                                    PredictResponse(listOf(Prediction(tryControl, it.predictions[0].distr))))
+                            if (mBluetoothStuffManager.motors != null) {
+                                val mot = mBluetoothStuffManager.motors!!
+                                when (tryControl) {
+                                    0 -> mot.stopMotors()
+                                    1 -> mot.spinMotor(1, IMotors.FORWARD, 75)
+                                    2 -> mot.spinMotor(1, IMotors.BACKWARD, 75)
+                                    3 -> mot.spinMotor(2, IMotors.FORWARD, 75)
+                                    4 -> mot.spinMotor(2, IMotors.BACKWARD, 75)
+                                }
+                            }
                         }
                     }
                             , {
