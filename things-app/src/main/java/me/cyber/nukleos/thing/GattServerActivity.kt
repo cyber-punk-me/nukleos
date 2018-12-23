@@ -40,7 +40,7 @@ import android.os.ParcelUuid
 import android.util.Log
 import android.view.WindowManager
 import android.widget.TextView
-import com.zugaldia.adafruit.motorhat.library.AdafruitMotorHat
+import com.zugaldia.robocar.hardware.adafruit2348.AdafruitMotorHat
 import me.cyber.nukleos.IMotors
 
 import java.util.Arrays

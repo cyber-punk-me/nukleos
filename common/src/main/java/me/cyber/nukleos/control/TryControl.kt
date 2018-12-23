@@ -15,12 +15,14 @@ class TryControl {
             return -1
         }
         return when {
+            aGuess == 0 && buffer.containsAtLeast(aGuess, THRESHOLD - ZERO_PREFERENCE) -> aGuess
             buffer.containsAtLeast(aGuess, THRESHOLD) -> aGuess
             else -> -1
         }
     }
 
     companion object {
+        val ZERO_PREFERENCE = 2
         val COMMAND_SET = 4
         val BUFFER_SIZE = 6
         val THRESHOLD = 5
