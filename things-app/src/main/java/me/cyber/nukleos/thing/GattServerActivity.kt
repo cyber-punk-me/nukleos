@@ -40,7 +40,7 @@ import android.os.ParcelUuid
 import android.util.Log
 import android.view.WindowManager
 import android.widget.TextView
-import com.zugaldia.adafruit.motorhat.library.AdafruitMotorHat
+import com.zugaldia.robocar.hardware.adafruit2348.AdafruitMotorHat
 import me.cyber.nukleos.IMotors
 
 import java.util.Arrays
@@ -144,6 +144,7 @@ class GattServerActivity : IMotors, Activity() {
                                               offset: Int, value: ByteArray) {
             if (IMotors.CHAR_MOTOR_CONTROL_UUID == characteristic.uuid) {
                 Log.d(TAG, "Motor charateristic write")
+                stopMotors()
                 spinMotor(value[0], value[1], value[2])
             }
             if (responseNeeded) {
