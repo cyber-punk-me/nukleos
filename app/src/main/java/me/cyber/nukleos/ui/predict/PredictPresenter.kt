@@ -84,6 +84,7 @@ class PredictPresenter(override val view: PredictInterface.View, private val mBl
                                     4 -> mot.spinMotor(2, IMotors.BACKWARD, 75)
                                 }
                             }
+
                         }
                     }
                             , {
