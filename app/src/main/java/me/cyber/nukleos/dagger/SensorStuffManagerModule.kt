@@ -8,8 +8,5 @@ class SensorStuffManagerModule {
 
     @Provides
     @Singleton
-    fun provideSensorStuffManager(): BluetoothStuffManager {
-        return BluetoothStuffManager()
-    }
-
+    fun provideSensorStuffManager()= BluetoothStuffManager()
 }

@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.layout_predict.*
 import me.cyber.nukleos.BaseFragment
@@ -13,27 +12,15 @@ import me.cyber.nukleos.api.PredictResponse
 import me.cyber.nukleos.myosensor.MYO_CHANNELS
 import me.cyber.nukleos.myosensor.MYO_MAX_VALUE
 import me.cyber.nukleos.myosensor.MYO_MIN_VALUE
+import me.cyber.nukleos.utils.showShortToast
 import me.cyber.nukleus.R
 import javax.inject.Inject
 
 class PredictFragment : BaseFragment<PredictInterface.Presenter>(), PredictInterface.View {
 
-    override fun updateMotors(iMotor: Int, direction: Int, speed: Int) {
-        Toast.makeText(context, "motor $iMotor moving $direction at $speed", Toast.LENGTH_SHORT).show()
-    }
 
-    override fun notifyPredict(response: PredictResponse) {
-        val prediction = response.predictions[0]
-        val max = prediction.distr.max()
-        val min = prediction.distr.min()
-        val delta = max!! - min!!
-
-        val normalized = prediction.distr.map { it -> ((it - min) / (delta) * 100).toInt() }
-        Toast.makeText(context, "${prediction.output} | $normalized", Toast.LENGTH_SHORT).show()
-    }
-
-    override fun notifyPredictError(error: Throwable) {
-        Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
+    companion object {
+        fun newInstance() = PredictFragment()
     }
 
     @Inject
@@ -62,6 +49,19 @@ class PredictFragment : BaseFragment<PredictInterface.Presenter>(), PredictInter
         sensor_charts_predict_view?.addNewPoint(data)
     }
 
+    override fun updateMotors(iMotor: Int, direction: Int, speed: Int) = "motor $iMotor moving $direction at $speed".showShortToast()
+
+    override fun notifyPredict(response: PredictResponse) {
+        val prediction = response.predictions[0]
+        val max = prediction.distr.max()
+        val min = prediction.distr.min()
+        val delta = max!! - min!!
+
+        val normalized = prediction.distr.map { it -> ((it - min) / (delta) * 100).toInt() }
+        "${prediction.output} | $normalized".showShortToast()
+    }
+
+    override fun notifyPredictError(error: Throwable) = (error.message ?: "").showShortToast()
     override fun startCharts(isRunning: Boolean) {
         sensor_charts_predict_view?.apply {
             this.isRunning = isRunning
@@ -75,9 +75,4 @@ class PredictFragment : BaseFragment<PredictInterface.Presenter>(), PredictInter
     override fun hideNoStreamingMessage() {
         connect_device_warning.visibility = View.INVISIBLE
     }
-
-    companion object {
-        fun newInstance() = PredictFragment()
-    }
-
 }

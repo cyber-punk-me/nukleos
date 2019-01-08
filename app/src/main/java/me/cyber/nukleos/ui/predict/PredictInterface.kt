@@ -2,7 +2,6 @@ package me.cyber.nukleos.ui.predict
 
 import me.cyber.nukleos.BasePresenter
 import me.cyber.nukleos.BaseView
-import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.api.PredictResponse
 
 interface PredictInterface {
@@ -20,6 +19,4 @@ interface PredictInterface {
     abstract class Presenter(override val view: BaseView) : BasePresenter<BaseView>(view) {
         abstract fun onPredictSwitched(on: Boolean)
     }
-
-
 }
