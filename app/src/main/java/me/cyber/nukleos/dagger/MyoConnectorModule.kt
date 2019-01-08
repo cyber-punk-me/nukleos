@@ -1,4 +1,5 @@
 package me.cyber.nukleos.dagger
+
 import android.content.Context
 import dagger.Module
 import dagger.Provides
@@ -10,8 +11,5 @@ class MyoConnectorModule {
 
     @Provides
     @Singleton
-    fun provideMyonnaise(context: Context): BluetoothConnector {
-        return BluetoothConnector(context)
-    }
-
+    fun provideMyonnaise(context: Context) = BluetoothConnector(context)
 }

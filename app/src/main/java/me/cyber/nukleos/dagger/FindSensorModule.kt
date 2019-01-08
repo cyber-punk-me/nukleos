@@ -12,9 +12,6 @@ class FindSensorModule {
     fun provideScanDevicePresenter(
             findSensorView: FindSensorInterface.View,
             bluetoothConnector: BluetoothConnector,
-            bluetoothStuffManager: BluetoothStuffManager
-    ): FindBluetoothPresenter {
-        return FindBluetoothPresenter(findSensorView, bluetoothConnector, bluetoothStuffManager)
-    }
-
+            bluetoothStuffManager: BluetoothStuffManager) =
+            FindBluetoothPresenter(findSensorView, bluetoothConnector, bluetoothStuffManager)
 }

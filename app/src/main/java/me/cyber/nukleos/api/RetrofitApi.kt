@@ -32,9 +32,8 @@ class RetrofitApi(private val mUrl: String) {
 
     private val mRequest by lazy { mRetrofit.create(IRetrofitRequests::class.java) }
 
-    fun postData(dataId: UUID, rawData: String, extension: String): Single<Meta> = Single.create { emitter: SingleEmitter<Meta> ->
-        val data = RequestBody.create(MediaType.parse("text/plain"), rawData)
-        mRequest.postData(dataId, data, extension)
+    fun postData(dataId: UUID, rawData: String, extension: String) = Single.create { emitter: SingleEmitter<Meta> ->
+        mRequest.postData(dataId, RequestBody.create(MediaType.parse("text/plain"), rawData), extension)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
@@ -44,9 +43,8 @@ class RetrofitApi(private val mUrl: String) {
                 })
     }
 
-    fun trainModel(dataId: UUID, scriptId: UUID): Single<Meta> = Single.create { emitter: SingleEmitter<Meta> ->
-        val trainMeta = Model(dataId, scriptId)
-        mRequest.postModel(trainMeta)
+    fun trainModel(dataId: UUID, scriptId: UUID) = Single.create { emitter: SingleEmitter<Meta> ->
+        mRequest.postModel(Model(dataId, scriptId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
@@ -56,7 +54,7 @@ class RetrofitApi(private val mUrl: String) {
                 })
     }
 
-    fun predict(data: PredictRequest): Single<PredictResponse> = Single.create { emitter: SingleEmitter<PredictResponse> ->
+    fun predict(data: PredictRequest) = Single.create { emitter: SingleEmitter<PredictResponse> ->
         mRequest.predict(data)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

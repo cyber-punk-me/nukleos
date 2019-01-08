@@ -24,37 +24,32 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
 
     override fun create() {
         mFindFlowable = mBluetoothConnector.startBluetoothScan(10, TimeUnit.SECONDS)
-
         mFindMotorsFlowable = mBluetoothConnector.startBluetoothScan(10, TimeUnit.SECONDS, IMotors.SERVICE_UUID)
-        mFindMotorsSubscription = mFindMotorsFlowable?.subscribeOn(Schedulers.io())
-                ?.observeOn(AndroidSchedulers.mainThread())
-                ?.subscribe({
-                    if (mBluetoothStuffManager.motors == null) {
-                        synchronized(mBluetoothStuffManager) {
-                            if (mBluetoothStuffManager.motors == null) {
-                                val motors = MotorsBlueTooth(it)
-                                mBluetoothStuffManager.motors = motors
-                                motors.connect(mBluetoothConnector.context)
-                            }
-                        }
-                    }
-                }, {
-                }, {
-                })
+                .apply {
+                    mFindMotorsSubscription = subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe({
+                                if (mBluetoothStuffManager.motors == null) {
+                                    synchronized(mBluetoothStuffManager) {
+                                        if (mBluetoothStuffManager.motors == null) {
+                                            val motors = MotorsBlueTooth(it)
+                                            mBluetoothStuffManager.motors = motors
+                                            motors.connect(mBluetoothConnector.context)
+                                        }
+                                    }
+                                }
+                            }, {}, {})
+                }
     }
 
-    override fun start() {
-        with(view) {
-            clearSensorList()
-            if (mBluetoothStuffManager.foundBTDevicesList.isEmpty()) {
-                showPreparingText()
-            } else {
-                populateSensorList(mBluetoothStuffManager
-                        .foundBTDevicesList
-                        .map { it -> SensorStuff(it.name, it.address) })
-            }
-
+    override fun start() = with(view) {
+        clearSensorList()
+        if (mBluetoothStuffManager.foundBTDevicesList.isEmpty()) {
+            showPreparingText()
+        } else {
+            populateSensorList(mBluetoothStuffManager.foundBTDevicesList.map { it -> SensorStuff(it.name, it.address) })
         }
+
     }
 
     override fun destroy() {
@@ -68,8 +63,7 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
         view.goToSensorControl()
     }
 
-    override fun onFindButtonClicked() {
-        with(view) {
+    override fun onFindButtonClicked() = with(view) {
             if (mFindSubscription?.isDisposed == false) {
                 mFindSubscription?.dispose()
                 hideFindLoader()
@@ -102,6 +96,4 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
                         })
             }
         }
-    }
-
 }
