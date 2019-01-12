@@ -9,6 +9,6 @@ import me.cyber.nukleos.ui.predict.PredictPresenter
 class PredictModule {
 
     @Provides
-    fun providePredictPresenter(chartsView: PredictInterface.View,
-                                bluetoothStuffManager: BluetoothStuffManager): PredictPresenter = PredictPresenter(chartsView, bluetoothStuffManager)
+    fun providePredictPresenter(chartsView: PredictInterface.View, bluetoothStuffManager: BluetoothStuffManager)
+            = PredictPresenter(chartsView, bluetoothStuffManager)
 }
