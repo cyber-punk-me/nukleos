@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import me.cyber.nukleos.ui.model.SensorStuff
+import me.cyber.nukleos.model.SensorStuff
 import me.cyber.nukleus.R
 
 class DeviceAdapter(private val deviceSelectedListener: DeviceSelectedListener) : RecyclerView.Adapter<DeviceAdapter.DeviceViewHolder>() {
