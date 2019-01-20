@@ -11,7 +11,7 @@ import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.layout_scan_device.*
 import me.cyber.nukleos.BaseFragment
 import me.cyber.nukleos.ui.MainActivity
-import me.cyber.nukleos.ui.model.SensorStuff
+import me.cyber.nukleos.model.SensorStuff
 import me.cyber.nukleos.utils.DeviceAdapter
 import me.cyber.nukleos.utils.DeviceSelectedListener
 import me.cyber.nukleos.utils.RecyclerItemFadeAnimator
