@@ -35,17 +35,20 @@ repositories {
     maven {
         url 'https://maven.google.com/'
     }
+    maven {
+        url 'https://google.bintray.com/tensorflow'
+    }
 }
 
 
 dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.61'
-    implementation 'com.android.support:appcompat-v7:28.0.0-alpha3'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'no.nordicsemi.android.support.v18:scanner:1.0.0'
-    implementation 'com.android.support:support-v4:28.0.0-alpha3'
-    implementation 'com.android.support:support-vector-drawable:28.0.0-alpha3'
-    implementation 'com.android.support:design:28.0.0-alpha3'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
+    implementation 'com.android.support:support-v4:28.0.0'
+    implementation 'com.android.support:support-vector-drawable:28.0.0'
+    implementation 'com.android.support:design:28.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     implementation('com.android.support:recyclerview-v7:28.0.0-alpha3') {
         exclude group: "com.android.support", module: "support-v4"
     }
@@ -62,7 +65,7 @@ dependencies {
     kapt "com.github.hotchemi:permissionsdispatcher-processor:3.1.0"
 
     // RX2
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.1'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.5'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
     // Dagger
     implementation 'com.google.dagger:dagger:2.16'
@@ -72,10 +75,11 @@ dependencies {
     kapt 'com.google.dagger:dagger-android-processor:2.16'
     // Tensorflow
     implementation 'org.tensorflow:tensorflow-android:1.8.0'
+    implementation 'org.tensorflow:tensorflow-lite:+'
     // EventBus
     implementation 'org.greenrobot:eventbus:3.1.1'
     // HockeyApp(for crash log)
-    implementation 'net.hockeyapp.android:HockeySDK:5.1.0'
+    implementation 'net.hockeyapp.android:HockeySDK:5.1.1'
     // MultiDEX
     implementation 'com.android.support:multidex:1.0.3'
     implementation fileTree(include: ['*.aar'], dir: 'libs')

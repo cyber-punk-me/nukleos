@@ -9,7 +9,7 @@ import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.dagger.BluetoothStuffManager
 import me.cyber.nukleos.bluetooth.BluetoothConnector
 import me.cyber.nukleos.motors.MotorsBlueTooth
-import me.cyber.nukleos.ui.model.SensorStuff
+import me.cyber.nukleos.model.SensorStuff
 import java.util.concurrent.TimeUnit
 
 //bt general management

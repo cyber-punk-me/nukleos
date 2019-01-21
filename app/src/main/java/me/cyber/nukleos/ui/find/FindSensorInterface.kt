@@ -2,7 +2,7 @@ package me.cyber.nukleos.ui.find
 
 import me.cyber.nukleos.BasePresenter
 import me.cyber.nukleos.BaseView
-import me.cyber.nukleos.ui.model.SensorStuff
+import me.cyber.nukleos.model.SensorStuff
 
 
 interface FindSensorInterface {
