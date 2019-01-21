@@ -19,4 +19,7 @@ interface IRetrofitRequests {
     @POST("/apply/1d722019-c892-44bc-844b-eb5708d55987")
     fun predict(@Body body: PredictRequest): Single<PredictResponse>
 
+    @GET("/time")
+    fun getServerTime() : Single<Long>
+
 }
