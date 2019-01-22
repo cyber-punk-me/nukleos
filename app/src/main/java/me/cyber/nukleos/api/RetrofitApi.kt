@@ -65,4 +65,15 @@ class RetrofitApi(private val mUrl: String) {
                 })
     }
 
+    fun getServerTime() = Single.create{ emitter : SingleEmitter<Long> ->
+        mRequest.getServerTime()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    emitter.onSuccess(it)
+                }, {
+                    emitter.onError(it)
+                })
+    }
+
 }
