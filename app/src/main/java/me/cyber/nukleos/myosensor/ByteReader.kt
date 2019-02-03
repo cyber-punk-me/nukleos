@@ -15,20 +15,20 @@ class ByteReader {
         }
 
     val short: Short
-        get() = this.byteBuffer!!.short
+        get() = this.byteBuffer?.short ?: 0
 
     val byte: Byte
-        get() = this.byteBuffer!!.get()
+        get() = this.byteBuffer?.get() ?: 0
 
     val int: Int
-        get() = this.byteBuffer!!.int
+        get() = this.byteBuffer?.int ?: 0
 
     fun rewind() = this.byteBuffer?.rewind()
 
     fun getBytes(size: Int): FloatArray {
         val result = FloatArray(size)
         for (i in 0 until size)
-            result[i] = byteBuffer!!.get().toFloat()
+            result[i] = byteBuffer?.get()?.toFloat() ?: 0F
         return result
     }
 }
