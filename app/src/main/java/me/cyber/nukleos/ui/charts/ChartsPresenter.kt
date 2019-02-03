@@ -1,5 +1,6 @@
 package me.cyber.nukleos.ui.charts
 
+import android.util.Log
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -12,18 +13,25 @@ import java.util.concurrent.TimeUnit
 
 class ChartsPresenter(override val view: ChartInterface.View, private val mBluetoothStuffManager: BluetoothStuffManager) : ChartInterface.Presenter(view) {
 
+    private val TAG = "ChartsPresenter"
+    private val millsBetweenReads = 5
+    private val numSensors = 8
     private val mApi by lazy { App.applicationComponent.getApiHelper().api }
     private val mLearningSessId = UUID.fromString("885d0665-ca5d-46ed-b6dc-ea2c2610a67f")
-    //UUID.randomUUID()
     private val mScriptId = UUID.fromString("7de76908-d4d9-4ce9-98de-118a4fb3b8f8")
+    private var mServerTimeMinusLocal: Long = 0
 
     private var mDataSubscription: Disposable? = null
     private var mChartsDataSubscription: Disposable? = null
     private var mPostDataSubscription: Disposable? = null
     private var mTrainModelSubscription: Disposable? = null
+    private var mServerTimeSubscription: Disposable? = null
+    private var mMarkTime = false
 
     private fun convertData(data: List<FloatArray>, dataType: Int, window: Int = 64, slide: Int = 64) =
             StringBuffer().apply {
+                val recordEndTime = System.currentTimeMillis() + mServerTimeMinusLocal
+                val recordStartTime = recordEndTime - millsBetweenReads * data.size
                 val floats = data.flatMap { d -> d.asList() }
                 var start = 0
                 var end = window
@@ -31,7 +39,12 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mBluet
                     for (i in start until end) {
                         append("${floats[i]},")
                     }
-                    append("$dataType\n")
+                    if (!mMarkTime) {
+                        append("$dataType\n")
+                    } else {
+                        val windowTime = recordStartTime + start * millsBetweenReads / numSensors
+                        append("$windowTime\n")
+                    }
                     start += slide
                     end += slide
                 }
@@ -57,10 +70,21 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mBluet
                 .subscribe({
                     view.goToState(ChartInterface.State.IDLE)
                     view.notifyTrainModelStarted()
-                }
-                        , {
+                }, {
                     view.goToState(ChartInterface.State.IDLE)
                     view.notifyTrainModelFailed()
+                })
+    }
+
+    private fun getServerTimeDiff() {
+        mServerTimeSubscription = mApi.getServerTime()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    mServerTimeMinusLocal = it - System.currentTimeMillis()
+                    Log.i(TAG, "mServerTimeMinusLocal: $mServerTimeMinusLocal")
+                }, {
+                    view.notifyDataFailed()
                 })
     }
 
@@ -86,6 +110,7 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mBluet
                 }
             }
         }
+        getServerTimeDiff()
     }
 
     override fun onCollectPressed() {
@@ -129,5 +154,6 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mBluet
         mDataSubscription?.dispose()
         mChartsDataSubscription?.dispose()
         mPostDataSubscription?.dispose()
+        mServerTimeSubscription?.dispose()
     }
 }
