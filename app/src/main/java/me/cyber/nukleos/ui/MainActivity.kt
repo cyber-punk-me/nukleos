@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.MenuItem
 import android.widget.Toast
 import dagger.android.AndroidInjection
@@ -35,15 +36,19 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
 
     private var usbService: UsbService? = null
     private var usbHandler: UsbHandler? = null
+    private var streamReady: Boolean = false
+
     private val usbConnection = object : ServiceConnection {
         override fun onServiceConnected(arg0: ComponentName, arg1: IBinder) {
+            streamReady = false
             usbHandler = UsbHandler(this@MainActivity)
             usbService = (arg1 as UsbService.UsbBinder).service
             usbService?.setHandler(usbHandler)
             //
             Thread {
-                sleep(1000)
                 usbService?.write("v".toByteArray())
+                sleep(1000)
+                usbService?.write("b".toByteArray())
             }.start()
         }
 
@@ -160,6 +165,7 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
         super.onPause()
         unregisterReceiver(usbReceiver)
         unbindService(usbConnection)
+        streamReady = false
     }
 
     fun navigateToPage(pageId: Int) {
@@ -189,14 +195,19 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
         override fun handleMessage(msg: Message) {
             when (msg.what) {
                 UsbService.MESSAGE_FROM_SERIAL_PORT -> {
-                    val data = msg.obj as String
-                    Toast.makeText(activity, data, Toast.LENGTH_LONG).show()
+                    val data = msg.obj as ByteArray
+                    Toast.makeText(activity, String(data), Toast.LENGTH_LONG).show()
                 }
                 UsbService.CTS_CHANGE -> Toast.makeText(activity, "CTS_CHANGE", Toast.LENGTH_LONG).show()
                 UsbService.DSR_CHANGE -> Toast.makeText(activity, "DSR_CHANGE", Toast.LENGTH_LONG).show()
                 UsbService.SYNC_READ -> {
-                    val data = msg.obj as String
-                    Toast.makeText(activity, data, Toast.LENGTH_LONG).show()
+                    val data = msg.obj as ByteArray
+                    if (!activity.streamReady) {
+                        Toast.makeText(activity, String(data), Toast.LENGTH_LONG).show()
+                        activity.streamReady = true
+                    } else {
+                        Log.d("Synaps", String(data))
+                    }
                 }
             }
         }

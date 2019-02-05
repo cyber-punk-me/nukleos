@@ -18,7 +18,6 @@ import com.felhr.usbserial.CDCSerialDevice;
 import com.felhr.usbserial.UsbSerialDevice;
 import com.felhr.usbserial.UsbSerialInterface;
 
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -86,13 +85,8 @@ public class UsbService extends Service {
     private UsbSerialInterface.UsbReadCallback mCallback = new UsbSerialInterface.UsbReadCallback() {
         @Override
         public void onReceivedData(byte[] arg0) {
-            try {
-                String data = new String(arg0, "UTF-8");
-                if (mHandler != null)
-                    mHandler.obtainMessage(MESSAGE_FROM_SERIAL_PORT, data).sendToTarget();
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+            if (mHandler != null)
+                mHandler.obtainMessage(MESSAGE_FROM_SERIAL_PORT, arg0).sendToTarget();
         }
     };
 
@@ -102,7 +96,7 @@ public class UsbService extends Service {
     private UsbSerialInterface.UsbCTSCallback ctsCallback = new UsbSerialInterface.UsbCTSCallback() {
         @Override
         public void onCTSChanged(boolean state) {
-            if(mHandler != null)
+            if (mHandler != null)
                 mHandler.obtainMessage(CTS_CHANGE).sendToTarget();
         }
     };
@@ -113,7 +107,7 @@ public class UsbService extends Service {
     private UsbSerialInterface.UsbDSRCallback dsrCallback = new UsbSerialInterface.UsbDSRCallback() {
         @Override
         public void onDSRChanged(boolean state) {
-            if(mHandler != null)
+            if (mHandler != null)
                 mHandler.obtainMessage(DSR_CHANGE).sendToTarget();
         }
     };
@@ -200,8 +194,8 @@ public class UsbService extends Service {
      * This function will be called from MainActivity to change baud rate
      */
 
-    public void changeBaudRate(int baudRate){
-        if(serialPort != null)
+    public void changeBaudRate(int baudRate) {
+        if (serialPort != null)
             serialPort.setBaudRate(baudRate);
     }
 
@@ -239,13 +233,13 @@ public class UsbService extends Service {
                     device = null;
                 }
             }
-            if (device==null) {
+            if (device == null) {
                 // There is no USB devices connected (but usb host were listed). Send an intent to MainActivity.
                 Intent intent = new Intent(ACTION_NO_USB);
                 sendBroadcast(intent);
             }
         } else {
-            Log.d(TAG, "findSerialPortDevice() usbManager returned empty device list." );
+            Log.d(TAG, "findSerialPortDevice() usbManager returned empty device list.");
             // There is no USB devices connected. Send an intent to MainActivity
             Intent intent = new Intent(ACTION_NO_USB);
             sendBroadcast(intent);
@@ -264,7 +258,7 @@ public class UsbService extends Service {
      * Request user permission. The response will be received in the BroadcastReceiver
      */
     private void requestUserPermission() {
-        Log.d(TAG, String.format("requestUserPermission(%X:%X)", device.getVendorId(), device.getProductId() ) );
+        Log.d(TAG, String.format("requestUserPermission(%X:%X)", device.getVendorId(), device.getProductId()));
         PendingIntent mPendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
         usbManager.requestPermission(device, mPendingIntent);
     }
@@ -333,15 +327,14 @@ public class UsbService extends Service {
     private class ReadThread extends Thread {
         @Override
         public void run() {
-            while(true){
+            while (true) {
                 byte[] buffer = new byte[100];
                 int n = serialPort.syncRead(buffer, 0);
-                if(n > 0) {
+                if (n > 0) {
                     byte[] received = new byte[n];
                     System.arraycopy(buffer, 0, received, 0, n);
-                    String receivedStr = new String(received);
                     if (mHandler != null) {
-                        mHandler.obtainMessage(SYNC_READ, receivedStr).sendToTarget();
+                        mHandler.obtainMessage(SYNC_READ, received).sendToTarget();
                     }
                 }
             }
