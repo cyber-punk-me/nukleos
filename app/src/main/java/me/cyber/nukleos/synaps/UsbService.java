@@ -340,4 +340,35 @@ public class UsbService extends Service {
             }
         }
     }
+
+    public static int[] readPacket(byte[] bytesIn){
+       if (bytesIn[1] == 0){
+           return null;
+       }
+       int start = 2;
+
+       int[] result = new int[9];
+       for (int i = 0; i < 8; i++) {
+           int offset = start + i * 3;
+           result[i] = interpret24bitAsInt32(bytesIn, offset);
+       }
+
+       result[8] = (int) bytesIn[1];
+       return result;
+    }
+
+    static int interpret24bitAsInt32(byte[] byteArray, int offset) {
+        //little endian
+        int newInt = (
+                ((0xFF & byteArray[offset]) << 16) |
+                        ((0xFF & byteArray[offset + 1]) << 8) |
+                        (0xFF & byteArray[offset + 2])
+        );
+        if ((newInt & 0x00800000) > 0) {
+            newInt |= 0xFF000000;
+        } else {
+            newInt &= 0x00FFFFFF;
+        }
+        return newInt;
+    }
 }

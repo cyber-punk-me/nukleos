@@ -206,6 +206,7 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
                         Toast.makeText(activity, String(data), Toast.LENGTH_LONG).show()
                         activity.streamReady = true
                     } else {
+                        val packet = UsbService.readPacket(data)
                         Log.d("Synaps", String(data))
                     }
                 }
