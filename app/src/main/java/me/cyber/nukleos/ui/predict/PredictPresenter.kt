@@ -9,10 +9,10 @@ import me.cyber.nukleos.api.PredictRequest
 import me.cyber.nukleos.api.PredictResponse
 import me.cyber.nukleos.api.Prediction
 import me.cyber.nukleos.control.TryControl
-import me.cyber.nukleos.dagger.BluetoothStuffManager
+import me.cyber.nukleos.dagger.PeripheryManager
 import me.cyber.nukleos.utils.LimitedQueue
 
-class PredictPresenter(override val view: PredictInterface.View, private val mBluetoothStuffManager: BluetoothStuffManager) : PredictInterface.Presenter(view) {
+class PredictPresenter(override val view: PredictInterface.View, private val mPeripheryManager: PeripheryManager) : PredictInterface.Presenter(view) {
 
     private var mChartsDataSubscription: Disposable? = null
     private var mPostPredict: Disposable? = null
@@ -26,7 +26,7 @@ class PredictPresenter(override val view: PredictInterface.View, private val mBl
 
     override fun start() {
         with(view) {
-            mBluetoothStuffManager.myo?.apply {
+            mPeripheryManager.synapsUsbHandler?.apply {
                 if (this.isStreaming()) {
                     hideNoStreamingMessage()
                     mChartsDataSubscription?.apply {
@@ -74,8 +74,8 @@ class PredictPresenter(override val view: PredictInterface.View, private val mBl
                         if (tryControl >= 0) {
                             view.notifyPredict(
                                     PredictResponse(listOf(Prediction(tryControl, it.predictions[0].distr))))
-                            if (mBluetoothStuffManager.motors != null) {
-                                val mot = mBluetoothStuffManager.motors!!
+                            if (mPeripheryManager.motors != null) {
+                                val mot = mPeripheryManager.motors!!
                                 when (tryControl) {
                                     0 -> mot.stopMotors()
                                     1 -> mot.spinMotor(1, IMotors.FORWARD, 75)

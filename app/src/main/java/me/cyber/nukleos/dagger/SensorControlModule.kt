@@ -13,6 +13,6 @@ class SensorControlModule {
     fun provideControlDevicePresenter(
             sensorControlView: SensorControlInterface.View,
             bluetoothConnector: BluetoothConnector,
-            bluetoothStuffManager: BluetoothStuffManager)
-            = SensorStuffPresenter(sensorControlView, bluetoothConnector, bluetoothStuffManager)
+            peripheryManager: PeripheryManager)
+            = SensorStuffPresenter(sensorControlView, bluetoothConnector, peripheryManager)
 }

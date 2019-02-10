@@ -342,17 +342,21 @@ public class UsbService extends Service {
     }
 
     public static int[] readPacket(byte[] bytesIn){
+       if (bytesIn.length < 26) {
+           return null;
+       }
        if (bytesIn[1] == 0){
            return null;
        }
        int start = 2;
 
        int[] result = new int[9];
+       //8 sensors
        for (int i = 0; i < 8; i++) {
            int offset = start + i * 3;
            result[i] = interpret24bitAsInt32(bytesIn, offset);
        }
-
+       //appending packet number
        result[8] = (int) bytesIn[1];
        return result;
     }
