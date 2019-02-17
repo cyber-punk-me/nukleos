@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
+import android.view.WindowManager
 import android.widget.Toast
 import dagger.android.AndroidInjection
 import dagger.android.AndroidInjector
@@ -127,6 +128,7 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
             }
             false
         }
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
     public override fun onResume() {
