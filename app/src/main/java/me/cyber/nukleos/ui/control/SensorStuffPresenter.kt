@@ -4,11 +4,11 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.bluetooth.BluetoothConnector
-import me.cyber.nukleos.dagger.BluetoothStuffManager
+import me.cyber.nukleos.dagger.PeripheryManager
 import me.cyber.nukleos.myosensor.*
 
 class SensorStuffPresenter(override val view: SensorControlInterface.View, private val mBluetoothConnector: BluetoothConnector,
-                           private val mBluetoothStuffManager: BluetoothStuffManager) : SensorControlInterface.Presenter(view) {
+                           private val mPeripheryManager: PeripheryManager) : SensorControlInterface.Presenter(view) {
 
     private var mSensorStatusSubscription: Disposable? = null
     private var mSensorControlSubscription: Disposable? = null
@@ -17,19 +17,19 @@ class SensorStuffPresenter(override val view: SensorControlInterface.View, priva
 
     override fun start() {
         with(view) {
-            if (mBluetoothStuffManager.selectedIndex == -1) {
+            if (mPeripheryManager.selectedIndex == -1) {
                 disableConnectButton()
                 return
             }
 
-            val currentSensorStuff = mBluetoothStuffManager.foundBTDevicesList[mBluetoothStuffManager.selectedIndex]
+            val currentSensorStuff = mPeripheryManager.foundBTDevicesList[mPeripheryManager.selectedIndex]
             showSensorStuffInformation(currentSensorStuff.name, currentSensorStuff.address)
             enableConnectButton()
-            if (mBluetoothStuffManager.myo == null) {
-                mBluetoothStuffManager.myo = Myo(currentSensorStuff)
+            if (mPeripheryManager.myo == null) {
+                mPeripheryManager.myo = Myo(currentSensorStuff)
             }
 
-            mBluetoothStuffManager.myo?.apply {
+            mPeripheryManager.myo?.apply {
                 mSensorControlSubscription = this.controlObservable()
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -72,7 +72,7 @@ class SensorStuffPresenter(override val view: SensorControlInterface.View, priva
     }
 
     override fun onConnectionButtonClicked() {
-        mBluetoothStuffManager.myo?.apply {
+        mPeripheryManager.myo?.apply {
             if (!isConnected()) {
                 connect(mBluetoothConnector.context)
             } else {
@@ -90,13 +90,13 @@ class SensorStuffPresenter(override val view: SensorControlInterface.View, priva
             else -> MYO_MAX_FREQUENCY
         }
         view.showScanFrequency(selectedFrequency)
-        mBluetoothStuffManager.myo?.apply {
+        mPeripheryManager.myo?.apply {
             frequency = selectedFrequency
         }
     }
 
     override fun onStartButtonClicked() {
-        mBluetoothStuffManager.myo?.apply {
+        mPeripheryManager.myo?.apply {
             if (!isStreaming()) {
                 sendCommand(CommandList.emgFilteredOnly())
             } else {
@@ -106,7 +106,7 @@ class SensorStuffPresenter(override val view: SensorControlInterface.View, priva
     }
 
     override fun onVibrationClicked(vibrationDuration: Int) {
-        mBluetoothStuffManager.myo?.apply {
+        mPeripheryManager.myo?.apply {
             sendCommand(when (vibrationDuration) {
                 1 -> CommandList.vibration1()
                 2 -> CommandList.vibration2()

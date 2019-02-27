@@ -10,5 +10,5 @@ class ChartsModule {
 
     @Provides
     fun provideGraphPresenter(chartsView: ChartInterface.View,
-                              bluetoothStuffManager: BluetoothStuffManager): ChartsPresenter = ChartsPresenter(chartsView, bluetoothStuffManager)
+                              peripheryManager: PeripheryManager): ChartsPresenter = ChartsPresenter(chartsView, peripheryManager)
 }
