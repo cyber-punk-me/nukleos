@@ -38,6 +38,9 @@ repositories {
     maven {
         url 'https://google.bintray.com/tensorflow'
     }
+    maven {
+        url "https://jitpack.io"
+    }
 }
 
 
@@ -78,6 +81,8 @@ dependencies {
     implementation 'org.tensorflow:tensorflow-lite:+'
     // EventBus
     implementation 'org.greenrobot:eventbus:3.1.1'
+    implementation 'com.github.felHR85:UsbSerial:6.0.1'
+
     // HockeyApp(for crash log)
     implementation 'net.hockeyapp.android:HockeySDK:5.1.1'
     // MultiDEX

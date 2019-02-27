@@ -6,14 +6,14 @@ import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import me.cyber.nukleos.dagger.BluetoothStuffManager
+import me.cyber.nukleos.dagger.PeripheryManager
 import me.cyber.nukleos.bluetooth.BluetoothConnector
 import me.cyber.nukleos.motors.MotorsBlueTooth
 import me.cyber.nukleos.model.SensorStuff
 import java.util.concurrent.TimeUnit
 
 //bt general management
-class FindBluetoothPresenter(override val view: FindSensorInterface.View, private val mBluetoothConnector: BluetoothConnector, private val mBluetoothStuffManager: BluetoothStuffManager
+class FindBluetoothPresenter(override val view: FindSensorInterface.View, private val mBluetoothConnector: BluetoothConnector, private val mPeripheryManager: PeripheryManager
 ) : FindSensorInterface.Presenter(view) {
 
     private var mFindFlowable: Flowable<BluetoothDevice>? = null
@@ -29,11 +29,11 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
                     mFindMotorsSubscription = subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe({
-                                if (mBluetoothStuffManager.motors == null) {
-                                    synchronized(mBluetoothStuffManager) {
-                                        if (mBluetoothStuffManager.motors == null) {
+                                if (mPeripheryManager.motors == null) {
+                                    synchronized(mPeripheryManager) {
+                                        if (mPeripheryManager.motors == null) {
                                             val motors = MotorsBlueTooth(it)
-                                            mBluetoothStuffManager.motors = motors
+                                            mPeripheryManager.motors = motors
                                             motors.connect(mBluetoothConnector.context)
                                         }
                                     }
@@ -44,10 +44,10 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
 
     override fun start() = with(view) {
         clearSensorList()
-        if (mBluetoothStuffManager.foundBTDevicesList.isEmpty()) {
+        if (mPeripheryManager.foundBTDevicesList.isEmpty()) {
             showPreparingText()
         } else {
-            populateSensorList(mBluetoothStuffManager.foundBTDevicesList.map { it -> SensorStuff(it.name, it.address) })
+            populateSensorList(mPeripheryManager.foundBTDevicesList.map { it -> SensorStuff(it.name, it.address) })
         }
 
     }
@@ -59,7 +59,7 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
     }
 
     override fun onSensorSelected(index: Int) {
-        mBluetoothStuffManager.selectedIndex = index
+        mPeripheryManager.selectedIndex = index
         view.goToSensorControl()
     }
 
@@ -67,7 +67,7 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
             if (mFindSubscription?.isDisposed == false) {
                 mFindSubscription?.dispose()
                 hideFindLoader()
-                if (mBluetoothStuffManager.foundBTDevicesList.isEmpty()) {
+                if (mPeripheryManager.foundBTDevicesList.isEmpty()) {
                     showEmptyListText()
                 }
             } else {
@@ -77,20 +77,20 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
                         ?.subscribeOn(Schedulers.io())
                         ?.observeOn(AndroidSchedulers.mainThread())
                         ?.subscribe({
-                            if (it !in mBluetoothStuffManager.foundBTDevicesList) {
+                            if (it !in mPeripheryManager.foundBTDevicesList) {
                                 addSensorToList(SensorStuff(it.name, it.address))
-                                mBluetoothStuffManager.foundBTDevicesList.add(it)
+                                mPeripheryManager.foundBTDevicesList.add(it)
                             }
                         }, {
                             hideFindLoader()
                             showFindError()
-                            if (mBluetoothStuffManager.foundBTDevicesList.isEmpty()) {
+                            if (mPeripheryManager.foundBTDevicesList.isEmpty()) {
                                 showEmptyListText()
                             }
                         }, {
                             hideFindLoader()
                             showFindSuccess()
-                            if (mBluetoothStuffManager.foundBTDevicesList.isEmpty()) {
+                            if (mPeripheryManager.foundBTDevicesList.isEmpty()) {
                                 showEmptyListText()
                             }
                         })

@@ -27,13 +27,13 @@
         <item>@color/seventh_chart</item>
         <item>@color/eight_chart</item>
     </array>
-    <color name="first_chart">#3f62b5</color>
-    <color name="second_chart">#FF9c27b0</color>
-    <color name="third_chart">#FF009688</color>
-    <color name="fourth_chart">#FF8bc34a</color>
-    <color name="fifth_chart">#FFffc107</color>
-    <color name="sixth_chart">#FF795548</color>
-    <color name="seventh_chart">#FFe51c23</color>
-    <color name="eight_chart">#FFcddc39</color>
+    <color name="first_chart">#FF0000</color>
+    <color name="second_chart">#FFA500</color>
+    <color name="third_chart">#FFFF00</color>
+    <color name="fourth_chart">#008000</color>
+    <color name="fifth_chart">#1573D0</color>
+    <color name="sixth_chart">#00008B</color>
+    <color name="seventh_chart">#800080</color>
+    <color name="eight_chart">#000000</color>
     <color name="chart_info">#1976D2</color>
 </resources>

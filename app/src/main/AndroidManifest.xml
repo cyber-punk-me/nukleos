@@ -34,6 +34,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name="me.cyber.nukleos.synaps.UsbService"
+            android:enabled="true">
+        </service>
     </application>
 
 </manifest>

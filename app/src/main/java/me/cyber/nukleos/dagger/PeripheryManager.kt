@@ -2,8 +2,9 @@ package me.cyber.nukleos.dagger
 import android.bluetooth.BluetoothDevice
 import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.myosensor.Myo
+import me.cyber.nukleos.synaps.UsbHandler
 
-class BluetoothStuffManager {
+class PeripheryManager {
 
     var selectedIndex: Int = -1
         set(value) {
@@ -15,7 +16,7 @@ class BluetoothStuffManager {
 
     var myo: Myo? = null
 
-    var connected = myo?.isConnected() ?: false
+    var synapsUsbHandler: UsbHandler? = null
 
     @Volatile var motors : IMotors? = null
 
