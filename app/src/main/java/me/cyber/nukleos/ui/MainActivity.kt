@@ -49,7 +49,9 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
             //
             Thread {
                 usbService?.write("v".toByteArray())
-                sleep(1000)
+                sleep(500)
+                usbService?.write("~4".toByteArray())
+                sleep(500)
                 usbService?.write("b".toByteArray())
             }.start()
         }

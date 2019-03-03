@@ -18,7 +18,7 @@ class UsbHandler(val activity: MainActivity) : Handler() {
 
     companion object {
         val MILLION = 1000000
-        val frequency = 250
+        val frequency = 1000
         val maxScaled = 127.0f
         val minScaled = -128.0f
         val scale = maxScaled - minScaled
