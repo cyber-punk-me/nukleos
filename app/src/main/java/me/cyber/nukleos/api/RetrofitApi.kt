@@ -39,7 +39,7 @@ class RetrofitApi(private val mUrl: String) {
                 .subscribe({
                     emitter.onSuccess(it)
                 }, {
-                    emitter.onError(it)
+                    emitter.tryOnError(it)
                 })
     }
 
@@ -50,7 +50,7 @@ class RetrofitApi(private val mUrl: String) {
                 .subscribe({
                     emitter.onSuccess(it)
                 }, {
-                    emitter.onError(it)
+                    emitter.tryOnError(it)
                 })
     }
 
@@ -61,7 +61,7 @@ class RetrofitApi(private val mUrl: String) {
                 .subscribe({
                     emitter.onSuccess(it)
                 }, {
-                    emitter.onError(it)
+                    emitter.tryOnError(it)
                 })
     }
 
@@ -72,7 +72,7 @@ class RetrofitApi(private val mUrl: String) {
                 .subscribe({
                     emitter.onSuccess(it)
                 }, {
-                    emitter.onError(it)
+                    emitter.tryOnError(it)
                 })
     }
 
