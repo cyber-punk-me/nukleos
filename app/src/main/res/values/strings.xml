@@ -7,6 +7,7 @@
     <string name="first_do_a_scan">Please, find sensor for start</string>
 
     <string name="unknown_problem">Unknown problem</string>
+    <string name="bt_adapter_problem">BT adapter is not turned on</string>
 
     <string name="description">Hello! This is a Nukleos! Miroslav Bulgakov and Kirill Yashuk was here!</string>
     <string name="author">Miroslav Bulgakov</string>
