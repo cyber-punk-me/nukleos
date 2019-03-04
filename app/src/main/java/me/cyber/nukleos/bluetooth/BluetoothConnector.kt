@@ -72,7 +72,7 @@ class BluetoothConnector(val context: Context) {
 
         override fun onScanFailed(errorCode: Int) {
             super.onScanFailed(errorCode)
-            emitter.onError(RuntimeException())
+            emitter.tryOnError(RuntimeException())
         }
     }
 }
