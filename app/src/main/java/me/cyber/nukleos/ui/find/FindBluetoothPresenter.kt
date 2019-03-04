@@ -1,15 +1,16 @@
 package me.cyber.nukleos.ui.find
 
 import android.bluetooth.BluetoothDevice
-import me.cyber.nukleos.IMotors
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import me.cyber.nukleos.dagger.PeripheryManager
+import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.bluetooth.BluetoothConnector
-import me.cyber.nukleos.motors.MotorsBlueTooth
+import me.cyber.nukleos.dagger.PeripheryManager
 import me.cyber.nukleos.model.SensorStuff
+import me.cyber.nukleos.motors.MotorsBlueTooth
+import me.cyber.nukleos.myosensor.Myo
 import java.util.concurrent.TimeUnit
 
 //bt general management
@@ -23,7 +24,7 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
     private var mFindMotorsSubscription: Disposable? = null
 
     override fun create() {
-        mFindFlowable = mBluetoothConnector.startBluetoothScan(10, TimeUnit.SECONDS)
+        mFindFlowable = mBluetoothConnector.startBluetoothScan(10, TimeUnit.SECONDS, Myo.BLUETOOTH_UUID)
         mFindMotorsFlowable = mBluetoothConnector.startBluetoothScan(10, TimeUnit.SECONDS, IMotors.SERVICE_UUID)
                 .apply {
                     mFindMotorsSubscription = subscribeOn(Schedulers.io())
