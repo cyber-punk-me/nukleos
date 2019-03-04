@@ -16,7 +16,7 @@ interface FindSensorInterface {
         fun addSensorToList(sensorStuff: SensorStuff)
         fun clearSensorList()
         fun populateSensorList(list: List<SensorStuff>)
-        fun showFindError()
+        fun showFindError(reason: String?)
         fun showFindSuccess()
         fun goToSensorControl()
     }

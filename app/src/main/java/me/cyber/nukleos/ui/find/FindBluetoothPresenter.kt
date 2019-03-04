@@ -84,7 +84,7 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
                             }
                         }, {
                             hideFindLoader()
-                            showFindError()
+                            showFindError(it.message)
                             if (mPeripheryManager.foundBTDevicesList.isEmpty()) {
                                 showEmptyListText()
                             }

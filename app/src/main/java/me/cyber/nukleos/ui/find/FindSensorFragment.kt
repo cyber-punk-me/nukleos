@@ -92,7 +92,9 @@ class FindSensorFragment : BaseFragment<FindSensorInterface.Presenter>(), FindSe
         progress_bar_search?.animate()?.alpha(0.0f)
     }
 
-    override fun showFindError() = Toast.makeText(this.context, getString(R.string.scan_failed), Toast.LENGTH_SHORT).show()
+    override fun showFindError(reason: String?) = showFindErrorToast(reason ?: getString(R.string.unknown_problem))
     override fun showFindSuccess() = Toast.makeText(this.context, getString(R.string.scan_completed), Toast.LENGTH_SHORT).show()
     override fun goToSensorControl() = (activity as MainActivity).navigateToPage(1)
+
+    private fun showFindErrorToast(reason: String) = Toast.makeText(this.context, "${getString(R.string.scan_failed)}: $reason", Toast.LENGTH_SHORT).show()
 }
