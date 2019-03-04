@@ -20,4 +20,8 @@ class PeripheryManager {
 
     @Volatile var motors : IMotors? = null
 
+    fun clear() {
+        selectedIndex = -1
+        foundBTDevicesList.clear()
+    }
 }

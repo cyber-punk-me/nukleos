@@ -73,6 +73,8 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
                 }
             } else {
                 hideEmptyListText()
+                mPeripheryManager.clear()
+                clearSensorList()
                 showFindLoader()
                 mFindSubscription = mFindFlowable
                         ?.subscribeOn(Schedulers.io())
