@@ -15,6 +15,10 @@ import java.util.concurrent.TimeUnit
 
 class Myo(private val device: BluetoothDevice) : BluetoothGattCallback() {
 
+    companion object {
+        val BLUETOOTH_UUID = UUID.fromString("D5060001-A904-DEB9-4748-2C7F4A124842")
+    }
+
     val name: String
         get() = device.name
 

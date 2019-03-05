@@ -3,38 +3,38 @@ package me.cyber.nukleos.bluetooth
 import  android.app.Activity
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
-import android.bluetooth.le.ScanCallback
-import android.bluetooth.le.ScanFilter
-import android.bluetooth.le.ScanResult
-import android.bluetooth.le.ScanSettings
+import android.bluetooth.le.*
 import android.content.Context
 import android.os.ParcelUuid
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import io.reactivex.FlowableEmitter
+import me.cyber.nukleus.R
+import java.lang.IllegalStateException
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 class BluetoothConnector(val context: Context) {
 
-    private val mBTLowEnergyScanner by lazy {
-        (context.getSystemService(Activity.BLUETOOTH_SERVICE) as BluetoothManager)
-                .adapter.bluetoothLeScanner
-    }
     private var mBluetoothScanCallback: BluetoothScanCallback? = null
     // scan.
     fun startBluetoothScan(serviceUUID: UUID?) = Flowable.create<BluetoothDevice>({
         mBluetoothScanCallback = BluetoothScanCallback(it)
+        val bluetoothScanner = getBluetoothScanner()
+        if (bluetoothScanner == null) {
+            it.tryOnError(IllegalStateException(context.getString(R.string.bt_adapter_problem)))
+            return@create
+        }
         if (serviceUUID == null) {
-            mBTLowEnergyScanner.startScan(mBluetoothScanCallback)
+            bluetoothScanner.startScan(mBluetoothScanCallback)
         } else {
-            mBTLowEnergyScanner.startScan(
+            bluetoothScanner.startScan(
                     arrayListOf(ScanFilter.Builder().setServiceUuid(ParcelUuid(serviceUUID)).build()),
                     ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build(),
                     mBluetoothScanCallback)
         }
     }, BackpressureStrategy.BUFFER).apply {
-        doOnCancel { mBTLowEnergyScanner.stopScan(mBluetoothScanCallback) }
+        doOnCancel { getBluetoothScanner()?.stopScan(mBluetoothScanCallback) }
     }
 
     // scan with timeout
@@ -60,6 +60,9 @@ class BluetoothConnector(val context: Context) {
                 }
             })
         }*/
+
+    private fun getBluetoothScanner(): BluetoothLeScanner? =
+            (context.getSystemService(Activity.BLUETOOTH_SERVICE) as? BluetoothManager)?.adapter?.bluetoothLeScanner
 
 
     inner class BluetoothScanCallback(private val emitter: FlowableEmitter<BluetoothDevice>) : ScanCallback() {
