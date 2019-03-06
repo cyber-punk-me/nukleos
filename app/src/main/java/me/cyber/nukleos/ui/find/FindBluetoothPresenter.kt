@@ -8,9 +8,8 @@ import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.bluetooth.BluetoothConnector
 import me.cyber.nukleos.dagger.PeripheryManager
-import me.cyber.nukleos.model.SensorStuff
 import me.cyber.nukleos.motors.MotorsBlueTooth
-import me.cyber.nukleos.myosensor.Myo
+import me.cyber.nukleos.sensors.myosensor.Myo
 import java.util.concurrent.TimeUnit
 
 //bt general management
@@ -45,10 +44,10 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
 
     override fun start() = with(view) {
         clearSensorList()
-        if (mPeripheryManager.foundBTDevicesList.isEmpty()) {
+        if (!mPeripheryManager.hasSensors()) {
             showPreparingText()
         } else {
-            populateSensorList(mPeripheryManager.foundBTDevicesList.map { it -> SensorStuff(it.name, it.address) })
+            populateSensorList(mPeripheryManager.getAvailableSensors())
         }
 
     }
@@ -60,7 +59,7 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
     }
 
     override fun onSensorSelected(index: Int) {
-        mPeripheryManager.selectedIndex = index
+        mPeripheryManager.setActiveSensor(index)
         view.goToSensorControl()
     }
 
@@ -68,7 +67,7 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
             if (mFindSubscription?.isDisposed == false) {
                 mFindSubscription?.dispose()
                 hideFindLoader()
-                if (mPeripheryManager.foundBTDevicesList.isEmpty()) {
+                if (!mPeripheryManager.hasSensors()) {
                     showEmptyListText()
                 }
             } else {
@@ -80,20 +79,21 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
                         ?.subscribeOn(Schedulers.io())
                         ?.observeOn(AndroidSchedulers.mainThread())
                         ?.subscribe({
-                            if (it !in mPeripheryManager.foundBTDevicesList) {
-                                addSensorToList(SensorStuff(it.name, it.address))
-                                mPeripheryManager.foundBTDevicesList.add(it)
+                            val sensor = Myo(it)
+                            if (sensor !in mPeripheryManager.getAvailableSensors()) {
+                                addSensorToList(sensor)
+                                mPeripheryManager.addSensor(sensor)
                             }
                         }, {
                             hideFindLoader()
                             showFindError(it.message)
-                            if (mPeripheryManager.foundBTDevicesList.isEmpty()) {
+                            if (!mPeripheryManager.hasSensors()) {
                                 showEmptyListText()
                             }
                         }, {
                             hideFindLoader()
                             showFindSuccess()
-                            if (mPeripheryManager.foundBTDevicesList.isEmpty()) {
+                            if (!mPeripheryManager.hasSensors()) {
                                 showEmptyListText()
                             }
                         })

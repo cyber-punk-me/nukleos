@@ -4,7 +4,7 @@ import android.bluetooth.*
 import android.content.Context
 import android.util.Log
 import me.cyber.nukleos.IMotors
-import me.cyber.nukleos.myosensor.TAG
+import me.cyber.nukleos.sensors.myosensor.TAG
 import java.lang.Thread.sleep
 
 class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothGattCallback() {

@@ -94,13 +94,13 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
 
     override fun start() {
         with(view) {
-            mPeripheryManager.myo?.apply {
+            mPeripheryManager.getSelectedSensor()?.apply {
                 if (this.isStreaming()) {
                     hideNoStreamingMessage()
                     mChartsDataSubscription?.apply {
                         if (isDisposed) this.dispose()
                     }
-                    mChartsDataSubscription = this.dataFlowable()
+                    mChartsDataSubscription = this.getDataFlowable()
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .doOnSubscribe { startCharts(true) }
