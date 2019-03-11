@@ -78,7 +78,7 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
                 -> Toast.makeText(context, "USB Permission not granted", Toast.LENGTH_SHORT).show()
                 UsbService.ACTION_NO_USB // NO USB CONNECTED
                 -> Toast.makeText(context, "No USB connected", Toast.LENGTH_SHORT).show()
-                UsbService.ACTION_USB_DISCONNECTED // USB DISCONNECTED
+                UsbService.ACTION_USB_DISCONNECTED // USB AVAILABLE
                 -> Toast.makeText(context, "USB disconnected", Toast.LENGTH_SHORT).show()
                 UsbService.ACTION_USB_NOT_SUPPORTED // USB NOT SUPPORTED
                 -> Toast.makeText(context, "USB device not supported", Toast.LENGTH_SHORT).show()

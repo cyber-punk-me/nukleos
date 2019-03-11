@@ -94,21 +94,22 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
 
     override fun start() {
         with(view) {
-            mPeripheryManager.getSelectedSensor()?.apply {
-                if (this.isStreaming()) {
-                    hideNoStreamingMessage()
-                    mChartsDataSubscription?.apply {
-                        if (isDisposed) this.dispose()
-                    }
-                    mChartsDataSubscription = this.getDataFlowable()
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .doOnSubscribe { startCharts(true) }
-                            .subscribe { showData(it) }
-                } else {
-                    showNoStreamingMessage()
-                }
+            //TODO there could be more than one streaming sensor
+            val firstStreamingSensor = mPeripheryManager.getAvailableSensors().firstOrNull { it.isStreaming() }
+            if (firstStreamingSensor == null) {
+                showNoStreamingMessage()
+                return
             }
+
+            hideNoStreamingMessage()
+            mChartsDataSubscription?.apply {
+                if (isDisposed) this.dispose()
+            }
+            mChartsDataSubscription = firstStreamingSensor.getDataFlowable()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .doOnSubscribe { startCharts(true) }
+                    .subscribe { showData(it) }
         }
         getServerTimeDiff()
     }

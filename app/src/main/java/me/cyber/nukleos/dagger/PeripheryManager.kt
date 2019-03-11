@@ -11,23 +11,23 @@ class PeripheryManager {
 
     private val sensors = mutableListOf<Sensor>()
 
-    private var activeSensor: Sensor? = null
+    private var selectedSensor: Sensor? = null
 
     fun clear() {
         sensors.clear()
-        activeSensor = null
+        selectedSensor = null
     }
 
     fun hasSensors() = !sensors.isEmpty()
 
     fun getAvailableSensors() = sensors
 
-    fun setActiveSensor(index: Int) {
-        activeSensor = sensors[index]
+    fun setSelectedSensor(index: Int) {
+        selectedSensor = sensors[index]
     }
 
     fun getSelectedSensor() : Sensor? {
-        return activeSensor
+        return selectedSensor
     }
 
     fun addSensor(sensor: Sensor) {

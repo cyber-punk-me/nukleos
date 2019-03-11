@@ -35,7 +35,7 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
     var keepAlive = true
     private var lastKeepAlive = 0L
 
-    private val connectionStatusSubject: BehaviorSubject<Status> = BehaviorSubject.createDefault(Status.DISCONNECTED)
+    private val connectionStatusSubject: BehaviorSubject<Status> = BehaviorSubject.createDefault(Status.AVAILABLE)
     private val controlStatusSubject: BehaviorSubject<ControlStatus> = BehaviorSubject.createDefault(ControlStatus.NOT_STREAMING)
     private val dataProcessor: PublishProcessor<FloatArray> = PublishProcessor.create()
 
@@ -62,7 +62,7 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
     override fun disconnect() {
         gatt?.close()
         controlStatusSubject.onNext(ControlStatus.NOT_STREAMING)
-        connectionStatusSubject.onNext(Status.DISCONNECTED)
+        connectionStatusSubject.onNext(Status.AVAILABLE)
     }
 
     override fun isConnected() = connectionStatusSubject.value == Status.CONNECTED || connectionStatusSubject.value == Status.READY

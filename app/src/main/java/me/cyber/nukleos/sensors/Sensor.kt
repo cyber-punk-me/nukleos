@@ -42,7 +42,7 @@ enum class Status {
     CONNECTING,
     READY,
     CONNECTED,
-    DISCONNECTED
+    AVAILABLE
 }
 
 enum class ControlStatus {

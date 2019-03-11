@@ -59,7 +59,7 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
     }
 
     override fun onSensorSelected(index: Int) {
-        mPeripheryManager.setActiveSensor(index)
+        mPeripheryManager.setSelectedSensor(index)
         view.goToSensorControl()
     }
 
