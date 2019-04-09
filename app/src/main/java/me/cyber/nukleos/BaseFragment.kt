@@ -14,6 +14,9 @@ open class BaseFragment<P: BasePresenter<BaseView>> : Fragment(), BaseView {
     fun attachPresenter(presenter: P) {
         this.presenter = presenter
         getPermissionsWithPermissionCheck()
+        if (isStartupFragment()) {
+            presenter.start()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,4 +39,5 @@ open class BaseFragment<P: BasePresenter<BaseView>> : Fragment(), BaseView {
 
     }
 
+    open fun isStartupFragment() = false
 }

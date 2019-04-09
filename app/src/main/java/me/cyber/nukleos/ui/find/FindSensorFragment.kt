@@ -36,6 +36,8 @@ class FindSensorFragment : BaseFragment<FindSensorInterface.Presenter>(), FindSe
         })
     }
 
+    override fun isStartupFragment() = true
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
             inflater.inflate(R.layout.layout_scan_device, container, false).apply { setHasOptionsMenu(true) }
 
