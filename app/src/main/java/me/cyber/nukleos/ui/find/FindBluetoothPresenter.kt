@@ -10,11 +10,13 @@ import me.cyber.nukleos.bluetooth.BluetoothConnector
 import me.cyber.nukleos.dagger.PeripheryManager
 import me.cyber.nukleos.motors.MotorsBlueTooth
 import me.cyber.nukleos.sensors.myosensor.Myo
-import me.cyber.nukleos.ui.control.SensorModel
 import java.util.concurrent.TimeUnit
 
 //bt general management
-class FindBluetoothPresenter(override val view: FindSensorInterface.View, private val mBluetoothConnector: BluetoothConnector, private val mPeripheryManager: PeripheryManager
+class FindBluetoothPresenter(
+        override val view: FindSensorInterface.View,
+        private val mBluetoothConnector: BluetoothConnector,
+        private val mPeripheryManager: PeripheryManager
 ) : FindSensorInterface.Presenter(view) {
 
     private var mFindFlowable: Flowable<BluetoothDevice>? = null
@@ -22,6 +24,8 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
 
     private var mFindSubscription: Disposable? = null
     private var mFindMotorsSubscription: Disposable? = null
+
+    private var mSensorsUpdateSubscription: Disposable? = null
 
     override fun create() {
         mFindFlowable = mBluetoothConnector.startBluetoothScan(10, TimeUnit.SECONDS, Myo.BLUETOOTH_UUID)
@@ -45,17 +49,19 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
 
     override fun start() = with(view) {
         clearSensorList()
-        if (!mPeripheryManager.hasSensors()) {
-            showPreparingText()
-        } else {
-            populateSensorList(mPeripheryManager.getSensorModels())
-        }
-
+        mSensorsUpdateSubscription =
+                mPeripheryManager.
+                        activeSensors.
+                        observeOn(AndroidSchedulers.mainThread()).
+                        subscribe {
+                            populateSensors(it)
+                        }
     }
 
     override fun destroy() {
         mFindSubscription?.dispose()
         mFindMotorsSubscription?.dispose()
+        mSensorsUpdateSubscription?.dispose()
         view.hideFindLoader()
     }
 
@@ -84,8 +90,7 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
                         ?.subscribe({
                             val sensor = Myo(it)
                             if (sensor !in mPeripheryManager.getSensors()) {
-                                val id = mPeripheryManager.addSensor(sensor)
-                                addSensorToList(SensorModel(sensor.name, sensor.address, id))
+                                mPeripheryManager.addSensor(sensor)
 
                             }
                         }, {

@@ -51,7 +51,10 @@ private class ConnectionThread internal constructor(
             val intent = Intent(UsbService.ACTION_USB_READY)
 //            context.sendBroadcast(intent) //TODO
 
-            onSensorInit(UsbSensor(usbHandler, serialPort))
+            Thread {
+                UsbSensor.startStreaming(serialPort)
+                onSensorInit(UsbSensor(usbHandler, serialPort))
+            }.start()
         } else {
             // Serial port could not be opened, maybe an I/O error or if CDC driver was chosen, it does not really fit
             // Send an Intent to Main Activity

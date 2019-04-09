@@ -1,7 +1,7 @@
 package me.cyber.nukleos.dagger
+import io.reactivex.subjects.BehaviorSubject
 import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.sensors.Sensor
-import me.cyber.nukleos.ui.control.SensorModel
 
 class PeripheryManager {
 
@@ -12,6 +12,8 @@ class PeripheryManager {
     private val sensors = mutableMapOf<Long, Sensor>()
     private var activeSensor: Sensor? = null
 
+    val activeSensors : BehaviorSubject<Map<Long, Sensor>> = BehaviorSubject.createDefault(sensors)
+
     fun clear() {
         sensors.filter { !it.value.isConnected() }.map { it.key }.forEach {
             sensors.remove(it)
@@ -20,8 +22,6 @@ class PeripheryManager {
     }
 
     fun hasSensors() = !sensors.isEmpty()
-
-    fun getSensorModels() = sensors.map { SensorModel(it.value.name, it.value.address, it.key) }
 
     fun getSensors() = sensors.values
 
@@ -33,9 +33,9 @@ class PeripheryManager {
         return activeSensor ?: sensors.values.firstOrNull()
     }
 
-    fun addSensor(sensor: Sensor) : Long {
+    fun addSensor(sensor: Sensor) {
         val id = devicesIdCounter++
         sensors[id] = sensor
-        return id
+        activeSensors.onNext(sensors.toMap())
     }
 }

@@ -7,7 +7,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "me.cyber.nukleos"
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 28
         versionCode 1
         manifestPlaceholders = [HOCKEYAPP_APP_ID: "$hockeyAppQaAppId"]
@@ -22,7 +22,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    buildToolsVersion '28.0.2'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -45,7 +44,7 @@ repositories {
 
 
 dependencies {
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.61'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.21'
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'no.nordicsemi.android.support.v18:scanner:1.0.0'
     implementation 'com.android.support:support-v4:28.0.0'

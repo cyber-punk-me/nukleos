@@ -12,15 +12,27 @@ class UsbSensor(private val usbHandler: UsbHandler, private val serialPort: UsbS
 
     companion object {
         const val BAUD_RATE = 115200 // BaudRate. Change this value if you need
+
+        fun startStreaming(serialPort: UsbSerialDevice) {
+            write("v".toByteArray(), serialPort)
+            Thread.sleep(1000)
+            write("~4".toByteArray(), serialPort)
+            Thread.sleep(1000)
+            write("b".toByteArray(), serialPort)
+        }
+
+        /*
+         * This function will be called from MainActivity to write data through Serial Port
+         */
+        private fun write(data: ByteArray, serialPort: UsbSerialDevice) {
+            serialPort.syncWrite(data, 0)
+        }
     }
 
     private val connectionStatusSubject: BehaviorSubject<Status> = BehaviorSubject.createDefault(Status.AVAILABLE)
 
     init {
         connectionStatusSubject.onNext(Status.STREAMING)
-        Thread {
-            startStreaming()
-        }.start()
     }
 
     override fun getDataFlowable(): Flowable<FloatArray> {
@@ -33,16 +45,11 @@ class UsbSensor(private val usbHandler: UsbHandler, private val serialPort: UsbS
     override fun statusObservable(): Observable<Status> = connectionStatusSubject
 
     private fun startStreaming() {
-        write("v".toByteArray())
-        Thread.sleep(1000)
-        write("~4".toByteArray())
-        Thread.sleep(1000)
-        write("b".toByteArray())
         connectionStatusSubject.onNext(Status.STREAMING)
     }
 
     private fun stopStreaming() {
-        write("s".toByteArray())
+        write("s".toByteArray(), serialPort)
         connectionStatusSubject.onNext(Status.AVAILABLE)
     }
 
@@ -73,12 +80,5 @@ class UsbSensor(private val usbHandler: UsbHandler, private val serialPort: UsbS
 
     fun changeBaudRate(baudRate: Int) {
         serialPort.setBaudRate(baudRate)
-    }
-
-    /*
-     * This function will be called from MainActivity to write data through Serial Port
-     */
-    private fun write(data: ByteArray) {
-        serialPort.syncWrite(data, 0)
     }
 }
