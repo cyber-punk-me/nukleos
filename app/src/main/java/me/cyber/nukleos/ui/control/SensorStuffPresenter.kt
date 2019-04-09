@@ -17,7 +17,7 @@ class SensorStuffPresenter(override val view: SensorControlInterface.View, priva
 
     override fun start() {
         with(view) {
-            val selectedSensor = mPeripheryManager.getSelectedSensor()
+            val selectedSensor = mPeripheryManager.getLastSelectedSensor()
             if (selectedSensor == null) {
                 disableConnectButton()
                 return
@@ -61,7 +61,7 @@ class SensorStuffPresenter(override val view: SensorControlInterface.View, priva
     }
 
     override fun onConnectionButtonClicked() {
-        mPeripheryManager.getSelectedSensor()?.apply {
+        mPeripheryManager.getLastSelectedSensor()?.apply {
             if (!isConnected()) {
                 connect(mBluetoothConnector.context)
             } else {
@@ -71,7 +71,7 @@ class SensorStuffPresenter(override val view: SensorControlInterface.View, priva
     }
 
     override fun onProgressSelected(progress: Int) {
-        val sensor = mPeripheryManager.getSelectedSensor() ?: return
+        val sensor = mPeripheryManager.getLastSelectedSensor() ?: return
         val availableFrequencies = sensor.getAvailableFrequencies()
         val selectedFrequency = if (progress >= 0 && progress < availableFrequencies.size)
             availableFrequencies[progress]
@@ -82,7 +82,7 @@ class SensorStuffPresenter(override val view: SensorControlInterface.View, priva
     }
 
     override fun onVibrationClicked(vibrationDuration: Int) {
-        mPeripheryManager.getSelectedSensor()?.apply {
+        mPeripheryManager.getLastSelectedSensor()?.apply {
             vibration(vibrationDuration)
         }
     }

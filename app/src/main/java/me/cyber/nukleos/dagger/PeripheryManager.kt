@@ -10,32 +10,43 @@ class PeripheryManager {
     @Volatile var motors : IMotors? = null
 
     private val sensors = mutableMapOf<Long, Sensor>()
-    private var activeSensor: Sensor? = null
+    private var lastSelectedSensorId: Long? = null
 
-    val activeSensors : BehaviorSubject<Map<Long, Sensor>> = BehaviorSubject.createDefault(sensors)
+    val activeSensorsObservable : BehaviorSubject<Map<Long, Sensor>> = BehaviorSubject.createDefault(sensors)
 
-    fun clear() {
-        sensors.filter { !it.value.isConnected() }.map { it.key }.forEach {
+    fun removeIf(needToBeDeleted: (Sensor) -> Boolean) {
+        sensors.filter { needToBeDeleted(it.value) }.map { it.key }.forEach {
             sensors.remove(it)
         }
-        activeSensor = null
+        notifySensorsChanged()
     }
 
     fun hasSensors() = !sensors.isEmpty()
 
     fun getSensors() = sensors.values
 
-    fun setSelectedSensorById(id: Long) {
-        activeSensor = sensors[id]
+    fun setLastSelectedSensorById(id: Long) {
+        lastSelectedSensorId = id
     }
 
-    fun getSelectedSensor() : Sensor? {
-        return activeSensor ?: sensors.values.firstOrNull()
+    fun getLastSelectedSensor() : Sensor? {
+        return sensors[lastSelectedSensorId] ?: sensors.values.firstOrNull()
     }
 
     fun addSensor(sensor: Sensor) {
         val id = devicesIdCounter++
         sensors[id] = sensor
-        activeSensors.onNext(sensors.toMap())
+        notifySensorsChanged()
+    }
+
+    fun removeSensor(id: Long) {
+        sensors.remove(id)
+        notifySensorsChanged()
+    }
+
+    fun getActiveSensor() = sensors.values.firstOrNull()
+
+    private fun notifySensorsChanged() {
+        activeSensorsObservable.onNext(sensors.toMap())
     }
 }

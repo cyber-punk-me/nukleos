@@ -15,9 +15,9 @@ class UsbSensor(private val usbHandler: UsbHandler, private val serialPort: UsbS
 
         fun startStreaming(serialPort: UsbSerialDevice) {
             write("v".toByteArray(), serialPort)
-            Thread.sleep(1000)
+            Thread.sleep(500)
             write("~4".toByteArray(), serialPort)
-            Thread.sleep(1000)
+            Thread.sleep(500)
             write("b".toByteArray(), serialPort)
         }
 

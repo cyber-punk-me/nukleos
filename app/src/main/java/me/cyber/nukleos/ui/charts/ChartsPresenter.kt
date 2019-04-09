@@ -95,7 +95,7 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
     override fun start() {
         with(view) {
             //TODO we should support several sensors
-            val firstStreamingSensor = mPeripheryManager.getSensors().firstOrNull()
+            val firstStreamingSensor = mPeripheryManager.getActiveSensor()
             if (firstStreamingSensor == null) {
                 showNoStreamingMessage()
                 return
@@ -117,7 +117,7 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
     override fun onCollectPressed() {
         val dataBuffer: ArrayList<FloatArray> = arrayListOf()
         with(view) {
-            val selectedSensor = mPeripheryManager.getSelectedSensor()
+            val selectedSensor = mPeripheryManager.getActiveSensor()
             if (selectedSensor == null) {
                 showNoStreamingMessage()
                 return

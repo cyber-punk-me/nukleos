@@ -126,7 +126,7 @@ public class UsbService extends Service {
                     // Usb device was disconnected. send an intent to the Main Activity
                     Intent intent = new Intent(ACTION_USB_DISCONNECTED);
                     arg0.sendBroadcast(intent);
-                    //TODO remove sensor
+                    peripheryManager.removeIf(sensor -> sensor instanceof UsbSensor);
                     break;
             }
         }

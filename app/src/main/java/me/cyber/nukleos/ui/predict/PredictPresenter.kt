@@ -26,7 +26,7 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
 
     override fun start() {
         with(view) {
-            val selectedSensor = mPeripheryManager.getSelectedSensor() ?: return
+            val selectedSensor = mPeripheryManager.getActiveSensor() ?: return
             selectedSensor.apply {
                 hideNoStreamingMessage()
                 mChartsDataSubscription?.apply {

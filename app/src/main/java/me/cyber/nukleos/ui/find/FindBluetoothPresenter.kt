@@ -51,7 +51,7 @@ class FindBluetoothPresenter(
         clearSensorList()
         mSensorsUpdateSubscription =
                 mPeripheryManager.
-                        activeSensors.
+                        activeSensorsObservable.
                         observeOn(AndroidSchedulers.mainThread()).
                         subscribe {
                             populateSensors(it)
@@ -68,7 +68,7 @@ class FindBluetoothPresenter(
     override fun onSensorSelected(index: Int) {
         val model = view.getSensorModel(index)
         val id = model?.id ?: return
-        mPeripheryManager.setSelectedSensorById(id)
+        mPeripheryManager.setLastSelectedSensorById(id)
         view.goToSensorControl()
     }
 
@@ -81,7 +81,7 @@ class FindBluetoothPresenter(
                 }
             } else {
                 hideEmptyListText()
-                mPeripheryManager.clear()
+                mPeripheryManager.removeIf { it is Myo }
                 clearSensorList()
                 showFindLoader()
                 mFindSubscription = mFindFlowable
