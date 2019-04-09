@@ -10,8 +10,8 @@ import android.widget.Toast
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.layout_scan_device.*
 import me.cyber.nukleos.BaseFragment
-import me.cyber.nukleos.sensors.Sensor
 import me.cyber.nukleos.ui.MainActivity
+import me.cyber.nukleos.ui.control.SensorModel
 import me.cyber.nukleos.utils.DeviceAdapter
 import me.cyber.nukleos.utils.DeviceSelectedListener
 import me.cyber.nukleos.utils.RecyclerItemFadeAnimator
@@ -67,14 +67,18 @@ class FindSensorFragment : BaseFragment<FindSensorInterface.Presenter>(), FindSe
         text_empty_list.visibility = View.INVISIBLE
     }
 
-    override fun populateSensorList(list: List<Sensor>) = with(mListDeviceAdapter) {
+    override fun populateSensorList(list: List<SensorModel>) = with(mListDeviceAdapter) {
         deviceList = list.toMutableList()
         notifyDataSetChanged()
     }
 
-    override fun addSensorToList(sensor: Sensor) = with(mListDeviceAdapter) {
-        deviceList.add(sensor)
+    override fun addSensorToList(sensorModel: SensorModel) = with(mListDeviceAdapter) {
+        deviceList.add(sensorModel)
         notifyItemInserted(itemCount)
+    }
+
+    override fun getSensorModel(index: Int): SensorModel? = with(mListDeviceAdapter) {
+        return@with deviceList[index]
     }
 
     override fun clearSensorList() = with(mListDeviceAdapter) {

@@ -60,7 +60,8 @@
         android:layout_height="2dp"
         android:layout_marginTop="@dimen/default_margin"
         android:background="@color/secondaryLightColor"
-        app:layout_constraintTop_toBottomOf="@id/device_address_subtitle" />
+        app:layout_constraintTop_toBottomOf="@id/device_address_subtitle"
+        app:layout_constraintLeft_toLeftOf="parent"/>
 
     <TextView
         android:id="@+id/sensor_status_title"
@@ -110,44 +111,11 @@
     <View
         android:id="@+id/status_divider"
         android:layout_width="wrap_content"
-        android:layout_height="2dp"
+        android:layout_height="5dp"
         android:layout_marginTop="@dimen/default_margin"
         android:background="@color/secondaryLightColor"
-        app:layout_constraintTop_toBottomOf="@id/button_connect" />
-
-    <TextView
-        android:id="@+id/sensor_control"
-        style="@style/TextAppearance.AppCompat.Subhead"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_margin"
-        android:text="@string/device_control"
-        android:textColor="@color/primaryColor"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/status_divider" />
-
-    <TextView
-        android:id="@+id/scan_status"
-        style="@style/TextAppearance.AppCompat.Body1"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_margin"
-        android:text="@string/waiting_for_scan"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/sensor_control" />
-
-    <android.support.design.button.MaterialButton
-        android:id="@+id/start_scan_btn"
-        style="@style/Widget.MaterialComponents.Button"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/ten_grid_size"
-        android:layout_margin="@dimen/default_margin"
-        android:enabled="false"
-        android:minWidth="120dp"
-        android:text="@string/start"
-        app:layout_constraintBottom_toTopOf="@+id/scan_status"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/scan_status" />
+        app:layout_constraintTop_toBottomOf="@id/button_connect"
+        app:layout_constraintLeft_toLeftOf="parent"/>
 
     <TextView
         android:id="@+id/sensor_frequency_title"
@@ -157,7 +125,8 @@
         android:layout_margin="@dimen/default_margin"
         android:text="@string/sensor_frequency"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/start_scan_btn" />
+        app:layout_constraintTop_toBottomOf="@id/status_divider"
+        tools:layout_editor_absoluteY="358dp" />
 
     <TextView
         android:id="@+id/device_frequency_value"
@@ -167,7 +136,8 @@
         android:layout_margin="@dimen/default_margin"
         android:text="@string/frequency_max"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/start_scan_btn" />
+        app:layout_constraintTop_toBottomOf="@id/status_divider"
+        tools:layout_editor_absoluteY="358dp" />
 
     <SeekBar
         android:id="@+id/sensor_frequency_seekbar"

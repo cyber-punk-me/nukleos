@@ -7,7 +7,6 @@ import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.processors.PublishProcessor
 import io.reactivex.subjects.BehaviorSubject
-import me.cyber.nukleos.sensors.ControlStatus
 import me.cyber.nukleos.sensors.Sensor
 import me.cyber.nukleos.sensors.Status
 import me.cyber.nukleos.utils.isStartStreamingCommand
@@ -21,7 +20,7 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
     companion object {
         val BLUETOOTH_UUID: UUID = UUID.fromString("D5060001-A904-DEB9-4748-2C7F4A124842")
 
-        private val availableFrequences = listOf(50, 100, 150, 200)
+        private val availableFrequencies = listOf(50, 100, 150, 200)
     }
 
     override val name: String
@@ -32,11 +31,10 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
 
     private var frequency: Int = MYO_MAX_FREQUENCY
 
-    var keepAlive = true
+    private var keepAlive = true
     private var lastKeepAlive = 0L
 
     private val connectionStatusSubject: BehaviorSubject<Status> = BehaviorSubject.createDefault(Status.AVAILABLE)
-    private val controlStatusSubject: BehaviorSubject<ControlStatus> = BehaviorSubject.createDefault(ControlStatus.NOT_STREAMING)
     private val dataProcessor: PublishProcessor<FloatArray> = PublishProcessor.create()
 
     private var gatt: BluetoothGatt? = null
@@ -60,18 +58,14 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
     }
 
     override fun disconnect() {
+        stopStreaming()
         gatt?.close()
-        controlStatusSubject.onNext(ControlStatus.NOT_STREAMING)
         connectionStatusSubject.onNext(Status.AVAILABLE)
     }
 
-    override fun isConnected() = connectionStatusSubject.value == Status.CONNECTED || connectionStatusSubject.value == Status.READY
-
-    override fun isStreaming() = controlStatusSubject.value == ControlStatus.STREAMING
+    override fun isConnected() = connectionStatusSubject.value == Status.STREAMING
 
     override fun statusObservable(): Observable<Status> = connectionStatusSubject
-
-    override fun controlObservable(): Observable<ControlStatus> = controlStatusSubject
 
     override fun getDataFlowable(): Flowable<FloatArray> {
         return if (frequency == 0) {
@@ -86,9 +80,9 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
             this.value = command
             if (this.properties == BluetoothGattCharacteristic.PROPERTY_WRITE) {
                 if (command.isStartStreamingCommand()) {
-                    controlStatusSubject.onNext(ControlStatus.STREAMING)
+                    connectionStatusSubject.onNext(Status.STREAMING)
                 } else if (command.isStopStreamingCommand()) {
-                    controlStatusSubject.onNext(ControlStatus.NOT_STREAMING)
+                    connectionStatusSubject.onNext(Status.AVAILABLE)
                 }
                 gatt?.writeCharacteristic(this)
                 return true
@@ -97,12 +91,14 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
         return false
     }
 
-    override fun startStreaming() {
+    private fun startStreaming() {
         sendCommand(CommandList.emgFilteredOnly())
+        connectionStatusSubject.onNext(Status.STREAMING)
     }
 
-    override fun stopStreaming() {
+    private fun stopStreaming() {
         sendCommand(CommandList.stopStreaming())
+        connectionStatusSubject.onNext(Status.AVAILABLE)
     }
 
     override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
@@ -110,7 +106,6 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
         Log.d(TAG, "onConnectionStateChange: $status -> $newState")
         if (newState == BluetoothProfile.STATE_CONNECTED) {
             Log.d(TAG, "Bluetooth Connected")
-            connectionStatusSubject.onNext(Status.CONNECTED)
             gatt.discoverServices()
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
             // Calling disconnect() here will cause to release the GATT resources.
@@ -165,8 +160,11 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
             characteristicCommand?.apply {
                 lastKeepAlive = System.currentTimeMillis()
                 sendCommand(CommandList.unSleep())
+                Thread {
+                    Thread.sleep(1000)
+                    startStreaming()
+                }.start()
                 // We send the ready event as soon as the characteristicCommand is ready.
-                connectionStatusSubject.onNext(Status.READY)
             }
         }
     }
@@ -261,5 +259,5 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
         frequency = if (newFrequency >= MYO_MAX_FREQUENCY) 0 else newFrequency
     }
 
-    override fun getAvailableFrequencies(): List<Int> = availableFrequences
+    override fun getAvailableFrequencies(): List<Int> = availableFrequencies
 }

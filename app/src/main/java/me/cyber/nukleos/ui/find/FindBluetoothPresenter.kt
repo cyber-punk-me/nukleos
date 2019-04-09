@@ -10,6 +10,7 @@ import me.cyber.nukleos.bluetooth.BluetoothConnector
 import me.cyber.nukleos.dagger.PeripheryManager
 import me.cyber.nukleos.motors.MotorsBlueTooth
 import me.cyber.nukleos.sensors.myosensor.Myo
+import me.cyber.nukleos.ui.control.SensorModel
 import java.util.concurrent.TimeUnit
 
 //bt general management
@@ -47,7 +48,7 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
         if (!mPeripheryManager.hasSensors()) {
             showPreparingText()
         } else {
-            populateSensorList(mPeripheryManager.getAvailableSensors())
+            populateSensorList(mPeripheryManager.getSensorModels())
         }
 
     }
@@ -59,7 +60,9 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
     }
 
     override fun onSensorSelected(index: Int) {
-        mPeripheryManager.setSelectedSensor(index)
+        val model = view.getSensorModel(index)
+        val id = model?.id ?: return
+        mPeripheryManager.setSelectedSensorById(id)
         view.goToSensorControl()
     }
 
@@ -80,9 +83,10 @@ class FindBluetoothPresenter(override val view: FindSensorInterface.View, privat
                         ?.observeOn(AndroidSchedulers.mainThread())
                         ?.subscribe({
                             val sensor = Myo(it)
-                            if (sensor !in mPeripheryManager.getAvailableSensors()) {
-                                addSensorToList(sensor)
-                                mPeripheryManager.addSensor(sensor)
+                            if (sensor !in mPeripheryManager.getSensors()) {
+                                val id = mPeripheryManager.addSensor(sensor)
+                                addSensorToList(SensorModel(sensor.name, sensor.address, id))
+
                             }
                         }, {
                             hideFindLoader()

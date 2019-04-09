@@ -1,36 +1,41 @@
 package me.cyber.nukleos.dagger
 import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.sensors.Sensor
-import me.cyber.nukleos.synaps.UsbHandler
+import me.cyber.nukleos.ui.control.SensorModel
 
 class PeripheryManager {
 
-    var synapsUsbHandler: UsbHandler? = null
+    private var devicesIdCounter: Long = 0
 
     @Volatile var motors : IMotors? = null
 
-    private val sensors = mutableListOf<Sensor>()
-
-    private var selectedSensor: Sensor? = null
+    private val sensors = mutableMapOf<Long, Sensor>()
+    private var activeSensor: Sensor? = null
 
     fun clear() {
-        sensors.clear()
-        selectedSensor = null
+        sensors.filter { !it.value.isConnected() }.map { it.key }.forEach {
+            sensors.remove(it)
+        }
+        activeSensor = null
     }
 
     fun hasSensors() = !sensors.isEmpty()
 
-    fun getAvailableSensors() = sensors
+    fun getSensorModels() = sensors.map { SensorModel(it.value.name, it.value.address, it.key) }
 
-    fun setSelectedSensor(index: Int) {
-        selectedSensor = sensors[index]
+    fun getSensors() = sensors.values
+
+    fun setSelectedSensorById(id: Long) {
+        activeSensor = sensors[id]
     }
 
     fun getSelectedSensor() : Sensor? {
-        return selectedSensor
+        return activeSensor ?: sensors.values.firstOrNull()
     }
 
-    fun addSensor(sensor: Sensor) {
-        sensors.add(sensor)
+    fun addSensor(sensor: Sensor) : Long {
+        val id = devicesIdCounter++
+        sensors[id] = sensor
+        return id
     }
 }

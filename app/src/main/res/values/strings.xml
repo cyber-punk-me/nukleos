@@ -6,6 +6,10 @@
     <string name="sensor_is_not_found">Sensor not found!</string>
     <string name="first_do_a_scan">Please, find sensor for start</string>
 
+    <string name="usb_device_is_not_provided">USB device is not provided</string>
+    <string name="intent_is_missing">Intent is missing</string>
+    <string name="extras_is_missing">Extras is missing</string>
+
     <string name="unknown_problem">Unknown problem</string>
     <string name="bt_adapter_problem">BT adapter is not turned on</string>
 

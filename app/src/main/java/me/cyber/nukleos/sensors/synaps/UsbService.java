@@ -1,4 +1,4 @@
-package me.cyber.nukleos.synaps;
+package me.cyber.nukleos.sensors.synaps;
 
 import android.app.PendingIntent;
 import android.app.Service;
@@ -7,19 +7,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Binder;
-import android.os.Handler;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.felhr.usbserial.CDCSerialDevice;
 import com.felhr.usbserial.UsbSerialDevice;
-import com.felhr.usbserial.UsbSerialInterface;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import kotlin.Unit;
+import me.cyber.nukleos.dagger.PeripheryManager;
+import me.cyber.nukleus.R;
+
+import static me.cyber.nukleos.sensors.synaps.UsbConnectionUtilsKt.connect;
 
 /**
  * The MIT License (MIT)
@@ -64,53 +67,16 @@ public class UsbService extends Service {
     public static final int DSR_CHANGE = 2;
     public static final int SYNC_READ = 3;
     private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
-    private static final int BAUD_RATE = 115200; // BaudRate. Change this value if you need
     public static boolean SERVICE_CONNECTED = false;
+
+    private static final String USB_DEVICE_EXTRA_KEY = "usb_device";
 
     private IBinder binder = new UsbBinder();
 
-    private Context context;
-    private Handler mHandler;
     private UsbManager usbManager;
-    private UsbDevice device;
-    private UsbDeviceConnection connection;
-    private UsbSerialDevice serialPort;
 
-    private boolean serialPortConnected;
-    /*
-     *  Data received from serial port will be received here. Just populate onReceivedData with your code
-     *  In this particular example. byte stream is converted to String and send to UI thread to
-     *  be treated there.
-     */
-    private UsbSerialInterface.UsbReadCallback mCallback = new UsbSerialInterface.UsbReadCallback() {
-        @Override
-        public void onReceivedData(byte[] arg0) {
-            if (mHandler != null)
-                mHandler.obtainMessage(MESSAGE_FROM_SERIAL_PORT, arg0).sendToTarget();
-        }
-    };
+    public PeripheryManager peripheryManager;
 
-    /*
-     * State changes in the CTS line will be received here
-     */
-    private UsbSerialInterface.UsbCTSCallback ctsCallback = new UsbSerialInterface.UsbCTSCallback() {
-        @Override
-        public void onCTSChanged(boolean state) {
-            if (mHandler != null)
-                mHandler.obtainMessage(CTS_CHANGE).sendToTarget();
-        }
-    };
-
-    /*
-     * State changes in the DSR line will be received here
-     */
-    private UsbSerialInterface.UsbDSRCallback dsrCallback = new UsbSerialInterface.UsbDSRCallback() {
-        @Override
-        public void onDSRChanged(boolean state) {
-            if (mHandler != null)
-                mHandler.obtainMessage(DSR_CHANGE).sendToTarget();
-        }
-    };
     /*
      * Different notifications from OS will be received here (USB attached, detached, permission responses...)
      * About BroadcastReceiver: http://developer.android.com/reference/android/content/BroadcastReceiver.html
@@ -118,30 +84,50 @@ public class UsbService extends Service {
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context arg0, Intent arg1) {
-            if (arg1.getAction().equals(ACTION_USB_PERMISSION)) {
-                boolean granted = arg1.getExtras().getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED);
-                if (granted) // User accepted our USB connection. Try to open the device as a serial port
-                {
-                    Intent intent = new Intent(ACTION_USB_PERMISSION_GRANTED);
-                    arg0.sendBroadcast(intent);
-                    connection = usbManager.openDevice(device);
-                    new ConnectionThread().start();
-                } else // User not accepted our USB connection. Send an Intent to the Main Activity
-                {
-                    Intent intent = new Intent(ACTION_USB_PERMISSION_NOT_GRANTED);
-                    arg0.sendBroadcast(intent);
-                }
-            } else if (arg1.getAction().equals(ACTION_USB_ATTACHED)) {
-                if (!serialPortConnected)
+            String action = arg1.getAction();
+            if (action == null) {
+                String intentIsMissingError = getString(R.string.intent_is_missing);
+                Log.e(intentIsMissingError, intentIsMissingError);
+                return;
+            }
+            switch (action) {
+                case ACTION_USB_PERMISSION:
+                    Bundle extras = arg1.getExtras();
+                    if (extras == null) {
+                        Log.e(TAG, getString(R.string.extras_is_missing));
+                        return;
+                    }
+                    boolean granted = extras.getBoolean(UsbManager.EXTRA_PERMISSION_GRANTED);
+                    if (granted) // User accepted our USB connection. Try to open the device as a serial port
+                    {
+                        Intent intent = new Intent(ACTION_USB_PERMISSION_GRANTED);
+                        arg0.sendBroadcast(intent);
+                        UsbDevice device = extras.getParcelable(USB_DEVICE_EXTRA_KEY);
+                        if (device == null) {
+                            Log.e(TAG, getString(R.string.usb_device_is_not_provided));
+                            return;
+                        }
+
+                        connect(device, usbManager, sensor -> {
+                            if (peripheryManager != null)
+                                peripheryManager.addSensor(sensor);
+                            return Unit.INSTANCE;
+                        });
+                    } else // User not accepted our USB connection. Send an Intent to the Main Activity
+                    {
+                        Intent intent = new Intent(ACTION_USB_PERMISSION_NOT_GRANTED);
+                        arg0.sendBroadcast(intent);
+                    }
+                    break;
+                case ACTION_USB_ATTACHED:
                     findSerialPortDevice(); // A USB device has been attached. Try to open it as a Serial port
-            } else if (arg1.getAction().equals(ACTION_USB_DETACHED)) {
-                // Usb device was disconnected. send an intent to the Main Activity
-                Intent intent = new Intent(ACTION_USB_DISCONNECTED);
-                arg0.sendBroadcast(intent);
-                if (serialPortConnected) {
-                    serialPort.syncClose();
-                }
-                serialPortConnected = false;
+                    break;
+                case ACTION_USB_DETACHED:
+                    // Usb device was disconnected. send an intent to the Main Activity
+                    Intent intent = new Intent(ACTION_USB_DISCONNECTED);
+                    arg0.sendBroadcast(intent);
+                    //TODO remove sensor
+                    break;
             }
         }
     };
@@ -152,8 +138,6 @@ public class UsbService extends Service {
      */
     @Override
     public void onCreate() {
-        this.context = this;
-        serialPortConnected = false;
         UsbService.SERVICE_CONNECTED = true;
         setFilter();
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
@@ -177,30 +161,8 @@ public class UsbService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        serialPort.close();
         unregisterReceiver(usbReceiver);
         UsbService.SERVICE_CONNECTED = false;
-    }
-
-    /*
-     * This function will be called from MainActivity to write data through Serial Port
-     */
-    public void write(byte[] data) {
-        if (serialPort != null)
-            serialPort.syncWrite(data, 0);
-    }
-
-    /*
-     * This function will be called from MainActivity to change baud rate
-     */
-
-    public void changeBaudRate(int baudRate) {
-        if (serialPort != null)
-            serialPort.setBaudRate(baudRate);
-    }
-
-    public void setHandler(Handler mHandler) {
-        this.mHandler = mHandler;
     }
 
     private void findSerialPortDevice() {
@@ -208,6 +170,7 @@ public class UsbService extends Service {
         HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
         if (!usbDevices.isEmpty()) {
 
+            UsbDevice device = null;
             // first, dump the map for diagnostic purposes
             for (Map.Entry<String, UsbDevice> entry : usbDevices.entrySet()) {
                 device = entry.getValue();
@@ -226,10 +189,9 @@ public class UsbService extends Service {
 //                if (deviceVID != 0x1d6b && (devicePID != 0x0001 && devicePID != 0x0002 && devicePID != 0x0003)) {
                 if (UsbSerialDevice.isSupported(device)) {
                     // There is a device connected to our Android device. Try to open it as a Serial Port.
-                    requestUserPermission();
+                    requestUserPermission(device);
                     break;
                 } else {
-                    connection = null;
                     device = null;
                 }
             }
@@ -257,87 +219,17 @@ public class UsbService extends Service {
     /*
      * Request user permission. The response will be received in the BroadcastReceiver
      */
-    private void requestUserPermission() {
+    private void requestUserPermission(UsbDevice device) {
         Log.d(TAG, String.format("requestUserPermission(%X:%X)", device.getVendorId(), device.getProductId()));
-        PendingIntent mPendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
+        Intent intent = new Intent(ACTION_USB_PERMISSION);
+        intent.putExtra(USB_DEVICE_EXTRA_KEY, device);
+        PendingIntent mPendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
         usbManager.requestPermission(device, mPendingIntent);
     }
 
     public class UsbBinder extends Binder {
         public UsbService getService() {
             return UsbService.this;
-        }
-    }
-
-    /*
-     * A simple thread to open a serial port.
-     * Although it should be a fast operation. moving usb operations away from UI thread is a good thing.
-     */
-    private class ConnectionThread extends Thread {
-        @Override
-        public void run() {
-            serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
-            if (serialPort != null) {
-                if (serialPort.syncOpen()) {
-                    serialPortConnected = true;
-                    serialPort.setBaudRate(BAUD_RATE);
-                    serialPort.setDataBits(UsbSerialInterface.DATA_BITS_8);
-                    serialPort.setStopBits(UsbSerialInterface.STOP_BITS_1);
-                    serialPort.setParity(UsbSerialInterface.PARITY_NONE);
-                    /**
-                     * Current flow control Options:
-                     * UsbSerialInterface.FLOW_CONTROL_OFF
-                     * UsbSerialInterface.FLOW_CONTROL_RTS_CTS only for CP2102 and FT232
-                     * UsbSerialInterface.FLOW_CONTROL_DSR_DTR only for CP2102 and FT232
-                     */
-                    serialPort.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
-                    serialPort.read(mCallback);
-                    serialPort.getCTS(ctsCallback);
-                    serialPort.getDSR(dsrCallback);
-
-                    new ReadThread().start();
-
-                    //
-                    // Some Arduinos would need some sleep because firmware wait some time to know whether a new sketch is going
-                    // to be uploaded or not
-                    //Thread.sleep(2000); // sleep some. YMMV with different chips.
-
-                    // Everything went as expected. Send an intent to MainActivity
-                    Intent intent = new Intent(ACTION_USB_READY);
-                    context.sendBroadcast(intent);
-                } else {
-                    // Serial port could not be opened, maybe an I/O error or if CDC driver was chosen, it does not really fit
-                    // Send an Intent to Main Activity
-                    if (serialPort instanceof CDCSerialDevice) {
-                        Intent intent = new Intent(ACTION_CDC_DRIVER_NOT_WORKING);
-                        context.sendBroadcast(intent);
-                    } else {
-                        Intent intent = new Intent(ACTION_USB_DEVICE_NOT_WORKING);
-                        context.sendBroadcast(intent);
-                    }
-                }
-            } else {
-                // No driver for given device, even generic CDC driver could not be loaded
-                Intent intent = new Intent(ACTION_USB_NOT_SUPPORTED);
-                context.sendBroadcast(intent);
-            }
-        }
-    }
-
-    private class ReadThread extends Thread {
-        @Override
-        public void run() {
-            while (true) {
-                byte[] buffer = new byte[100];
-                int n = serialPort.syncRead(buffer, 0);
-                if (n > 0) {
-                    byte[] received = new byte[n];
-                    System.arraycopy(buffer, 0, received, 0, n);
-                    if (mHandler != null) {
-                        mHandler.obtainMessage(SYNC_READ, received).sendToTarget();
-                    }
-                }
-            }
         }
     }
 

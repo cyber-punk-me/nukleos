@@ -15,17 +15,16 @@ import dagger.android.AndroidInjection
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.support.HasSupportFragmentInjector
+import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_main.*
 import me.cyber.nukleos.dagger.PeripheryManager
-import me.cyber.nukleos.synaps.UsbHandler
+import me.cyber.nukleos.sensors.synaps.UsbService
 import me.cyber.nukleos.ui.charts.ChartsFragment
 import me.cyber.nukleos.ui.control.SensorControlFragment
 import me.cyber.nukleos.ui.find.FindSensorFragment
 import me.cyber.nukleos.ui.predict.PredictFragment
 import me.cyber.nukleus.R
 import javax.inject.Inject
-import me.cyber.nukleos.synaps.UsbService
-import java.lang.Thread.sleep
 
 class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
 
@@ -36,28 +35,14 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
     lateinit var peripheryManager: PeripheryManager
 
     private var navigationBlocked = false
-
-    private var usbService: UsbService? = null
-    var usbStreamReady: Boolean = false
+    private var peripheryManagerSubscribeDisposable : Disposable? = null
 
     private val usbConnection = object : ServiceConnection {
         override fun onServiceConnected(arg0: ComponentName, arg1: IBinder) {
-            usbStreamReady = false
-            peripheryManager.synapsUsbHandler = UsbHandler(this@MainActivity)
-            usbService = (arg1 as UsbService.UsbBinder).service
-            usbService?.setHandler(peripheryManager.synapsUsbHandler)
-            //
-            Thread {
-                usbService?.write("v".toByteArray())
-                sleep(500)
-                usbService?.write("~4".toByteArray())
-                sleep(500)
-                usbService?.write("b".toByteArray())
-            }.start()
+            (arg1 as UsbService.UsbBinder).service.peripheryManager = peripheryManager
         }
 
         override fun onServiceDisconnected(arg0: ComponentName) {
-            usbService = null
         }
     }
 
@@ -71,7 +56,7 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
      */
     private val usbReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            when (intent.getAction()) {
+            when (intent.action) {
                 UsbService.ACTION_USB_PERMISSION_GRANTED // USB PERMISSION GRANTED
                 -> Toast.makeText(context, "USB Ready", Toast.LENGTH_SHORT).show()
                 UsbService.ACTION_USB_PERMISSION_NOT_GRANTED // USB PERMISSION NOT GRANTED
@@ -93,8 +78,9 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.new_toolbar))
 
+        val findSensorFragment = FindSensorFragment.newInstance()
         val fragmentList = listOf<Fragment>(
-                FindSensorFragment.newInstance(),
+                findSensorFragment,
                 SensorControlFragment.newInstance(),
                 ChartsFragment.newInstance(),
                 PredictFragment.newInstance()
@@ -170,8 +156,6 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
         super.onPause()
         unregisterReceiver(usbReceiver)
         unbindService(usbConnection)
-        peripheryManager.synapsUsbHandler = null
-        usbStreamReady = false
     }
 
     fun navigateToPage(pageId: Int) {
@@ -193,4 +177,8 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        peripheryManagerSubscribeDisposable?.dispose()
+    }
 }

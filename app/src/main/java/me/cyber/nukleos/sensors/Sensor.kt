@@ -11,15 +11,7 @@ interface Sensor {
 
     val address: String
 
-    fun isStreaming(): Boolean
-
     fun statusObservable(): Observable<Status>
-
-    fun controlObservable(): Observable<ControlStatus>
-
-    fun startStreaming()
-
-    fun stopStreaming()
 
     fun connect(context: Context)
 
@@ -39,13 +31,7 @@ interface Sensor {
 }
 
 enum class Status {
+    AVAILABLE,
     CONNECTING,
-    READY,
-    CONNECTED,
-    AVAILABLE
-}
-
-enum class ControlStatus {
-    STREAMING,
-    NOT_STREAMING
+    STREAMING
 }
