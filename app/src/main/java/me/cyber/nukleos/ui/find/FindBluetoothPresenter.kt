@@ -48,7 +48,6 @@ class FindBluetoothPresenter(
     }
 
     override fun start() = with(view) {
-        clearSensorList()
         mSensorsUpdateSubscription =
                 mPeripheryManager.
                         activeSensorsObservable.

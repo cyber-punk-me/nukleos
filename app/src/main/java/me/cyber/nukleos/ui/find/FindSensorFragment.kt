@@ -71,13 +71,12 @@ class FindSensorFragment : BaseFragment<FindSensorInterface.Presenter>(), FindSe
     }
 
     override fun populateSensors(sensors: Map<Long, Sensor>) = with(mListDeviceAdapter) {
-        if (deviceList.removeIf { !sensors.contains(it.id) }) {
-            notifyDataSetChanged()
-        }
-        sensors.filter { sensorPair -> deviceList.all { it.id != sensorPair.key } }.
-                map { SensorModel(it.value.name, it.value.address, it.key) }.forEach {
-            addSensorToList(it)
-        }
+        deviceList.removeIf { !sensors.contains(it.id) }
+        val newSensorModels = sensors.
+                filter { sensorPair -> deviceList.all { it.id != sensorPair.key } }.
+                map { SensorModel(it.value.name, it.value.address, it.key) }
+        deviceList.addAll(newSensorModels)
+        notifyDataSetChanged()
     }
 
     override fun addSensorToList(sensorModel: SensorModel) = with(mListDeviceAdapter) {
