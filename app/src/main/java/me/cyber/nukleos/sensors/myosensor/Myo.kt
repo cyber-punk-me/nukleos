@@ -21,6 +21,8 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
         val BLUETOOTH_UUID: UUID = UUID.fromString("D5060001-A904-DEB9-4748-2C7F4A124842")
 
         private val availableFrequencies = listOf(50, 100, 150, 200)
+
+        private const val defaultDelayBetweenCommands = 3000L
     }
 
     override val name: String
@@ -161,7 +163,7 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
                 lastKeepAlive = System.currentTimeMillis()
                 sendCommand(CommandList.unSleep())
                 Thread {
-                    Thread.sleep(1000)
+                    Thread.sleep(defaultDelayBetweenCommands)
                     startStreaming()
                 }.start()
                 // We send the ready event as soon as the characteristicCommand is ready.

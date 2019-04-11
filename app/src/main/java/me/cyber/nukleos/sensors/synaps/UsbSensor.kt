@@ -13,11 +13,13 @@ class UsbSensor(private val usbHandler: UsbHandler, private val serialPort: UsbS
     companion object {
         const val BAUD_RATE = 115200 // BaudRate. Change this value if you need
 
+        private const val defaultDelayBetweenCommandsOverUsb = 500L
+
         fun startStreaming(serialPort: UsbSerialDevice) {
             write("v".toByteArray(), serialPort)
-            Thread.sleep(500)
+            Thread.sleep(defaultDelayBetweenCommandsOverUsb)
             write("~4".toByteArray(), serialPort)
-            Thread.sleep(500)
+            Thread.sleep(defaultDelayBetweenCommandsOverUsb)
             write("b".toByteArray(), serialPort)
         }
 
@@ -43,10 +45,6 @@ class UsbSensor(private val usbHandler: UsbHandler, private val serialPort: UsbS
     override val address: String = serialPort.portName
 
     override fun statusObservable(): Observable<Status> = connectionStatusSubject
-
-    private fun startStreaming() {
-        connectionStatusSubject.onNext(Status.STREAMING)
-    }
 
     private fun stopStreaming() {
         write("s".toByteArray(), serialPort)
