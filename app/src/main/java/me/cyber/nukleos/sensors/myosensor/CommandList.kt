@@ -1,4 +1,4 @@
-package me.cyber.nukleos.myosensor
+package me.cyber.nukleos.sensors.myosensor
 
 import java.util.*
 

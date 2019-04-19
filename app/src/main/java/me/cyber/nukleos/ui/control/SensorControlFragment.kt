@@ -30,7 +30,7 @@ class SensorControlFragment : BaseFragment<SensorControlInterface.Presenter>(), 
         super.onAttach(context)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
             inflater.inflate(R.layout.layout_sensor_control, container, false).apply { setHasOptionsMenu(true) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -40,7 +40,6 @@ class SensorControlFragment : BaseFragment<SensorControlInterface.Presenter>(), 
             vibro_button_2.setOnClickListener { onVibrationClicked(2) }
             vibro_button_3.setOnClickListener { onVibrationClicked(3) }
             button_connect.setOnClickListener { onConnectionButtonClicked() }
-            start_scan_btn.setOnClickListener { onStartButtonClicked() }
             sensor_frequency_seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) { onProgressSelected(progress) }
                 override fun onStartTrackingTouch(p0: SeekBar?) {}
@@ -90,7 +89,6 @@ class SensorControlFragment : BaseFragment<SensorControlInterface.Presenter>(), 
     }
 
     override fun disableControlPanel() {
-        start_scan_btn.isEnabled = false
         vibro_button_1.isEnabled = false
         vibro_button_2.isEnabled = false
         vibro_button_3.isEnabled = false
@@ -98,7 +96,6 @@ class SensorControlFragment : BaseFragment<SensorControlInterface.Presenter>(), 
     }
 
     override fun enableControlPanel() {
-        start_scan_btn.isEnabled = true
         vibro_button_1.isEnabled = true
         vibro_button_2.isEnabled = true
         vibro_button_3.isEnabled = true
@@ -106,13 +103,11 @@ class SensorControlFragment : BaseFragment<SensorControlInterface.Presenter>(), 
     }
 
     override fun showScan() {
-        start_scan_btn?.text = getText(R.string.stop)
-        scan_status?.text = getString(R.string.currently_streaming)
+        device_status?.text = getString(R.string.currently_streaming)
     }
 
     override fun showNotScan() {
-        start_scan_btn?.text = getText(R.string.start)
-        scan_status?.text = getString(R.string.waiting_for_scan)
+        device_status?.text = getString(R.string.waiting_for_scan)
     }
 
     override fun showScanFrequency(frequency: Int) {

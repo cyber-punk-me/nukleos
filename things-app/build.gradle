@@ -3,7 +3,6 @@ apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion '28.0.2'
 
     defaultConfig {
         applicationId 'com.nilhcem.blefun.things'
@@ -26,7 +25,7 @@ dependencies {
     implementation project(':common')
     implementation project(':motor-lib')
     implementation 'com.google.android.things.contrib:driver-pwmservo:1.0'
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 repositories {
     mavenCentral()

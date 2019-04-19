@@ -26,26 +26,23 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
 
     override fun start() {
         with(view) {
-            mPeripheryManager.synapsUsbHandler?.apply {
-                if (this.isStreaming()) {
-                    hideNoStreamingMessage()
-                    mChartsDataSubscription?.apply {
-                        if (isDisposed) this.dispose()
-                    }
-                    mChartsDataSubscription = this.dataFlowable()
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .doOnSubscribe { startCharts(true) }
-                            .subscribe {
-                                showData(it)
-                                predictBuffer.add(it)
-                                if (predictEnabled) {
-                                    predict()
-                                }
-                            }
-                } else {
-                    showNoStreamingMessage()
+            val selectedSensor = mPeripheryManager.getActiveSensor() ?: return
+            selectedSensor.apply {
+                hideNoStreamingMessage()
+                mChartsDataSubscription?.apply {
+                    if (isDisposed) this.dispose()
                 }
+                mChartsDataSubscription = this.getDataFlowable()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnSubscribe { startCharts(true) }
+                        .subscribe {
+                            showData(it)
+                            predictBuffer.add(it)
+                            if (predictEnabled) {
+                                predict()
+                            }
+                        }
             }
         }
     }

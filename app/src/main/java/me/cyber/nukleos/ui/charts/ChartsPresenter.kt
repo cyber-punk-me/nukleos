@@ -94,21 +94,22 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
 
     override fun start() {
         with(view) {
-            mPeripheryManager.myo?.apply {
-                if (this.isStreaming()) {
-                    hideNoStreamingMessage()
-                    mChartsDataSubscription?.apply {
-                        if (isDisposed) this.dispose()
-                    }
-                    mChartsDataSubscription = this.dataFlowable()
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .doOnSubscribe { startCharts(true) }
-                            .subscribe { showData(it) }
-                } else {
-                    showNoStreamingMessage()
-                }
+            //TODO we should support several sensors
+            val firstStreamingSensor = mPeripheryManager.getActiveSensor()
+            if (firstStreamingSensor == null) {
+                showNoStreamingMessage()
+                return
             }
+
+            hideNoStreamingMessage()
+            mChartsDataSubscription?.apply {
+                if (isDisposed) this.dispose()
+            }
+            mChartsDataSubscription = firstStreamingSensor.getDataFlowable()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .doOnSubscribe { startCharts(true) }
+                    .subscribe { showData(it) }
         }
         getServerTimeDiff()
     }
@@ -116,32 +117,29 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
     override fun onCollectPressed() {
         val dataBuffer: ArrayList<FloatArray> = arrayListOf()
         with(view) {
-            if (mPeripheryManager.synapsUsbHandler == null) {
+            val selectedSensor = mPeripheryManager.getActiveSensor()
+            if (selectedSensor == null) {
                 showNoStreamingMessage()
                 return
             }
-            mPeripheryManager.synapsUsbHandler?.apply {
-                if (this.isStreaming()) {
-                    goToState(ChartInterface.State.COUNTDOWN)
-                    hideNoStreamingMessage()
-                    if (mDataSubscription == null || mDataSubscription?.isDisposed == true) {
-                        mDataSubscription = this.dataFlowable()
-                                .skip(TIMER_COUNT, TimeUnit.SECONDS)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .take(TIMER_COUNT + LEARNING_TIME, TimeUnit.SECONDS)
-                                .doOnComplete {
-                                    goToState(ChartInterface.State.SENDING)
-                                    sendData(convertData(dataBuffer,
-                                            view.getDataType(), 64, 64),
-                                            mLearningSessId)
-                                }
-                                .subscribe { dataBuffer.add(it) }
-                    } else {
-                        mDataSubscription?.dispose()
-                    }
+            selectedSensor.apply {
+                goToState(ChartInterface.State.COUNTDOWN)
+                hideNoStreamingMessage()
+                if (mDataSubscription == null || mDataSubscription?.isDisposed == true) {
+                    mDataSubscription = this.getDataFlowable()
+                            .skip(TIMER_COUNT, TimeUnit.SECONDS)
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .take(TIMER_COUNT + LEARNING_TIME, TimeUnit.SECONDS)
+                            .doOnComplete {
+                                goToState(ChartInterface.State.SENDING)
+                                sendData(convertData(dataBuffer,
+                                        view.getDataType(), 64, 64),
+                                        mLearningSessId)
+                            }
+                            .subscribe { dataBuffer.add(it) }
                 } else {
-                    showNoStreamingMessage()
+                    mDataSubscription?.dispose()
                 }
             }
         }

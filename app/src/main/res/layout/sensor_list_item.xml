@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -10,11 +9,14 @@
         android:id="@+id/device_type_iv"
         android:layout_width="40dp"
         android:layout_height="40dp"
+        android:layout_marginStart="4dp"
         android:background="@drawable/circle_background"
         android:contentDescription="@null"
         android:scaleType="center"
         android:src="@android:drawable/stat_sys_data_bluetooth"
-        android:tint="@android:color/white" />
+        android:tint="@android:color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/address_tv"
@@ -38,11 +40,13 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
-    <android.support.design.button.MaterialButton
-        android:id="@+id/button"
+    <TextView
+        android:id="@+id/item_status"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
-        android:text="@string/select"
+        android:text="@string/disconnected"
+        android:textAlignment="gravity"
+        android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/device_type_iv"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/device_type_iv" />

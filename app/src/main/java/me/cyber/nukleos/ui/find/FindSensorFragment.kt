@@ -10,8 +10,9 @@ import android.widget.Toast
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.layout_scan_device.*
 import me.cyber.nukleos.BaseFragment
+import me.cyber.nukleos.sensors.Sensor
 import me.cyber.nukleos.ui.MainActivity
-import me.cyber.nukleos.model.SensorStuff
+import me.cyber.nukleos.ui.control.SensorModel
 import me.cyber.nukleos.utils.DeviceAdapter
 import me.cyber.nukleos.utils.DeviceSelectedListener
 import me.cyber.nukleos.utils.RecyclerItemFadeAnimator
@@ -35,7 +36,9 @@ class FindSensorFragment : BaseFragment<FindSensorInterface.Presenter>(), FindSe
         })
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
+    override fun isStartupFragment() = true
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
             inflater.inflate(R.layout.layout_scan_device, container, false).apply { setHasOptionsMenu(true) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -67,14 +70,22 @@ class FindSensorFragment : BaseFragment<FindSensorInterface.Presenter>(), FindSe
         text_empty_list.visibility = View.INVISIBLE
     }
 
-    override fun populateSensorList(list: List<SensorStuff>) = with(mListDeviceAdapter) {
-        deviceList = list.toMutableList()
+    override fun populateSensors(sensors: Map<Long, Sensor>) = with(mListDeviceAdapter) {
+        deviceList.removeIf { !sensors.contains(it.id) }
+        val newSensorModels = sensors.
+                filter { sensorPair -> deviceList.all { it.id != sensorPair.key } }.
+                map { SensorModel(it.value.name, it.value.address, it.key) }
+        deviceList.addAll(newSensorModels)
         notifyDataSetChanged()
     }
 
-    override fun addSensorToList(device: SensorStuff) = with(mListDeviceAdapter) {
-        deviceList.add(device)
+    override fun addSensorToList(sensorModel: SensorModel) = with(mListDeviceAdapter) {
+        deviceList.add(sensorModel)
         notifyItemInserted(itemCount)
+    }
+
+    override fun getSensorModel(index: Int): SensorModel? = with(mListDeviceAdapter) {
+        return@with deviceList[index]
     }
 
     override fun clearSensorList() = with(mListDeviceAdapter) {

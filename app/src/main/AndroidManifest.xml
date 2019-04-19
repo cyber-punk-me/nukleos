@@ -36,7 +36,7 @@
         </activity>
 
         <service
-            android:name="me.cyber.nukleos.synaps.UsbService"
+            android:name="me.cyber.nukleos.sensors.synaps.UsbService"
             android:enabled="true">
         </service>
     </application>

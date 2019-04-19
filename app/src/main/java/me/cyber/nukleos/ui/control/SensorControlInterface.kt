@@ -27,7 +27,6 @@ interface SensorControlInterface {
     abstract class Presenter(override val view: BaseView) : BasePresenter<BaseView>(view) {
 
         abstract fun onConnectionButtonClicked()
-        abstract fun onStartButtonClicked()
         abstract fun onVibrationClicked(vibrationDuration: Int)
         abstract fun onProgressSelected(progress: Int)
 

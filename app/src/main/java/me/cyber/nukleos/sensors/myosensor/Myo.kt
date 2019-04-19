@@ -1,4 +1,4 @@
-package me.cyber.nukleos.myosensor
+package me.cyber.nukleos.sensors.myosensor
 
 import android.bluetooth.*
 import android.content.Context
@@ -7,34 +7,36 @@ import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.processors.PublishProcessor
 import io.reactivex.subjects.BehaviorSubject
+import me.cyber.nukleos.sensors.Sensor
+import me.cyber.nukleos.sensors.Status
 import me.cyber.nukleos.utils.isStartStreamingCommand
 import me.cyber.nukleos.utils.isStopStreamingCommand
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 
-class Myo(private val device: BluetoothDevice) : BluetoothGattCallback() {
+class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback() {
 
     companion object {
-        val BLUETOOTH_UUID = UUID.fromString("D5060001-A904-DEB9-4748-2C7F4A124842")
+        val BLUETOOTH_UUID: UUID = UUID.fromString("D5060001-A904-DEB9-4748-2C7F4A124842")
+
+        private val availableFrequencies = listOf(50, 100, 150, 200)
+
+        private const val defaultDelayBetweenCommands = 3000L
     }
 
-    val name: String
+    override val name: String
         get() = device.name
 
-    val address: String
+    override val address: String
         get() = device.address
 
-    var frequency: Int = 0
-        set(value) {
-            field = if (value >= MYO_MAX_FREQUENCY) 0 else value
-        }
+    private var frequency: Int = MYO_MAX_FREQUENCY
 
-    var keepAlive = true
+    private var keepAlive = true
     private var lastKeepAlive = 0L
 
-    private val connectionStatusSubject: BehaviorSubject<MyoStatus> = BehaviorSubject.createDefault(MyoStatus.DISCONNECTED)
-    private val controlStatusSubject: BehaviorSubject<MyoControlStatus> = BehaviorSubject.createDefault(MyoControlStatus.NOT_STREAMING)
+    private val connectionStatusSubject: BehaviorSubject<Status> = BehaviorSubject.createDefault(Status.AVAILABLE)
     private val dataProcessor: PublishProcessor<FloatArray> = PublishProcessor.create()
 
     private var gatt: BluetoothGatt? = null
@@ -52,26 +54,22 @@ class Myo(private val device: BluetoothDevice) : BluetoothGattCallback() {
     private val writeQueue: LinkedList<BluetoothGattDescriptor> = LinkedList()
     private val readQueue: LinkedList<BluetoothGattCharacteristic> = LinkedList()
 
-    fun connect(context: Context) {
-        connectionStatusSubject.onNext(MyoStatus.CONNECTING)
+    override fun connect(context: Context) {
+        connectionStatusSubject.onNext(Status.CONNECTING)
         gatt = device.connectGatt(context, false, this)
     }
 
-    fun disconnect() {
+    override fun disconnect() {
+        stopStreaming()
         gatt?.close()
-        controlStatusSubject.onNext(MyoControlStatus.NOT_STREAMING)
-        connectionStatusSubject.onNext(MyoStatus.DISCONNECTED)
+        connectionStatusSubject.onNext(Status.AVAILABLE)
     }
 
-    fun isConnected() = connectionStatusSubject.value == MyoStatus.CONNECTED || connectionStatusSubject.value == MyoStatus.READY
+    override fun isConnected() = connectionStatusSubject.value == Status.STREAMING
 
-    fun isStreaming() = controlStatusSubject.value == MyoControlStatus.STREAMING
+    override fun statusObservable(): Observable<Status> = connectionStatusSubject
 
-    fun statusObservable(): Observable<MyoStatus> = connectionStatusSubject
-
-    fun controlObservable(): Observable<MyoControlStatus> = controlStatusSubject
-
-    fun dataFlowable(): Flowable<FloatArray> {
+    override fun getDataFlowable(): Flowable<FloatArray> {
         return if (frequency == 0) {
             dataProcessor.onBackpressureDrop()
         } else {
@@ -79,14 +77,14 @@ class Myo(private val device: BluetoothDevice) : BluetoothGattCallback() {
         }
     }
 
-    fun sendCommand(command: Command): Boolean {
+    private fun sendCommand(command: Command): Boolean {
         characteristicCommand?.apply {
             this.value = command
             if (this.properties == BluetoothGattCharacteristic.PROPERTY_WRITE) {
                 if (command.isStartStreamingCommand()) {
-                    controlStatusSubject.onNext(MyoControlStatus.STREAMING)
+                    connectionStatusSubject.onNext(Status.STREAMING)
                 } else if (command.isStopStreamingCommand()) {
-                    controlStatusSubject.onNext(MyoControlStatus.NOT_STREAMING)
+                    connectionStatusSubject.onNext(Status.AVAILABLE)
                 }
                 gatt?.writeCharacteristic(this)
                 return true
@@ -95,12 +93,21 @@ class Myo(private val device: BluetoothDevice) : BluetoothGattCallback() {
         return false
     }
 
+    private fun startStreaming() {
+        sendCommand(CommandList.emgFilteredOnly())
+        connectionStatusSubject.onNext(Status.STREAMING)
+    }
+
+    private fun stopStreaming() {
+        sendCommand(CommandList.stopStreaming())
+        connectionStatusSubject.onNext(Status.AVAILABLE)
+    }
+
     override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
         super.onConnectionStateChange(gatt, status, newState)
         Log.d(TAG, "onConnectionStateChange: $status -> $newState")
         if (newState == BluetoothProfile.STATE_CONNECTED) {
             Log.d(TAG, "Bluetooth Connected")
-            connectionStatusSubject.onNext(MyoStatus.CONNECTED)
             gatt.discoverServices()
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
             // Calling disconnect() here will cause to release the GATT resources.
@@ -155,13 +162,16 @@ class Myo(private val device: BluetoothDevice) : BluetoothGattCallback() {
             characteristicCommand?.apply {
                 lastKeepAlive = System.currentTimeMillis()
                 sendCommand(CommandList.unSleep())
+                Thread {
+                    Thread.sleep(defaultDelayBetweenCommands)
+                    startStreaming()
+                }.start()
                 // We send the ready event as soon as the characteristicCommand is ready.
-                connectionStatusSubject.onNext(MyoStatus.READY)
             }
         }
     }
 
-    internal fun writeDescriptor(gatt: BluetoothGatt, descriptor: BluetoothGattDescriptor) {
+    private fun writeDescriptor(gatt: BluetoothGatt, descriptor: BluetoothGattDescriptor) {
         writeQueue.add(descriptor)
         // When writing, if the queue is empty, write immediately.
         if (writeQueue.size == 1) {
@@ -227,16 +237,29 @@ class Myo(private val device: BluetoothDevice) : BluetoothGattCallback() {
             sendCommand(CommandList.unSleep())
         }
     }
-}
 
-enum class MyoStatus {
-    CONNECTING,
-    READY,
-    CONNECTED,
-    DISCONNECTED
-}
+    override fun equals(other: Any?): Boolean {
+        if (other !is Myo) return false
+        return other.address == address
+    }
 
-enum class MyoControlStatus {
-    STREAMING,
-    NOT_STREAMING
+    override fun hashCode(): Int = address.hashCode()
+
+    override fun isVibrationSupported(): Boolean = true
+
+    override fun vibration(duration: Int) {
+        sendCommand(when (duration) {
+            1 -> CommandList.vibration1()
+            2 -> CommandList.vibration2()
+            else -> CommandList.vibration3()
+        })
+    }
+
+    override fun getFrequency(): Int = frequency
+
+    override fun setFrequency(newFrequency: Int) {
+        frequency = if (newFrequency >= MYO_MAX_FREQUENCY) 0 else newFrequency
+    }
+
+    override fun getAvailableFrequencies(): List<Int> = availableFrequencies
 }

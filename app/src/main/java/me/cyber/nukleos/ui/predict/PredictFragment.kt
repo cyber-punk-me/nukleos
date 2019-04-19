@@ -9,9 +9,9 @@ import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.layout_predict.*
 import me.cyber.nukleos.BaseFragment
 import me.cyber.nukleos.api.PredictResponse
-import me.cyber.nukleos.myosensor.MYO_CHANNELS
-import me.cyber.nukleos.myosensor.MYO_MAX_VALUE
-import me.cyber.nukleos.myosensor.MYO_MIN_VALUE
+import me.cyber.nukleos.sensors.myosensor.MYO_CHANNELS
+import me.cyber.nukleos.sensors.myosensor.MYO_MAX_VALUE
+import me.cyber.nukleos.sensors.myosensor.MYO_MIN_VALUE
 import me.cyber.nukleos.utils.showShortToast
 import me.cyber.nukleus.R
 import javax.inject.Inject
