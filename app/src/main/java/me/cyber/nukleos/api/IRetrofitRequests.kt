@@ -2,6 +2,7 @@ package me.cyber.nukleos.api
 
 import io.reactivex.Single
 import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.http.*
 import java.util.*
 
@@ -22,4 +23,6 @@ interface IRetrofitRequests {
     @GET("/time")
     fun getServerTime() : Single<Long>
 
+    @GET("/model/1d722019-c892-44bc-844b-eb5708d55987")
+    fun getModel() : Single<ResponseBody>
 }

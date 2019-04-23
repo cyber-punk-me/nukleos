@@ -42,7 +42,8 @@ class PredictFragment : BaseFragment<PredictInterface.Presenter>(), PredictInter
             maxValue = MYO_MAX_VALUE
             minValue = MYO_MIN_VALUE
         }
-        predict_toggle.setOnClickListener { predictPresenter.onPredictSwitched(predict_toggle.isChecked) }
+        predict_toggle.setOnClickListener { predictPresenter.onPredictSwitched(predict_toggle.isChecked, predict_online_toggle.isChecked) }
+        predict_online_toggle.setOnClickListener { predictPresenter.onPredictSwitched(predict_toggle.isChecked, predict_online_toggle.isChecked) }
     }
 
     override fun showData(data: FloatArray) {
