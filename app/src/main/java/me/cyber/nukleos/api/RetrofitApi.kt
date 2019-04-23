@@ -7,6 +7,7 @@ import io.reactivex.schedulers.Schedulers
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -67,6 +68,17 @@ class RetrofitApi(private val mUrl: String) {
 
     fun getServerTime() = Single.create{ emitter : SingleEmitter<Long> ->
         mRequest.getServerTime()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    emitter.onSuccess(it)
+                }, {
+                    emitter.tryOnError(it)
+                })
+    }
+
+    fun downloadModel() = Single.create { emitter: SingleEmitter<ResponseBody> ->
+        mRequest.getModel()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
