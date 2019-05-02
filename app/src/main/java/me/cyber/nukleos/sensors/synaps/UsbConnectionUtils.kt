@@ -78,7 +78,7 @@ private class ReadThread(
                 break
             }
             val buffer = ByteArray(100)
-            val n = serialPort.syncRead(buffer, 0)
+            val n = serialPort.syncRead(buffer, 1000)
             if (n > 0) {
                 val received = ByteArray(n)
                 System.arraycopy(buffer, 0, received, 0, n)
