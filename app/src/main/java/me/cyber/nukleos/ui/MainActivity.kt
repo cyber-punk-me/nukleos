@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.MenuItem
 import android.view.WindowManager
 import android.widget.Toast
@@ -28,6 +29,8 @@ import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
 
+    val TAG = MainActivity::class.java.name
+
     @Inject
     lateinit var fragmentDispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
 
@@ -36,6 +39,7 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
 
     private var navigationBlocked = false
     private var peripheryManagerSubscribeDisposable : Disposable? = null
+    private var usbServiceIntent: Intent? = null
 
     private val usbConnection = object : ServiceConnection {
         override fun onServiceConnected(arg0: ComponentName, arg1: IBinder) {
@@ -117,26 +121,26 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
             false
         }
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        startService(UsbService::class.java, usbConnection, null) // Start UsbService(if it was not started before) and Bind it
     }
 
     public override fun onResume() {
         super.onResume()
         setFilters()  // Start listening notifications from UsbService
-        startService(UsbService::class.java, usbConnection, null) // Start UsbService(if it was not started before) and Bind it
     }
 
 
     private fun startService(service: Class<*>, serviceConnection: ServiceConnection, extras: Bundle?) {
         if (!UsbService.SERVICE_CONNECTED) {
-            val startService = Intent(this, service)
+            usbServiceIntent = Intent(this, service)
             if (extras != null && !extras.isEmpty) {
                 val keys = extras.keySet()
                 for (key in keys) {
                     val extra = extras.getString(key)
-                    startService.putExtra(key, extra)
+                    usbServiceIntent!!.putExtra(key, extra)
                 }
             }
-            startService(startService)
+            startService(usbServiceIntent)
         }
         val bindingIntent = Intent(this, service)
         bindService(bindingIntent, serviceConnection, Context.BIND_AUTO_CREATE)
@@ -154,8 +158,14 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
 
     public override fun onPause() {
         super.onPause()
-        unregisterReceiver(usbReceiver)
-        unbindService(usbConnection)
+        if (usbServiceIntent != null) {
+            unregisterReceiver(usbReceiver)
+            try {
+                unbindService(usbConnection)
+            } catch (t: Throwable) {
+                Log.d(TAG, "Unbind USB Service error: " + t.message)
+            }
+        }
     }
 
     fun navigateToPage(pageId: Int) {
@@ -180,5 +190,8 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
     override fun onDestroy() {
         super.onDestroy()
         peripheryManagerSubscribeDisposable?.dispose()
+        if (usbServiceIntent != null) {
+            stopService(usbServiceIntent)
+        }
     }
 }
