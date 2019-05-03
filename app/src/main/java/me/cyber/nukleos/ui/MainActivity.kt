@@ -157,8 +157,8 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
     }
 
     public override fun onPause() {
+        super.onPause()
         if (usbServiceIntent != null) {
-            super.onPause()
             unregisterReceiver(usbReceiver)
             try {
                 unbindService(usbConnection)
