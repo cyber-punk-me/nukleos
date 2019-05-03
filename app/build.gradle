@@ -80,7 +80,8 @@ dependencies {
     implementation 'org.tensorflow:tensorflow-lite:+'
     // EventBus
     implementation 'org.greenrobot:eventbus:3.1.1'
-    implementation 'com.github.felHR85:UsbSerial:6.0.1'
+    // USB
+    implementation 'com.github.felHR85:UsbSerial:6.0.6'
 
     // HockeyApp(for crash log)
     implementation 'net.hockeyapp.android:HockeySDK:5.1.1'
