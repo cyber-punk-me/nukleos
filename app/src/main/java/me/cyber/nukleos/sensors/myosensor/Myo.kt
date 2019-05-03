@@ -30,8 +30,8 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
 
     override val address: String
         get() = device.address
-
-    private var frequency: Int = MYO_MAX_FREQUENCY
+    //todo fix flowable & frequency bug. for now 0 fixes it temporarily
+    private var frequency: Int = 0//MYO_MAX_FREQUENCY
 
     private var keepAlive = true
     private var lastKeepAlive = 0L
