@@ -15,6 +15,7 @@ import me.cyber.nukleos.dagger.PeripheryManager
 import me.cyber.nukleos.utils.LimitedQueue
 import org.tensorflow.lite.Interpreter
 import java.io.ByteArrayOutputStream
+import java.lang.IllegalStateException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.zip.ZipInputStream
@@ -151,7 +152,8 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
                 .subscribe({
                     try {
                         ZipInputStream(it.byteStream()).use { zipInputStream ->
-                            while (true) {
+                            var foundModel = false
+                            while (!foundModel) {
                                 val nextEntry = zipInputStream.nextEntry ?: break
                                 if (!nextEntry.name.endsWith(TFLITE_EXTENSION, ignoreCase = true)) {
                                     continue
@@ -174,8 +176,13 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
                                     val mInterpreter = Interpreter(byteBuffer)
 
                                     subject.onNext(mInterpreter)
+                                    foundModel = true
                                 }
                                 break
+                            }
+
+                            if (!foundModel) {
+                                subject.onError(IllegalStateException("Can't unzip downloaded model"))
                             }
                         }
                     } catch (t: Throwable) {
