@@ -159,7 +159,7 @@ public class UsbService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        return Service.START_NOT_STICKY;
+        return Service.START_STICKY;
     }
 
     @Override
@@ -167,6 +167,7 @@ public class UsbService extends Service {
         super.onDestroy();
         unregisterReceiver(usbReceiver);
         UsbService.SERVICE_CONNECTED = false;
+        Log.w(TAG, "USB Service destroyed.");
     }
 
     private void findSerialPortDevice() {

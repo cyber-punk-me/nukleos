@@ -192,6 +192,7 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
         peripheryManagerSubscribeDisposable?.dispose()
         if (usbServiceIntent != null) {
             stopService(usbServiceIntent)
+            unregisterReceiver(usbReceiver)
         }
     }
 }

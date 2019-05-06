@@ -7,9 +7,6 @@ import com.felhr.usbserial.UsbSerialDevice
 import com.felhr.usbserial.UsbSerialInterface
 import io.reactivex.Flowable
 import io.reactivex.processors.PublishProcessor
-import java.util.concurrent.TimeUnit
-import kotlin.math.max
-import kotlin.math.min
 
 /*
  * This handler will be passed to UsbService. Data received from serial port is displayed through this handler
@@ -19,12 +16,6 @@ class UsbHandler : Handler() {
     companion object {
         const val MILLION = 1000000
         const val frequency = 1000
-        private const val maxScaled = 127.0f
-        private const val minScaled = -128.0f
-        const val scale = maxScaled - minScaled
-
-        var max = Float.MIN_VALUE
-        var min = Float.MAX_VALUE
     }
 
     /*
@@ -57,13 +48,13 @@ class UsbHandler : Handler() {
 
     private fun getGraphData(input: IntArray): FloatArray {
         val reads = input.slice(0..7)
-        max = max(max, reads.max()?.toFloat() ?: max)
-        min = min(min, reads.min()?.toFloat() ?: max)
-        return reads.map { i -> (i * scale / max(max - min, 1.0f)) }.toFloatArray()
+        //todo magic number
+        return reads.map { i -> i / 80000f }.toFloatArray()
     }
 
     fun dataFlowable(): Flowable<FloatArray> {
-        return dataProcessor.sample((MILLION / frequency).toLong(), TimeUnit.MICROSECONDS).onBackpressureDrop()
+        return dataProcessor.onBackpressureDrop()
+        //return dataProcessor.sample((MILLION / frequency).toLong(), TimeUnit.MICROSECONDS).onBackpressureDrop()
     }
 
     override fun handleMessage(msg: Message) {
@@ -78,15 +69,18 @@ class UsbHandler : Handler() {
                 if (packet != null) {
                     val graphData = getGraphData(packet)
                     dataProcessor.onNext(graphData)
-                    Log.d("Synaps", graphData.toString())
+                    //Log.d("Synaps", graphData.toString())
                     if (i < frequency) {
                         i++
                     } else {
-                        Log.i("Synaps", "one second")
+                        Log.i("Synaps", "got one second of data")
                         i = 1
                     }
                 }
 
+            }
+            else -> {
+                Log.w("Synaps", msg.obj.toString())
             }
         }
     }
