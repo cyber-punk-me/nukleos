@@ -3,9 +3,11 @@ package me.cyber.nukleos.sensors.synaps
 import android.content.Intent
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
+import android.util.Log
 import com.felhr.usbserial.CDCSerialDevice
 import com.felhr.usbserial.UsbSerialDevice
 import com.felhr.usbserial.UsbSerialInterface
+import me.cyber.nukleos.sensors.synaps.UsbService.TAG
 
 fun connect(device: UsbDevice, usbManager: UsbManager, onSensorInit: (UsbSensor) -> Unit) {
     val usbHandler = UsbHandler()
@@ -69,20 +71,27 @@ private class ConnectionThread internal constructor(
     }
 }
 
+private const val READ_TIMEOUT = 1000
+
 private class ReadThread(
         private val serialPort: UsbSerialDevice,
         private val handler: UsbHandler) : Thread() {
+
     override fun run() {
         while (true) {
             if (!serialPort.isOpen) {
+                Log.w(TAG, "Usb Sensor closed connection.")
                 break
             }
-            val buffer = ByteArray(100)
-            val n = serialPort.syncRead(buffer, 1000)
+            val buffer = ByteArray(1000)
+            val n = serialPort.syncRead(buffer, READ_TIMEOUT)
             if (n > 0) {
                 val received = ByteArray(n)
                 System.arraycopy(buffer, 0, received, 0, n)
                 handler.obtainMessage(UsbService.SYNC_READ, received).sendToTarget()
+                if (n >= 100) {
+                    Log.w(TAG, "got plenty bytes: $n")
+                }
             }
         }
     }
