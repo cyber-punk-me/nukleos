@@ -1,5 +1,6 @@
 package me.cyber.nukleos.ui.predict
 
+import android.util.Log
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -25,6 +26,8 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
     companion object {
         private const val TFLITE_EXTENSION = ".tflite"
         private const val FLOAT_SIZE = 4
+
+        private const val PREDICTION_INFO_TAG = "Nukleos Prediction"
     }
 
     private var mChartsDataSubscription: Disposable? = null
@@ -38,6 +41,8 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
     private val control = TryControl()
 
     private lateinit var mInterpreter: Interpreter
+
+    @Volatile private var predictionInProgress = false
 
     override fun create() {}
 
@@ -66,6 +71,11 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
                         .doOnSubscribe { startCharts(true) }
                         .subscribe {
                             showData(it)
+
+                            if (predictionInProgress) {
+                                return@subscribe
+                            }
+
                             predictBuffer.add(it)
                             if (predictEnabled) {
                                 predict()
@@ -85,30 +95,41 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
 
     private fun doPredict() {
         if (predictBuffer.size == 8) {
+            predictionInProgress = true
             val predictRequest = PredictRequest(ArrayList<List<Float>>()
                     .also { it.add(predictBuffer.flatMap { d -> d.asList() }) })
 
-            //has downloaded tflite model
-            if (::mInterpreter.isInitialized && !predictOnlineEnabled) {
-                doLocalPredict(predictRequest)
-            }
-            else {
-                doOnlinePredict(predictRequest)
+            run {
+                //has downloaded tflite model
+                if (::mInterpreter.isInitialized && !predictOnlineEnabled) {
+                    doLocalPredict(predictRequest)
+                } else {
+                    doOnlinePredict(predictRequest)
+                }
             }
         }
     }
 
     private fun doLocalPredict(predictRequest: PredictRequest) {
-        val outputTensorCount = mInterpreter.getOutputTensor(0).shape()[1]
+        try {
+            val outputTensorCount = mInterpreter.getOutputTensor(0).shape()[1]
 
-        val data = predictRequest.instances[0]
-        val byteBuffer = ByteBuffer.allocateDirect(data.size * FLOAT_SIZE)
-        byteBuffer.order(ByteOrder.nativeOrder())
-        data.forEach { byteBuffer.putFloat(it) }
-        val result = Array(1) { FloatArray(outputTensorCount) }
-        mInterpreter.run(byteBuffer, result)
-        val distribution = result[0]
-        onPredictionResult(distribution.indices.maxBy { distribution[it] } ?: -1, distribution.toList())
+            val data = predictRequest.instances[0]
+            val byteBuffer = ByteBuffer.allocateDirect(data.size * FLOAT_SIZE)
+            byteBuffer.order(ByteOrder.nativeOrder())
+            data.forEach { byteBuffer.putFloat(it) }
+            val result = Array(1) { FloatArray(outputTensorCount) }
+            mInterpreter.run(byteBuffer, result)
+            val distribution = result[0]
+            onPredictionResult(distribution.indices.maxBy { distribution[it] }
+                    ?: -1, distribution.toList())
+        }
+        catch (e: Throwable) {
+            Log.e(PREDICTION_INFO_TAG, e.message, e)
+        }
+        finally {
+            predictionInProgress = false
+        }
     }
 
     private fun doOnlinePredict(predictRequest: PredictRequest) {
@@ -118,9 +139,11 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
                 .subscribe({
                     val predictedClass = it.predictions[0].output
                     onPredictionResult(predictedClass, it.predictions[0].distr)
+                    predictionInProgress = false
                 }
                         , {
                     view.notifyPredictError(it)
+                    predictionInProgress = false
                 })
     }
 
@@ -200,13 +223,14 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
         predictEnabled = on
         predictOnlineEnabled = predictOnline
         predictBuffer = LimitedQueue(8)
+        predictionInProgress = false
     }
 
     override fun destroy() {
+        predictEnabled = false
         view.startCharts(false)
         mChartsDataSubscription?.dispose()
         mDownloadModelSubscription?.dispose()
         mPostPredict?.dispose()
     }
-
 }
