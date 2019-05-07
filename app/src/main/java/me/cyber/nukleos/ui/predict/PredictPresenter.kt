@@ -1,6 +1,5 @@
 package me.cyber.nukleos.ui.predict
 
-import android.util.Log
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -16,7 +15,6 @@ import me.cyber.nukleos.dagger.PeripheryManager
 import me.cyber.nukleos.utils.LimitedQueue
 import org.tensorflow.lite.Interpreter
 import java.io.ByteArrayOutputStream
-import java.lang.IllegalStateException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.zip.ZipInputStream
@@ -26,8 +24,6 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
     companion object {
         private const val TFLITE_EXTENSION = ".tflite"
         private const val FLOAT_SIZE = 4
-
-        private const val PREDICTION_INFO_TAG = "Nukleos Prediction"
     }
 
     private var mChartsDataSubscription: Disposable? = null
@@ -125,10 +121,7 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
                     ?: -1, distribution.toList())
         }
         catch (e: Throwable) {
-            Log.e(PREDICTION_INFO_TAG, e.message, e)
-        }
-        finally {
-            predictionInProgress = false
+            onPredictionError(e)
         }
     }
 
@@ -139,15 +132,15 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
                 .subscribe({
                     val predictedClass = it.predictions[0].output
                     onPredictionResult(predictedClass, it.predictions[0].distr)
-                    predictionInProgress = false
                 }
                         , {
-                    view.notifyPredictError(it)
-                    predictionInProgress = false
+                    onPredictionError(it)
                 })
     }
 
     private fun onPredictionResult(predictedClass: Int, distribution: List<Float>) {
+        predictionInProgress = false
+
         val tryControl = control.guess(predictedClass)
 
         if (tryControl >= 0) {
@@ -165,6 +158,11 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
             }
 
         }
+    }
+
+    private fun onPredictionError(t: Throwable) {
+        predictionInProgress = false
+        view.notifyPredictError(t)
     }
 
     private fun getActualModel(): Observable<Interpreter> {
