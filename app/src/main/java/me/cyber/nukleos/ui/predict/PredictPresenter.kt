@@ -38,6 +38,8 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
 
     private lateinit var mInterpreter: Interpreter
 
+    @Volatile private var predictionInProgress = false
+
     override fun create() {}
 
     override fun start() {
@@ -65,6 +67,11 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
                         .doOnSubscribe { startCharts(true) }
                         .subscribe {
                             showData(it)
+
+                            if (predictionInProgress) {
+                                return@subscribe
+                            }
+
                             predictBuffer.add(it)
                             if (predictEnabled) {
                                 predict()
@@ -84,30 +91,38 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
 
     private fun doPredict() {
         if (predictBuffer.size == 8) {
+            predictionInProgress = true
             val predictRequest = PredictRequest(ArrayList<List<Float>>()
                     .also { it.add(predictBuffer.flatMap { d -> d.asList() }) })
 
-            //has downloaded tflite model
-            if (::mInterpreter.isInitialized && !predictOnlineEnabled) {
-                doLocalPredict(predictRequest)
-            }
-            else {
-                doOnlinePredict(predictRequest)
+            run {
+                //has downloaded tflite model
+                if (::mInterpreter.isInitialized && !predictOnlineEnabled) {
+                    doLocalPredict(predictRequest)
+                } else {
+                    doOnlinePredict(predictRequest)
+                }
             }
         }
     }
 
     private fun doLocalPredict(predictRequest: PredictRequest) {
-        val outputTensorCount = mInterpreter.getOutputTensor(0).shape()[1]
+        try {
+            val outputTensorCount = mInterpreter.getOutputTensor(0).shape()[1]
 
-        val data = predictRequest.instances[0]
-        val byteBuffer = ByteBuffer.allocateDirect(data.size * FLOAT_SIZE)
-        byteBuffer.order(ByteOrder.nativeOrder())
-        data.forEach { byteBuffer.putFloat(it) }
-        val result = Array(1) { FloatArray(outputTensorCount) }
-        mInterpreter.run(byteBuffer, result)
-        val distribution = result[0]
-        onPredictionResult(distribution.indices.maxBy { distribution[it] } ?: -1, distribution.toList())
+            val data = predictRequest.instances[0]
+            val byteBuffer = ByteBuffer.allocateDirect(data.size * FLOAT_SIZE)
+            byteBuffer.order(ByteOrder.nativeOrder())
+            data.forEach { byteBuffer.putFloat(it) }
+            val result = Array(1) { FloatArray(outputTensorCount) }
+            mInterpreter.run(byteBuffer, result)
+            val distribution = result[0]
+            onPredictionResult(distribution.indices.maxBy { distribution[it] }
+                    ?: -1, distribution.toList())
+        }
+        catch (e: Throwable) {
+            onPredictionError(e)
+        }
     }
 
     private fun doOnlinePredict(predictRequest: PredictRequest) {
@@ -119,11 +134,13 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
                     onPredictionResult(predictedClass, it.predictions[0].distr)
                 }
                         , {
-                    view.notifyPredictError(it)
+                    onPredictionError(it)
                 })
     }
 
     private fun onPredictionResult(predictedClass: Int, distribution: List<Float>) {
+        predictionInProgress = false
+
         val tryControl = control.guess(predictedClass)
 
         if (tryControl >= 0) {
@@ -143,6 +160,11 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
         }
     }
 
+    private fun onPredictionError(t: Throwable) {
+        predictionInProgress = false
+        view.notifyPredictError(t)
+    }
+
     private fun getActualModel(): Observable<Interpreter> {
         val subject = BehaviorSubject.create<Interpreter>()
 
@@ -151,7 +173,8 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
                 .subscribe({
                     try {
                         ZipInputStream(it.byteStream()).use { zipInputStream ->
-                            while (true) {
+                            var foundModel = false
+                            while (!foundModel) {
                                 val nextEntry = zipInputStream.nextEntry ?: break
                                 if (!nextEntry.name.endsWith(TFLITE_EXTENSION, ignoreCase = true)) {
                                     continue
@@ -174,8 +197,13 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
                                     val mInterpreter = Interpreter(byteBuffer)
 
                                     subject.onNext(mInterpreter)
+                                    foundModel = true
                                 }
                                 break
+                            }
+
+                            if (!foundModel) {
+                                subject.onError(IllegalStateException("Can't unzip downloaded model"))
                             }
                         }
                     } catch (t: Throwable) {
@@ -193,13 +221,14 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
         predictEnabled = on
         predictOnlineEnabled = predictOnline
         predictBuffer = LimitedQueue(8)
+        predictionInProgress = false
     }
 
     override fun destroy() {
+        predictEnabled = false
         view.startCharts(false)
         mChartsDataSubscription?.dispose()
         mDownloadModelSubscription?.dispose()
         mPostPredict?.dispose()
     }
-
 }

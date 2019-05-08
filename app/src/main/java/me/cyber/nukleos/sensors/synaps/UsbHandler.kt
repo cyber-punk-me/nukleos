@@ -7,6 +7,7 @@ import com.felhr.usbserial.UsbSerialDevice
 import com.felhr.usbserial.UsbSerialInterface
 import io.reactivex.Flowable
 import io.reactivex.processors.PublishProcessor
+import me.cyber.nukleos.utils.showLongToast
 
 /*
  * This handler will be passed to UsbService. Data received from serial port is displayed through this handler
@@ -60,8 +61,8 @@ class UsbHandler : Handler() {
     override fun handleMessage(msg: Message) {
         when (msg.what) {
             UsbService.MESSAGE_FROM_SERIAL_PORT -> {
-                //val data = msg.obj as ByteArray //TODO should we show message?
-//                Toast.makeText(activity, String(data), Toast.LENGTH_LONG).show()
+                val data = msg.obj as ByteArray
+                String(data).showLongToast()
             }
             UsbService.SYNC_READ -> {
                 val data = msg.obj as ByteArray

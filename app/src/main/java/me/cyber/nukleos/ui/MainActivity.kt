@@ -11,7 +11,6 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.MenuItem
 import android.view.WindowManager
-import android.widget.Toast
 import dagger.android.AndroidInjection
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
@@ -24,12 +23,15 @@ import me.cyber.nukleos.ui.charts.ChartsFragment
 import me.cyber.nukleos.ui.control.SensorControlFragment
 import me.cyber.nukleos.ui.find.FindSensorFragment
 import me.cyber.nukleos.ui.predict.PredictFragment
+import me.cyber.nukleos.utils.showShortToast
 import me.cyber.nukleus.R
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
 
-    val TAG = MainActivity::class.java.name
+    companion object {
+        private val TAG = MainActivity::class.java.name
+    }
 
     @Inject
     lateinit var fragmentDispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
@@ -62,15 +64,15 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
         override fun onReceive(context: Context, intent: Intent) {
             when (intent.action) {
                 UsbService.ACTION_USB_PERMISSION_GRANTED // USB PERMISSION GRANTED
-                -> Toast.makeText(context, "USB Ready", Toast.LENGTH_SHORT).show()
+                -> "USB Ready".showShortToast()
                 UsbService.ACTION_USB_PERMISSION_NOT_GRANTED // USB PERMISSION NOT GRANTED
-                -> Toast.makeText(context, "USB Permission not granted", Toast.LENGTH_SHORT).show()
+                -> "USB Permission not granted".showShortToast()
                 UsbService.ACTION_NO_USB // NO USB CONNECTED
-                -> Toast.makeText(context, "No USB connected", Toast.LENGTH_SHORT).show()
+                -> "No USB connected".showShortToast()
                 UsbService.ACTION_USB_DISCONNECTED // USB AVAILABLE
-                -> Toast.makeText(context, "USB disconnected", Toast.LENGTH_SHORT).show()
+                -> "USB disconnected".showShortToast()
                 UsbService.ACTION_USB_NOT_SUPPORTED // USB NOT SUPPORTED
-                -> Toast.makeText(context, "USB device not supported", Toast.LENGTH_SHORT).show()
+                -> "USB device not supported".showShortToast()
             }
         }
     }

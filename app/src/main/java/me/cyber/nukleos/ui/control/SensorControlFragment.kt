@@ -7,10 +7,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
-import android.widget.Toast
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.layout_sensor_control.*
 import me.cyber.nukleos.BaseFragment
+import me.cyber.nukleos.utils.showShortToast
 import me.cyber.nukleus.R
 import javax.inject.Inject
 
@@ -76,7 +76,7 @@ class SensorControlFragment : BaseFragment<SensorControlInterface.Presenter>(), 
     }
 
     override fun showConnectionError() {
-        Toast.makeText(context, "Connection failed", Toast.LENGTH_SHORT).show()
+        "Connection failed".showShortToast()
         button_connect.text = getString(R.string.connect)
     }
 

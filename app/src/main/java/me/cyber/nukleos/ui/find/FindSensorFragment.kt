@@ -6,7 +6,6 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.layout_scan_device.*
 import me.cyber.nukleos.BaseFragment
@@ -16,6 +15,7 @@ import me.cyber.nukleos.ui.control.SensorModel
 import me.cyber.nukleos.utils.DeviceAdapter
 import me.cyber.nukleos.utils.DeviceSelectedListener
 import me.cyber.nukleos.utils.RecyclerItemFadeAnimator
+import me.cyber.nukleos.utils.showShortToast
 import me.cyber.nukleus.R
 import javax.inject.Inject
 
@@ -104,8 +104,8 @@ class FindSensorFragment : BaseFragment<FindSensorInterface.Presenter>(), FindSe
     }
 
     override fun showFindError(reason: String?) = showFindErrorToast(reason ?: getString(R.string.unknown_problem))
-    override fun showFindSuccess() = Toast.makeText(this.context, getString(R.string.scan_completed), Toast.LENGTH_SHORT).show()
+    override fun showFindSuccess() = getString(R.string.scan_completed).showShortToast()
     override fun goToSensorControl() = (activity as MainActivity).navigateToPage(1)
 
-    private fun showFindErrorToast(reason: String) = Toast.makeText(this.context, "${getString(R.string.scan_failed)}: $reason", Toast.LENGTH_SHORT).show()
+    private fun showFindErrorToast(reason: String) = "${getString(R.string.scan_failed)}: $reason".showShortToast()
 }
