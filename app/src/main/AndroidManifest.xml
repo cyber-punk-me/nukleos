@@ -39,6 +39,11 @@
             android:name="me.cyber.nukleos.sensors.synaps.UsbService"
             android:enabled="true">
         </service>
+
+        <service
+            android:name="me.cyber.nukleos.ui.predict.PredictionService"
+            android:enabled="true">
+        </service>
     </application>
 
 </manifest>
