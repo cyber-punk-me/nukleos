@@ -18,7 +18,6 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
     private var mChartsDataSubscription: Disposable? = null
     private var mDownloadModelSubscription: Disposable? = null
     private val predictionResultReceiver = PredictionResultReceiver(
-            Handler(),
             { predictedClass, distribution ->
                 onPredictionResult(predictedClass, distribution) },
             { onPredictionError(Exception(it)) })

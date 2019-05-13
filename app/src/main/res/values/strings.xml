@@ -66,6 +66,7 @@
     <string name="connect_data_source">Please connect a data source</string>
     <string name="record_starts_in">Record starts in …</string>
     <string name="train">TRAIN</string>
+    <string name="calibrate">CALIBRATE EXISTING MODEL</string>
     <string name="predict">Predict</string>
     <string name="onlinePredict">Predict online</string>
     <string name="motor">motor</string>

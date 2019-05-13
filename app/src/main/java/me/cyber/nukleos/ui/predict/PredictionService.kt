@@ -21,6 +21,10 @@ import java.util.zip.ZipInputStream
 class PredictionService : IntentService(PredictionService::class.java.name) {
 
     companion object {
+        const val CALIBRATION_DATA_KEY = "calibration_data"
+
+        const val CLASSES_COUNT_KEY = "classes_count"
+
         const val ERROR_KEY = "error"
         const val PREDICTED_CLASS_KEY = "predicted_class"
         const val DISTRIBUTION_KEY = "distribution_key"
@@ -64,7 +68,27 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
                 val preferOfflinePrediction = intent.getBooleanExtra(PREFER_OFFLINE_PREDICTION_KEY, true)
                 predict(PredictRequest(ArrayList<List<Float>>().also { it.add(predictionData.asList()) }), receiver, preferOfflinePrediction)
             }
-            ServiceCommands.CALIBRATE -> TODO()
+
+            ServiceCommands.PREPARE_FOR_CALIBRATION -> {
+                val savedModel = getSavedModel()
+                if (savedModel == null) {
+                    responseWithError(receiver, "Model is not saved")
+                    return
+                }
+                val outputTensorCount = savedModel.getOutputTensor(0).shape()[1]
+                onCalibrationPreparationResult(outputTensorCount, receiver)
+            }
+
+            ServiceCommands.CALIBRATE -> {
+                @Suppress("UNCHECKED_CAST")
+                val calibrationData = intent.getSerializableExtra(CALIBRATION_DATA_KEY) as? Array<Array<FloatArray>>
+                if (calibrationData == null) {
+                    responseWithError(receiver, "Failed to receive calibration data")
+                    return
+                }
+                TODO()
+                onCalibrationResult(receiver)
+            }
             ServiceCommands.UPDATE_MODEL -> TODO()
         }
     }
@@ -92,7 +116,7 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
             val message = t.message ?: ""
             "Failed to predict: $message".showShortToast()
             Log.e(predictionServiceTag, message, t)
-            onPredictionError(receiver, message)
+            responseWithError(receiver, message)
         }
     }
 
@@ -116,6 +140,17 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
         return predictResponse.predictions[0]
     }
 
+    private fun onCalibrationPreparationResult(outputClassesCount: Int, receiver: ResultReceiver) {
+        receiver.send(ServiceResponses.SUCCESS.ordinal, Bundle().apply {
+            putInt(CLASSES_COUNT_KEY, outputClassesCount)
+        })
+    }
+
+    private fun onCalibrationResult(receiver: ResultReceiver) {
+        receiver.send(ServiceResponses.SUCCESS.ordinal, Bundle().apply {
+        })
+    }
+
     private fun onPredictionResult(prediction: Prediction, receiver: ResultReceiver) {
         receiver.send(ServiceResponses.SUCCESS.ordinal, Bundle().apply {
             putInt(PREDICTED_CLASS_KEY, prediction.output)
@@ -123,30 +158,38 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
         })
     }
 
-    private fun onPredictionError(receiver: ResultReceiver, errorMessage: String) {
+    private fun responseWithError(receiver: ResultReceiver, errorMessage: String) {
         receiver.send(ServiceResponses.ERROR.ordinal, Bundle().apply {
             putString(ERROR_KEY, errorMessage)
         })
     }
 
+    private fun getSavedModel() : Interpreter? {
+        val modelFile = getModelLocation()
+
+        if (modelFile.exists()) {
+            try {
+                return loadInterpreterFromFile(modelFile)
+            } catch (t: Throwable) {
+                "Failed to load interpreter from file: ${t.message}".showShortToast()
+                Log.e(predictionServiceTag, t.message, t)
+            }
+        }
+        return null
+    }
+
     private fun getOrCreateModel(): Interpreter? {
         try {
-            val modelFile = getModelLocation()
-
-            if (modelFile.exists()) {
-                try {
-                    return loadInterpreterFromFile(modelFile)
-                } catch (t: Throwable) {
-                    "Failed to load interpreter from file: ${t.message}".showShortToast()
-                    Log.e(predictionServiceTag, t.message, t)
-                }
+            val savedInterpreter = getSavedModel()
+            if (savedInterpreter != null) {
+                return savedInterpreter
             }
 
             val responseBody = App.applicationComponent.getApiHelper().api.downloadModel().blockingGet()
             val byteArray = findModelInResponse(responseBody)
                     ?: throw java.lang.IllegalStateException("Can't download model from server")
 
-            saveModelToFile(byteArray, modelFile)
+            saveModelToFile(byteArray, getModelLocation())
             return loadInterpreterFromByteArray(byteArray)
         } catch (t: Throwable) {
             "Failed to get tflite model: ${t.message}. Fallback to online prediction".showShortToast()
@@ -203,6 +246,7 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
 
     enum class ServiceCommands {
         PREDICT,
+        PREPARE_FOR_CALIBRATION,
         CALIBRATE,
         UPDATE_MODEL
     }

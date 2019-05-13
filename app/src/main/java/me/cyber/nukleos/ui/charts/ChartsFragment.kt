@@ -84,6 +84,8 @@ class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.
         record_button.setOnClickListener { graphPresenter.onCollectPressed() }
         train_button.setOnClickListener { graphPresenter.onTrainPressed() }
         train_button.isEnabled = false
+
+        calibrate_button.setOnClickListener { graphPresenter.onCalibratePressed() }
     }
 
     override fun notifyTrainModelStarted() = "Model training started.".showShortToast()
@@ -119,6 +121,7 @@ class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.
                 data_type_spinner.isEnabled = true
                 startCharts(true)
                 train_button.isEnabled = true
+                calibrate_button.isEnabled = true
                 blockNavigation(false)
             }
             ChartInterface.State.COUNTDOWN -> {
@@ -127,6 +130,7 @@ class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.
                 showCountdown()
                 startCharts(false)
                 train_button.isEnabled = false
+                calibrate_button.isEnabled = false
                 blockNavigation(true)
             }
             ChartInterface.State.RECORDING -> {
@@ -135,6 +139,7 @@ class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.
                 countdown_layout.visibility = View.INVISIBLE
                 startCharts(true)
                 train_button.isEnabled = false
+                calibrate_button.isEnabled = false
                 blockNavigation(true)
             }
             ChartInterface.State.SENDING -> {
@@ -143,10 +148,13 @@ class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.
                 countdown_layout.visibility = View.INVISIBLE
                 startCharts(false)
                 train_button.isEnabled = false
+                calibrate_button.isEnabled = false
                 blockNavigation(true)
             }
         }
     }
 
-
+    override fun setDataType(selectedType: Int) {
+        data_type_spinner.setSelection(selectedType)
+    }
 }

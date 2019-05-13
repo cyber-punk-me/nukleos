@@ -57,12 +57,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="70dp"
+        android:enabled="true"
+        android:gravity="center"
+        android:text="@string/train" />
+
+    <android.support.design.button.MaterialButton
+        android:id="@+id/calibrate_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
         android:layout_marginBottom="10dp"
         android:layout_marginRight="20dp"
         android:layout_marginLeft="20dp"
         android:enabled="true"
         android:gravity="center"
-        android:text="@string/train" />
+        android:text="@string/calibrate" />
 
     <LinearLayout
         android:id="@+id/countdown_layout"

@@ -5,11 +5,10 @@ import android.os.Handler
 import android.os.ResultReceiver
 
 class PredictionResultReceiver(
-        handler: Handler,
         private val predictionCallback: (predictedClass: Int, distribution: FloatArray) -> Unit,
         private val errorCallback: (error: String) -> Unit
 ) :
-        ResultReceiver(handler) {
+        ResultReceiver(Handler()) {
 
     companion object {
         private const val DEFAULT_PREDICTION_RESPONSE_ERROR = "Invalid prediction response"
