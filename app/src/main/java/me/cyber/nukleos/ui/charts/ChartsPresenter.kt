@@ -46,8 +46,10 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
     private val calibrationResultReceiver = CalibrationResultReceiver(
             {
                 "Calibration is finished".showShortToast()
+                view.goToState(ChartInterface.State.IDLE)
             }, {
         it.showShortToast()
+        view.goToState(ChartInterface.State.IDLE)
     }
     )
 

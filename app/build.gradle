@@ -92,4 +92,7 @@ dependencies {
     implementation project(':common')
 
     implementation 'commons-io:commons-io:2.6'
+
+    implementation "org.deeplearning4j:deeplearning4j-core:${dl4j_version}"
+    implementation "org.nd4j:nd4j-native-platform:${dl4j_version}"
 }

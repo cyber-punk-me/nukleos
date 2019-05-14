@@ -9,6 +9,7 @@ buildscript {
         retrofitVersion = '2.2.0'
         lastAdapterVersion = "2.3.0"
         supportLibVersion = "27.1.1"
+        dl4j_version = "1.0.0-beta4"
     }
     repositories {
         google()
