@@ -1,5 +1,6 @@
 package me.cyber.nukleos.ui.charts
 
+import android.content.Intent
 import android.util.Log
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -8,8 +9,11 @@ import me.cyber.nukleos.App
 import me.cyber.nukleos.dagger.PeripheryManager
 import me.cyber.nukleos.ui.charts.ChartsFragment.Companion.LEARNING_TIME
 import me.cyber.nukleos.ui.charts.ChartsFragment.Companion.TIMER_COUNT
+import me.cyber.nukleos.ui.predict.PredictionService
+import me.cyber.nukleos.utils.showShortToast
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
 class ChartsPresenter(override val view: ChartInterface.View, private val mPeripheryManager: PeripheryManager) : ChartInterface.Presenter(view) {
 
@@ -27,6 +31,27 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
     private var mTrainModelSubscription: Disposable? = null
     private var mServerTimeSubscription: Disposable? = null
     private var mMarkTime = false
+
+    private val calibrationPreparationResultReceiver = CalibrationPreparationResultReceiver(
+            {
+                if (it <= 0) {
+                    "Wrong classes count: $it".showShortToast()
+                    return@CalibrationPreparationResultReceiver
+                }
+                val data = ArrayList<Array<FloatArray>>()
+                collectDataForClass(0, it, data)
+            }, {
+        it.showShortToast()
+    })
+    private val calibrationResultReceiver = CalibrationResultReceiver(
+            {
+                "Calibration is finished".showShortToast()
+                view.goToState(ChartInterface.State.IDLE)
+            }, {
+        it.showShortToast()
+        view.goToState(ChartInterface.State.IDLE)
+    }
+    )
 
     private fun convertData(data: List<FloatArray>, dataType: Int, window: Int = 64, slide: Int = 64) =
             StringBuffer().apply {
@@ -115,6 +140,15 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
     }
 
     override fun onCollectPressed() {
+        collectData(LEARNING_TIME) {
+            view.goToState(ChartInterface.State.SENDING)
+            sendData(convertData(it,
+                    view.getDataType(), 64, 64),
+                    mLearningSessId)
+        }
+    }
+
+    private fun collectData(collectTimeSeconds: Int, onCollected: (ArrayList<FloatArray>) -> Unit) {
         val dataBuffer: ArrayList<FloatArray> = arrayListOf()
         with(view) {
             val selectedSensor = mPeripheryManager.getActiveSensor()
@@ -125,27 +159,67 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
             selectedSensor.apply {
                 goToState(ChartInterface.State.COUNTDOWN)
                 hideNoStreamingMessage()
-                if (mDataSubscription == null || mDataSubscription?.isDisposed == true) {
-                    mDataSubscription = this.getDataFlowable()
-                            .skip(TIMER_COUNT, TimeUnit.SECONDS)
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .take(TIMER_COUNT + LEARNING_TIME, TimeUnit.SECONDS)
-                            .doOnComplete {
-                                goToState(ChartInterface.State.SENDING)
-                                sendData(convertData(dataBuffer,
-                                        view.getDataType(), 64, 64),
-                                        mLearningSessId)
-                            }
-                            .subscribe { dataBuffer.add(it) }
-                } else {
-                    mDataSubscription?.dispose()
-                }
+                mDataSubscription?.dispose()
+                mDataSubscription = this.getDataFlowable()
+                        .skip(TIMER_COUNT, TimeUnit.SECONDS)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .take(TIMER_COUNT + collectTimeSeconds, TimeUnit.SECONDS)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnComplete {
+                            onCollected(dataBuffer)
+                        }
+                        .subscribe {
+                            dataBuffer.add(it)
+                        }
             }
         }
     }
 
     override fun onTrainPressed() = trainModel(mLearningSessId, mScriptId)
+
+    override fun onCalibratePressed() {
+        startPreparationForCalibration()
+    }
+
+    private fun startPreparationForCalibration() {
+        val appContext = App.applicationComponent.getAppContext()
+        val nextIntent = Intent(appContext, PredictionService::class.java).apply {
+            type = PredictionService.ServiceCommands.PREPARE_FOR_CALIBRATION.name
+            putExtra(PredictionService.RECEIVER_KEY, calibrationPreparationResultReceiver)
+        }
+        appContext.startService(nextIntent)
+    }
+
+    private fun collectDataForClass(classNumber: Int, totalNumberOfClasses: Int, data: ArrayList<Array<FloatArray>>) {
+        view.setDataType(classNumber)
+        collectData(LEARNING_TIME) {
+
+            @Suppress("NestedLambdaShadowedImplicitParameter")
+            val classData = it.withIndex()
+                    .groupBy { it.index / 8 } //make groups of 8 x 8 floats
+                    .map { it.value.map { it.value } } //get rid of indices
+                    .dropLast(1) //drop last group that could be incomplete
+                    .map { it.flatMap { it.toList() }.toFloatArray() } //make arrays of 64 floats for prediction purposes
+                    .toTypedArray()
+            data.add(classData)
+            if (classNumber >= totalNumberOfClasses - 1) {
+                sendDataForCalibration(data.toTypedArray())
+            } else {
+                collectDataForClass(classNumber + 1, totalNumberOfClasses, data)
+            }
+        }
+    }
+
+    private fun sendDataForCalibration(data: Array<Array<FloatArray>>) {
+        val appContext = App.applicationComponent.getAppContext()
+        val nextIntent = Intent(appContext, PredictionService::class.java).apply {
+            type = PredictionService.ServiceCommands.CALIBRATE.name
+            putExtra(PredictionService.RECEIVER_KEY, calibrationResultReceiver)
+            putExtra(PredictionService.CALIBRATION_DATA_KEY, data)
+        }
+        appContext.startService(nextIntent)
+    }
 
     override fun destroy() {
         view.startCharts(false)

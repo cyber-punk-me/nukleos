@@ -1,33 +1,26 @@
 package me.cyber.nukleos.ui.predict
 
-import io.reactivex.Observable
+import android.content.Intent
+import android.os.Handler
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.BehaviorSubject
 import me.cyber.nukleos.App
 import me.cyber.nukleos.IMotors
-import me.cyber.nukleos.api.PredictRequest
 import me.cyber.nukleos.api.PredictResponse
 import me.cyber.nukleos.api.Prediction
 import me.cyber.nukleos.control.TryControl
 import me.cyber.nukleos.dagger.PeripheryManager
 import me.cyber.nukleos.utils.LimitedQueue
-import org.tensorflow.lite.Interpreter
-import java.io.ByteArrayOutputStream
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.util.zip.ZipInputStream
 
 class PredictPresenter(override val view: PredictInterface.View, private val mPeripheryManager: PeripheryManager) : PredictInterface.Presenter(view) {
 
-    companion object {
-        private const val TFLITE_EXTENSION = ".tflite"
-        private const val FLOAT_SIZE = 4
-    }
-
     private var mChartsDataSubscription: Disposable? = null
     private var mDownloadModelSubscription: Disposable? = null
+    private val predictionResultReceiver = PredictionResultReceiver(
+            { predictedClass, distribution ->
+                onPredictionResult(predictedClass, distribution) },
+            { onPredictionError(Exception(it)) })
     private var mPostPredict: Disposable? = null
     private var predictEnabled = false
     private var predictOnlineEnabled = false
@@ -36,21 +29,12 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
     private val updatesUntilPredict = 4
     private val control = TryControl()
 
-    private lateinit var mInterpreter: Interpreter
-
     @Volatile private var predictionInProgress = false
 
     override fun create() {}
 
     override fun start() {
-        mDownloadModelSubscription = getActualModel().subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread()).subscribe({
-                    mInterpreter = it
-                    initializePrediction()
-                }, { t ->
-                    view.notifyPredictError(t)
-                    initializePrediction()
-                })
+        initializePrediction()
     }
 
     private fun initializePrediction() {
@@ -92,60 +76,26 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
     private fun doPredict() {
         if (predictBuffer.size == 8) {
             predictionInProgress = true
-            val predictRequest = PredictRequest(ArrayList<List<Float>>()
-                    .also { it.add(predictBuffer.flatMap { d -> d.asList() }) })
-
-            run {
-                //has downloaded tflite model
-                if (::mInterpreter.isInitialized && !predictOnlineEnabled) {
-                    doLocalPredict(predictRequest)
-                } else {
-                    doOnlinePredict(predictRequest)
-                }
+            val data = predictBuffer.flatMap { d -> d.asList() }.toFloatArray()
+            val appContext = App.applicationComponent.getAppContext()
+            val nextIntent = Intent(appContext, PredictionService::class.java).apply {
+                type = PredictionService.ServiceCommands.PREDICT.name
+                putExtra(PredictionService.PREDICT_DATA_KEY, data)
+                putExtra(PredictionService.RECEIVER_KEY, predictionResultReceiver)
+                putExtra(PredictionService.PREFER_OFFLINE_PREDICTION_KEY, !predictOnlineEnabled)
             }
+            appContext.startService(nextIntent)
         }
     }
 
-    private fun doLocalPredict(predictRequest: PredictRequest) {
-        try {
-            val outputTensorCount = mInterpreter.getOutputTensor(0).shape()[1]
-
-            val data = predictRequest.instances[0]
-            val byteBuffer = ByteBuffer.allocateDirect(data.size * FLOAT_SIZE)
-            byteBuffer.order(ByteOrder.nativeOrder())
-            data.forEach { byteBuffer.putFloat(it) }
-            val result = Array(1) { FloatArray(outputTensorCount) }
-            mInterpreter.run(byteBuffer, result)
-            val distribution = result[0]
-            onPredictionResult(distribution.indices.maxBy { distribution[it] }
-                    ?: -1, distribution.toList())
-        }
-        catch (e: Throwable) {
-            onPredictionError(e)
-        }
-    }
-
-    private fun doOnlinePredict(predictRequest: PredictRequest) {
-        mPostPredict = App.applicationComponent.getApiHelper().api.predict(predictRequest)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-                    val predictedClass = it.predictions[0].output
-                    onPredictionResult(predictedClass, it.predictions[0].distr)
-                }
-                        , {
-                    onPredictionError(it)
-                })
-    }
-
-    private fun onPredictionResult(predictedClass: Int, distribution: List<Float>) {
+    private fun onPredictionResult(predictedClass: Int, distribution: FloatArray) {
         predictionInProgress = false
 
         val tryControl = control.guess(predictedClass)
 
         if (tryControl >= 0) {
             view.notifyPredict(
-                    PredictResponse(listOf(Prediction(tryControl, distribution))))
+                    PredictResponse(listOf(Prediction(tryControl, distribution.asList()))))
             if (mPeripheryManager.motors != null) {
                 val mot = mPeripheryManager.motors!!
                 when (tryControl) {
@@ -163,58 +113,6 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
     private fun onPredictionError(t: Throwable) {
         predictionInProgress = false
         view.notifyPredictError(t)
-    }
-
-    private fun getActualModel(): Observable<Interpreter> {
-        val subject = BehaviorSubject.create<Interpreter>()
-
-        mDownloadModelSubscription = App.applicationComponent.getApiHelper().api.downloadModel().subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-                    try {
-                        ZipInputStream(it.byteStream()).use { zipInputStream ->
-                            var foundModel = false
-                            while (!foundModel) {
-                                val nextEntry = zipInputStream.nextEntry ?: break
-                                if (!nextEntry.name.endsWith(TFLITE_EXTENSION, ignoreCase = true)) {
-                                    continue
-                                }
-
-                                val buffer = ByteArray(1024)
-                                ByteArrayOutputStream().use { outputStream ->
-                                    while (true) {
-                                        val read = zipInputStream.read(buffer, 0, 1024)
-                                        if (read < 0) {
-                                            break
-                                        }
-                                        outputStream.write(buffer, 0, read)
-                                    }
-                                    val bytes = outputStream.toByteArray()
-
-                                    val byteBuffer = ByteBuffer.allocateDirect(bytes.size)
-                                    byteBuffer.order(ByteOrder.nativeOrder())
-                                    byteBuffer.put(bytes)
-                                    val mInterpreter = Interpreter(byteBuffer)
-
-                                    subject.onNext(mInterpreter)
-                                    foundModel = true
-                                }
-                                break
-                            }
-
-                            if (!foundModel) {
-                                subject.onError(IllegalStateException("Can't unzip downloaded model"))
-                            }
-                        }
-                    } catch (t: Throwable) {
-                        subject.onError(t)
-                    }
-                }
-                        , {
-                    subject.onError(it)
-                })
-
-        return subject
     }
 
     override fun onPredictSwitched(on: Boolean, predictOnline: Boolean) {

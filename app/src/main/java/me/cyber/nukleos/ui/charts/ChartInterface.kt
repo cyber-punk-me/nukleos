@@ -17,6 +17,7 @@ interface ChartInterface {
 
         fun goToState(state : State)
         fun getDataType(): Int
+        fun setDataType(selectedType: Int)
         fun notifyDataSent()
         fun notifyDataFailed()
         fun notifyTrainModelStarted()
@@ -26,6 +27,7 @@ interface ChartInterface {
     abstract class Presenter(override val view: BaseView) : BasePresenter<BaseView>(view) {
         abstract fun onCollectPressed()
         abstract fun onTrainPressed()
+        abstract fun onCalibratePressed()
 
     }
 }
