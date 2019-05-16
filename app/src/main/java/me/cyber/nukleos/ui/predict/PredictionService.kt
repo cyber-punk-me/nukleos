@@ -90,7 +90,7 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
                     responseWithError(receiver, "Model is not saved")
                     return
                 }
-                val outputTensorCount = savedModel.getOutputTensor(0).shape()[1]
+                val outputTensorCount = savedModel.getOutputTensor(1).shape()[1]
                 onCalibrationPreparationResult(outputTensorCount, receiver)
             }
 
@@ -138,16 +138,16 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
                 .list()
                 .layer(
                         DenseLayer.Builder() //create the first, input layer with xavier initialization
-                                .nIn(4)
-                                .nOut(100)
+                                .nIn(20)
+                                .nOut(11)
                                 .activation(Activation.RELU)
                                 .weightInit(WeightInit.XAVIER)
                                 .build()
                 )
                 .layer(
                         OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD) //create hidden layer
-                                .nIn(100)
-                                .nOut(4)
+                                .nIn(11)
+                                .nOut(5)
                                 .activation(Activation.SOFTMAX)
                                 .weightInit(WeightInit.XAVIER)
                                 .build()
@@ -170,13 +170,14 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
         for (predictionClass in 0 until outputsSize) {
             val label = FloatArray(outputsSize).also { it[predictionClass] = 1f }
             val calibrationDataForClass = calibrationData[predictionClass]
-            val distributions = mutableListOf<FloatArray>()
+            val midRepresentation = mutableListOf<FloatArray>()
             for (sample in calibrationDataForClass) {
-                distributions.add(predictWithInterpreter(sample.asList(), outputsSize, interpreter))
+                val tfOutput = predictWithInterpreter(sample.asList(), interpreter)
+                midRepresentation.add((tfOutput[2] as Array<FloatArray>)[0])
             }
 
-            val toTypedArray = (0 until distributions.size).map { label.copyOf() }.toTypedArray()
-            dataSets.add(DataSet(NDArray(distributions.toTypedArray()), NDArray(toTypedArray)))
+            val toTypedArray = (0 until midRepresentation.size).map { label.copyOf() }.toTypedArray()
+            dataSets.add(DataSet(NDArray(midRepresentation.toTypedArray()), NDArray(toTypedArray)))
         }
 
         return DataSet.merge(dataSets)
@@ -197,7 +198,7 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
             val prediction = if (interpreter != null) {
                 doLocalPredictWithTflite(predictRequest, interpreter)
             } else {
-                doOnlinePredictWithTflite(predictRequest)
+                doOnlinePredict(predictRequest)
             }
 
             val finalPrediction = tryApplyCalibration(prediction)
@@ -212,25 +213,27 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
     }
 
     private fun doLocalPredictWithTflite(predictRequest: PredictRequest, interpreter: Interpreter) : Prediction {
-        val outputTensorCount = interpreter.getOutputTensor(0).shape()[1]
-
         val data = predictRequest.instances[0]
-        val distribution = predictWithInterpreter(data, outputTensorCount, interpreter)
-
-        return Prediction(distribution.indices.maxBy { distribution[it] }
-                ?: -1, distribution.toList())
+        val tfOutput = predictWithInterpreter(data, interpreter)
+        return Prediction((tfOutput[0] as Array<LongArray>)[0][0].toInt(),
+                (tfOutput[1] as Array<FloatArray>)[0].toList(),
+                (tfOutput[2] as Array<FloatArray>)[0].toList())
     }
 
-    private fun predictWithInterpreter(data: Collection<Float>, outputTensorCount: Int, interpreter: Interpreter): FloatArray {
+    private fun predictWithInterpreter(data: Collection<Float>, interpreter: Interpreter): Map<Int, Any> {
+        val outputTensorCount = interpreter.getOutputTensor(1).shape()[1]
+        val midTensorCount = interpreter.getOutputTensor(2).shape()[1]
         val byteBuffer = ByteBuffer.allocateDirect(data.size * FLOAT_SIZE)
         byteBuffer.order(ByteOrder.nativeOrder())
         data.forEach { byteBuffer.putFloat(it) }
-        val result = Array(1) { FloatArray(outputTensorCount) }
-        interpreter.run(byteBuffer, result)
-        return result[0]
+        val result = mapOf(0 to arrayOf(LongArray(1)),
+                1 to arrayOf(FloatArray(outputTensorCount)),
+                2 to arrayOf(FloatArray(midTensorCount)))
+        interpreter.runForMultipleInputsOutputs(arrayOf(byteBuffer), result)
+        return result
     }
 
-    private fun doOnlinePredictWithTflite(predictRequest: PredictRequest): Prediction {
+    private fun doOnlinePredict(predictRequest: PredictRequest): Prediction {
         val predictResponse = App.applicationComponent.getApiHelper().api.predict(predictRequest).blockingGet()
         return predictResponse.predictions[0]
     }
@@ -362,16 +365,19 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
         return MultiLayerNetwork.load(location, true)
     }
 
-    private fun tryApplyCalibration(tflitePrediction: Prediction): Prediction {
+    private fun tryApplyCalibration(predictionIn: Prediction): Prediction {
+        if (predictionIn.midLayer == null) {
+            return predictionIn
+        }
         try {
-            val network = getCalibrationNetwork() ?: return tflitePrediction
-            val ndArray = NDArray(Array(1) { tflitePrediction.distr.toFloatArray() })
+            val network = getCalibrationNetwork() ?: return predictionIn
+            val ndArray = NDArray(Array(1) { predictionIn.midLayer.toFloatArray() })
             val prediction = network.predict(ndArray)[0]
-            return Prediction(prediction, List(tflitePrediction.distr.size) { 0f }) //TODO use weights from network
+            return Prediction(prediction, List(predictionIn.distr.size) { 0f }) //TODO use weights from network
         }
         catch (t: Throwable) {
             Log.e(predictionServiceTag, t.message, t)
-            return tflitePrediction
+            return predictionIn
         }
     }
 

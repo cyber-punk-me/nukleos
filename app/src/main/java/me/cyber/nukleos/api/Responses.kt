@@ -15,5 +15,5 @@ data class PredictRequest(val instances : List<List<Float>>)
 
 data class PredictResponse(val predictions : List<Prediction>)
 
-data class Prediction(val output: Int, val distr: List<Float>)
+data class Prediction(val output: Int, val distr: List<Float>, val midLayer: List<Float>? = null)
 

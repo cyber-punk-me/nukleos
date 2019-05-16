@@ -68,7 +68,7 @@
     <string name="train">TRAIN</string>
     <string name="calibrate">CALIBRATE EXISTING MODEL</string>
     <string name="predict">Predict</string>
-    <string name="onlinePredict">Predict online</string>
+    <string name="onlinePredict">Online mode</string>
     <string name="motor">motor</string>
     <string name="direction">direction</string>
     <string name="speed">speed</string>
