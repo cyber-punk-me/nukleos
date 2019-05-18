@@ -93,6 +93,19 @@ dependencies {
 
     implementation 'commons-io:commons-io:2.6'
 
-    implementation "org.deeplearning4j:deeplearning4j-core:${dl4j_version}"
-    implementation "org.nd4j:nd4j-native-platform:${dl4j_version}"
+    implementation "org.deeplearning4j:deeplearning4j-nn:${dl4j_version}"
+    implementation (group: 'org.bytedeco', name: 'javacv', version: '1.5' , {
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'flandmark'
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'flycapture'
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'leptonica'
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'opencv'
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'libdc1394'
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'libfreenect2'
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'libfreenect'
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'librealsense'
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'tesseract'
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'videoinput'
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'artoolkitplus'
+    })
+    implementation "org.nd4j:nd4j-native:${dl4j_version}"
 }
