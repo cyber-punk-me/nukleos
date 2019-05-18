@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" android:key="">
+    <EditTextPreference
+        android:fragment="me.cyber.nukleos.ui.settings.SettingsFragment"
+        android:key="@string/server_address_key"
+        android:title="@string/server_address"
+        android:defaultValue="http://192.168.1.48:8080" />
+</PreferenceScreen>

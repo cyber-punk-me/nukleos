@@ -234,7 +234,7 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
     }
 
     private fun doOnlinePredict(predictRequest: PredictRequest): Prediction {
-        val predictResponse = App.applicationComponent.getApiHelper().api.predict(predictRequest).blockingGet()
+        val predictResponse = App.applicationComponent.getApiHelper().getApi().predict(predictRequest).blockingGet()
         return predictResponse.predictions[0]
     }
 
@@ -283,7 +283,7 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
                 return savedInterpreter
             }
 
-            val responseBody = App.applicationComponent.getApiHelper().api.downloadModel().blockingGet()
+            val responseBody = App.applicationComponent.getApiHelper().getApi().downloadModel().blockingGet()
             val byteArray = findTfliteModelInResponse(responseBody)
                     ?: throw java.lang.IllegalStateException("Can't download model from server")
 
