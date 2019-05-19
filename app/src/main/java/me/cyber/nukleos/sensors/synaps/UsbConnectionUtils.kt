@@ -7,6 +7,7 @@ import android.util.Log
 import com.felhr.usbserial.CDCSerialDevice
 import com.felhr.usbserial.UsbSerialDevice
 import com.felhr.usbserial.UsbSerialInterface
+import me.cyber.nukleos.App
 import me.cyber.nukleos.sensors.synaps.UsbService.TAG
 
 fun connect(device: UsbDevice, usbManager: UsbManager, onSensorInit: (UsbSensor) -> Unit) {
@@ -51,7 +52,7 @@ private class ConnectionThread internal constructor(
 
             // Everything went as expected. Send an intent to MainActivity
             val intent = Intent(UsbService.ACTION_USB_READY)
-//            context.sendBroadcast(intent) //TODO
+            App.applicationComponent.getAppContext().sendBroadcast(intent)
 
             Thread {
                 UsbSensor.startStreaming(serialPort)
@@ -60,13 +61,13 @@ private class ConnectionThread internal constructor(
         } else {
             // Serial port could not be opened, maybe an I/O error or if CDC driver was chosen, it does not really fit
             // Send an Intent to Main Activity
-            if (serialPort is CDCSerialDevice) {
-                val intent = Intent(UsbService.ACTION_CDC_DRIVER_NOT_WORKING)
-//                context.sendBroadcast(intent) //TODO
-            } else {
-                val intent = Intent(UsbService.ACTION_USB_DEVICE_NOT_WORKING)
-//                context.sendBroadcast(intent) //TODO
-            }
+            val intent = Intent(
+                    if (serialPort is CDCSerialDevice)
+                        UsbService.ACTION_CDC_DRIVER_NOT_WORKING
+                    else
+                        UsbService.ACTION_USB_DEVICE_NOT_WORKING
+            )
+            App.applicationComponent.getAppContext().sendBroadcast(intent)
         }
     }
 }

@@ -13,4 +13,7 @@
     <item android:id="@+id/item_predict"
         android:icon="@drawable/ic_learning"
         android:title="@string/predict" />
+    <item android:id="@+id/item_settings"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="@string/settings_menu" />
 </menu>

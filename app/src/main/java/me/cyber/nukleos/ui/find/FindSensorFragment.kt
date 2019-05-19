@@ -49,6 +49,8 @@ class FindSensorFragment : BaseFragment<FindSensorInterface.Presenter>(), FindSe
             itemAnimator = RecyclerItemFadeAnimator()
             adapter = mListDeviceAdapter
         }
+
+        scanDevicePresenter.onFindButtonClicked()
     }
     override fun onAttach(context: Context?) {
         AndroidSupportInjection.inject(this)

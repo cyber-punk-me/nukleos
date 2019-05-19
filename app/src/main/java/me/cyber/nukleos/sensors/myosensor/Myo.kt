@@ -1,12 +1,13 @@
 package me.cyber.nukleos.sensors.myosensor
 
 import android.bluetooth.*
-import android.content.Context
 import android.util.Log
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.processors.PublishProcessor
 import io.reactivex.subjects.BehaviorSubject
+import me.cyber.nukleos.App
+import me.cyber.nukleos.sensors.LastKnownSensorManager
 import me.cyber.nukleos.sensors.Sensor
 import me.cyber.nukleos.sensors.Status
 import me.cyber.nukleos.utils.isStartStreamingCommand
@@ -54,9 +55,9 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
     private val writeQueue: LinkedList<BluetoothGattDescriptor> = LinkedList()
     private val readQueue: LinkedList<BluetoothGattCharacteristic> = LinkedList()
 
-    override fun connect(context: Context) {
+    override fun connect() {
         connectionStatusSubject.onNext(Status.CONNECTING)
-        gatt = device.connectGatt(context, false, this)
+        gatt = device.connectGatt(App.applicationComponent.getAppContext(), false, this)
     }
 
     override fun disconnect() {
@@ -96,6 +97,7 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
     private fun startStreaming() {
         sendCommand(CommandList.emgFilteredOnly())
         connectionStatusSubject.onNext(Status.STREAMING)
+        LastKnownSensorManager.updateLastKnownSensor(this)
     }
 
     private fun stopStreaming() {
