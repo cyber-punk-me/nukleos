@@ -1,10 +1,10 @@
 package me.cyber.nukleos.sensors.synaps
 
-import android.content.Context
 import com.felhr.usbserial.UsbSerialDevice
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
+import me.cyber.nukleos.sensors.LastKnownSensorManager
 import me.cyber.nukleos.sensors.Sensor
 import me.cyber.nukleos.sensors.Status
 
@@ -51,7 +51,8 @@ class UsbSensor(private val usbHandler: UsbHandler, private val serialPort: UsbS
         connectionStatusSubject.onNext(Status.AVAILABLE)
     }
 
-    override fun connect(context: Context) {
+    override fun connect() {
+        LastKnownSensorManager.updateLastKnownSensor(this)
     }
 
     override fun disconnect() {
