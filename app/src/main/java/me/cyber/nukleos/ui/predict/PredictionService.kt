@@ -234,7 +234,7 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
     }
 
     private fun doOnlinePredict(predictRequest: PredictRequest): Prediction {
-        val predictResponse = App.applicationComponent.getApiHelper().getApi().predict(predictRequest).blockingGet()
+        val predictResponse = App.applicationComponent.getApiHelper().api.predict(predictRequest).blockingGet()
         return predictResponse.predictions[0]
     }
 
