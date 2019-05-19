@@ -20,7 +20,7 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
     private val TAG = "ChartsPresenter"
     private val millsBetweenReads = 5
     private val numSensors = 8
-    private val mApi by lazy { App.applicationComponent.getApiHelper().api }
+    private val mApi by lazy { App.applicationComponent.getApiHelper().getApi() }
     private val mLearningSessId = UUID.fromString("885d0665-ca5d-46ed-b6dc-ea2c2610a67f")
     private val mScriptId = UUID.fromString("7de76908-d4d9-4ce9-98de-118a4fb3b8f8")
     private var mServerTimeMinusLocal: Long = 0

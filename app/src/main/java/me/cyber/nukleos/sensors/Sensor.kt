@@ -1,6 +1,5 @@
 package me.cyber.nukleos.sensors
 
-import android.content.Context
 import io.reactivex.Flowable
 import io.reactivex.Observable
 
@@ -13,7 +12,7 @@ interface Sensor {
 
     fun statusObservable(): Observable<Status>
 
-    fun connect(context: Context)
+    fun connect()
 
     fun disconnect()
 

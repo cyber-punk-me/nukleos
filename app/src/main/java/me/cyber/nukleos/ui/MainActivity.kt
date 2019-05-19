@@ -23,6 +23,7 @@ import me.cyber.nukleos.ui.charts.ChartsFragment
 import me.cyber.nukleos.ui.control.SensorControlFragment
 import me.cyber.nukleos.ui.find.FindSensorFragment
 import me.cyber.nukleos.ui.predict.PredictFragment
+import me.cyber.nukleos.ui.settings.SettingsFragment
 import me.cyber.nukleos.utils.showShortToast
 import me.cyber.nukleus.R
 import javax.inject.Inject
@@ -85,15 +86,16 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
         setSupportActionBar(findViewById(R.id.new_toolbar))
 
         val findSensorFragment = FindSensorFragment.newInstance()
-        val fragmentList = listOf<Fragment>(
+        val fragmentList = listOf(
                 findSensorFragment,
                 SensorControlFragment.newInstance(),
                 ChartsFragment.newInstance(),
-                PredictFragment.newInstance()
+                PredictFragment.newInstance(),
+                SettingsFragment.newInstance()
         )
 
         view_pager.adapter = MyAdapter(supportFragmentManager, fragmentList)
-        view_pager.offscreenPageLimit = 3
+        view_pager.offscreenPageLimit = 4
         view_pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             var prevMenuItem: MenuItem? = null
             override fun onPageScrollStateChanged(state: Int) {}
@@ -118,6 +120,7 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
                     R.id.item_control -> view_pager.currentItem = 1
                     R.id.item_graph -> view_pager.currentItem = 2
                     R.id.item_predict -> view_pager.currentItem = 3
+                    R.id.item_settings -> view_pager.currentItem = 4
                 }
             }
             false

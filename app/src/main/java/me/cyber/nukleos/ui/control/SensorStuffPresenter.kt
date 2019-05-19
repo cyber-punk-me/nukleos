@@ -63,7 +63,7 @@ class SensorStuffPresenter(override val view: SensorControlInterface.View, priva
     override fun onConnectionButtonClicked() {
         mPeripheryManager.getLastSelectedSensor()?.apply {
             if (!isConnected()) {
-                connect(mBluetoothConnector.context)
+                connect()
             } else {
                 disconnect()
             }
