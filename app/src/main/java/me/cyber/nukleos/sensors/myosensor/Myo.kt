@@ -10,6 +10,7 @@ import me.cyber.nukleos.App
 import me.cyber.nukleos.sensors.LastKnownSensorManager
 import me.cyber.nukleos.sensors.Sensor
 import me.cyber.nukleos.sensors.Status
+import me.cyber.nukleos.ui.predict.PredictionService
 import me.cyber.nukleos.utils.isStartStreamingCommand
 import me.cyber.nukleos.utils.isStopStreamingCommand
 import java.util.*
@@ -24,6 +25,8 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
         private val availableFrequencies = listOf(50, 100, 150, 200)
 
         private const val defaultDelayBetweenCommands = 3000L
+
+        private const val TAG = "Myo"
     }
 
     override val name: String
@@ -226,10 +229,14 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
         if (characteristic.uuid.toString().endsWith(CHAR_EMG_POSTFIX)) {
             val emgData = characteristic.value
             byteReader.byteData = emgData
-
-            // We receive 16 bytes of data. Let's cut them in 2 and deliver both of them.
-            dataProcessor.onNext(byteReader.getBytes(EMG_ARRAY_SIZE / 2))
-            dataProcessor.onNext(byteReader.getBytes(EMG_ARRAY_SIZE / 2))
+            try {
+                // We receive 16 bytes of data. Let's cut them in 2 and deliver both of them.
+                dataProcessor.onNext(byteReader.getBytes(EMG_ARRAY_SIZE / 2))
+                dataProcessor.onNext(byteReader.getBytes(EMG_ARRAY_SIZE / 2))
+            } catch (t: Throwable) {
+                //todo figure why sometimes we see buffer underflows
+                Log.w(TAG,"Myo data handling problem", t)
+            }
         }
 
         // Finally check if keep alive makes sense.

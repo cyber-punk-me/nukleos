@@ -55,6 +55,8 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
         private val predictionServiceTag = PredictionService::class.java.name
 
         private const val rngSeed = 1337L
+
+        private var bufferedTFModel: Interpreter? = null
     }
 
     override fun onHandleIntent(intent: Intent) {
@@ -124,8 +126,7 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
 
             saveCalibrationNetworkToFile(network)
             onCalibrationResult(receiver)
-        }
-        catch (t: Throwable) {
+        } catch (t: Throwable) {
             val message = t.message ?: ""
             Log.e(predictionServiceTag, message, t)
             responseWithError(receiver, message)
@@ -186,7 +187,7 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
         return DataSet.merge(dataSets)
     }
 
-    private fun fetchCommand(requestTypeString: String) : ServiceCommands? {
+    private fun fetchCommand(requestTypeString: String): ServiceCommands? {
         return try {
             ServiceCommands.valueOf(requestTypeString)
         } catch (e: Exception) {
@@ -204,8 +205,9 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
                 doOnlinePredict(predictRequest)
             }
 
-            val finalPrediction = tryApplyCalibration(prediction)
-            onPredictionResult(finalPrediction, receiver)
+            //todo fix calibration
+            //val finalPrediction = tryApplyCalibration(prediction)
+            onPredictionResult(prediction, receiver)
 
         } catch (t: Throwable) {
             val message = t.message ?: ""
@@ -215,7 +217,7 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
         }
     }
 
-    private fun doLocalPredictWithTflite(predictRequest: PredictRequest, interpreter: Interpreter) : Prediction {
+    private fun doLocalPredictWithTflite(predictRequest: PredictRequest, interpreter: Interpreter): Prediction {
         val data = predictRequest.instances[0]
         val tfOutput = predictWithInterpreter(data, interpreter)
         return Prediction((tfOutput[0] as Array<LongArray>)[0][0].toInt(),
@@ -265,14 +267,20 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
         })
     }
 
-    private fun getSavedTfliteModel() : Interpreter? {
+    private fun getSavedTfliteModel(): Interpreter? {
+        if (bufferedTFModel != null) {
+            return bufferedTFModel
+        }
+        Log.i(predictionServiceTag, "Loading saved TF model..")
         val modelFile = getTfliteModelLocation()
 
         if (modelFile.exists()) {
             try {
-                return loadInterpreterFromFile(modelFile)
+                bufferedTFModel = loadInterpreterFromFile(modelFile)
+                Log.i(predictionServiceTag, "Saved TF model loaded.")
+                return bufferedTFModel
             } catch (t: Throwable) {
-                "Failed to load interpreter from file: ${t.message}".showShortToast()
+                "Failed to load TF interpreter from file: ${t.message}".showShortToast()
                 Log.e(predictionServiceTag, t.message, t)
             }
         }
@@ -280,7 +288,8 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
     }
 
     //return if model does not exist after this method is executed
-    private fun deleteSavedTfliteModel() : ServiceResponses {
+    private fun deleteSavedTfliteModel(): ServiceResponses {
+        bufferedTFModel = null
         val modelFile = getTfliteModelLocation()
 
         return if (modelFile.exists()) {
@@ -299,15 +308,11 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
         }
     }
 
-    private fun getOrCreateTfliteModel(forceUpdate: Boolean = false): Interpreter? {
+    private fun getOrCreateTfliteModel(): Interpreter? {
         try {
-            if (!forceUpdate) {
-                Log.i(predictionServiceTag, "Loading saved TF model..")
-                val savedInterpreter = getSavedTfliteModel()
-                if (savedInterpreter != null) {
-                    Log.i(predictionServiceTag, "Saved TF model loaded.")
-                    return savedInterpreter
-                }
+            bufferedTFModel = getSavedTfliteModel()
+            if (bufferedTFModel != null) {
+                return bufferedTFModel
             }
 
             Log.i(predictionServiceTag, "Downloading TF model...")
@@ -322,7 +327,7 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
             Log.i(predictionServiceTag, "TF Model Downloaded.")
             return loadInterpreterFromByteArray(byteArray)
         } catch (t: Throwable) {
-            "Failed to get tflite model: ${t.message}. Fallback to online prediction".showShortToast()
+            "Failed to download TF model: ${t.message}. Fallback to online prediction".showShortToast()
             Log.e(predictionServiceTag, t.message, t)
             return null
         }
@@ -387,7 +392,7 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
         getCalibrationNetworkLocation().deleteOnExit()
     }
 
-    private fun getCalibrationNetwork() : MultiLayerNetwork? {
+    private fun getCalibrationNetwork(): MultiLayerNetwork? {
         val location = getCalibrationNetworkLocation()
         if (!location.exists()) {
             return null
@@ -404,8 +409,7 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
             val ndArray = NDArray(Array(1) { predictionIn.midLayer.toFloatArray() })
             val prediction = network.predict(ndArray)[0]
             return Prediction(prediction, List(predictionIn.distr.size) { 0f }) //TODO use weights from network
-        }
-        catch (t: Throwable) {
+        } catch (t: Throwable) {
             Log.e(predictionServiceTag, t.message, t)
             return predictionIn
         }
