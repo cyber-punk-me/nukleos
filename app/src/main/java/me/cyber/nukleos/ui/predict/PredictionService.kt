@@ -104,7 +104,10 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
 
                 calibrate(calibrationData, receiver)
             }
-            ServiceCommands.UPDATE_MODEL -> TODO()
+            ServiceCommands.DELETE_SAVED_TF_MODEL -> {
+                val modelGone = deleteSavedTfliteModel()
+                receiver.send(modelGone.ordinal, Bundle.EMPTY)
+            }
         }
     }
 
@@ -276,12 +279,38 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
         return null
     }
 
-    private fun getOrCreateTfliteModel(): Interpreter? {
-        try {
-            val savedInterpreter = getSavedTfliteModel()
-            if (savedInterpreter != null) {
-                return savedInterpreter
+    //return if model does not exist after this method is executed
+    private fun deleteSavedTfliteModel() : ServiceResponses {
+        val modelFile = getTfliteModelLocation()
+
+        return if (modelFile.exists()) {
+            try {
+                modelFile.delete()
+                "Deleted TF model file ${modelFile.absolutePath}}"
+                ServiceResponses.SUCCESS
+            } catch (t: Throwable) {
+                "Failed to delete TF model file ${modelFile.absolutePath}}"
+                Log.e(predictionServiceTag, t.message, t)
+                ServiceResponses.ERROR
             }
+        } else {
+            "Deleted TF model file ${modelFile.absolutePath}}"
+            ServiceResponses.SUCCESS
+        }
+    }
+
+    private fun getOrCreateTfliteModel(forceUpdate: Boolean = false): Interpreter? {
+        try {
+            if (!forceUpdate) {
+                Log.i(predictionServiceTag, "Loading saved TF model..")
+                val savedInterpreter = getSavedTfliteModel()
+                if (savedInterpreter != null) {
+                    Log.i(predictionServiceTag, "Saved TF model loaded.")
+                    return savedInterpreter
+                }
+            }
+
+            Log.i(predictionServiceTag, "Downloading TF model...")
 
             val responseBody = App.applicationComponent.getApiHelper().getApi().downloadModel().blockingGet()
             val byteArray = findTfliteModelInResponse(responseBody)
@@ -290,6 +319,7 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
             clearCalibrationNetwork()
 
             saveTfliteModelToFile(byteArray, getTfliteModelLocation())
+            Log.i(predictionServiceTag, "TF Model Downloaded.")
             return loadInterpreterFromByteArray(byteArray)
         } catch (t: Throwable) {
             "Failed to get tflite model: ${t.message}. Fallback to online prediction".showShortToast()
@@ -385,7 +415,7 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
         PREDICT,
         PREPARE_FOR_CALIBRATION,
         CALIBRATE,
-        UPDATE_MODEL
+        DELETE_SAVED_TF_MODEL
     }
 
     enum class ServiceResponses {

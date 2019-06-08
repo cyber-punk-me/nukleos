@@ -50,8 +50,14 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
             }, {
         it.showShortToast()
         view.goToState(ChartInterface.State.IDLE)
-    }
-    )
+    })
+    private val deleteTfModelResultReceiver = DeleteModelResultReceiver(
+            {
+                "Model deleted".showShortToast()
+            },
+            {
+                "Model delete failed".showShortToast()
+            })
 
     private fun convertData(data: List<FloatArray>, dataType: Int, window: Int = 64, slide: Int = 64) =
             StringBuffer().apply {
@@ -89,6 +95,14 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
     }
 
     private fun trainModel(dataId: UUID, scriptId: UUID) {
+        //delete previously saved model outdated
+        val appContext = App.applicationComponent.getAppContext()
+        val nextIntent = Intent(appContext, PredictionService::class.java).apply {
+            type = PredictionService.ServiceCommands.DELETE_SAVED_TF_MODEL.name
+            putExtra(PredictionService.RECEIVER_KEY, deleteTfModelResultReceiver)
+        }
+        appContext.startService(nextIntent)
+        //train model online
         mTrainModelSubscription = mApi.trainModel(dataId, scriptId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
