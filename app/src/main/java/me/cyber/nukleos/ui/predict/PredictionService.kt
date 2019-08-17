@@ -220,7 +220,7 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
     private fun doLocalPredictWithTflite(predictRequest: PredictRequest, interpreter: Interpreter): Prediction {
         val data = predictRequest.instances[0]
         val tfOutput = predictWithInterpreter(data, interpreter)
-        return Prediction((tfOutput[0] as Array<LongArray>)[0][0].toInt(),
+        return Prediction((tfOutput[0] as LongArray)[0].toInt(),
                 (tfOutput[1] as Array<FloatArray>)[0].toList(),
                 (tfOutput[2] as Array<FloatArray>)[0].toList())
     }
@@ -231,10 +231,14 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
         val byteBuffer = ByteBuffer.allocateDirect(data.size * FLOAT_SIZE)
         byteBuffer.order(ByteOrder.nativeOrder())
         data.forEach { byteBuffer.putFloat(it) }
-        val result = mapOf(0 to arrayOf(LongArray(1)),
+        val result = mapOf(0 to LongArray(1),
                 1 to arrayOf(FloatArray(outputTensorCount)),
                 2 to arrayOf(FloatArray(midTensorCount)))
-        interpreter.runForMultipleInputsOutputs(arrayOf(byteBuffer), result)
+        try {
+            interpreter.runForMultipleInputsOutputs(arrayOf(byteBuffer), result)
+        } catch (t: Throwable) {
+            Log.e(PredictionService::class.java.name, t.message, t)
+        }
         return result
     }
 
