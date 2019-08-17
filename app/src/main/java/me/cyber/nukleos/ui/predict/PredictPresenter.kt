@@ -1,7 +1,6 @@
 package me.cyber.nukleos.ui.predict
 
 import android.content.Intent
-import android.os.Handler
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -26,7 +25,7 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
     private var predictOnlineEnabled = false
     private var predictBuffer = LimitedQueue<FloatArray>(8)
     private var iUpdate = 0
-    private val updatesUntilPredict = 4
+    private val updatesUntilPredictOnline = 4
     private val control = TryControl()
 
     @Volatile private var predictionInProgress = false
@@ -67,7 +66,7 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
 
     private fun predict() {
         iUpdate++
-        if (iUpdate >= updatesUntilPredict) {
+        if (iUpdate >= updatesUntilPredictOnline || !predictOnlineEnabled) {
             iUpdate = 0
             doPredict()
         }

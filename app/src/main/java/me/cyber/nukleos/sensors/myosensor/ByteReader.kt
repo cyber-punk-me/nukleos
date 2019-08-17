@@ -32,4 +32,8 @@ class ByteReader {
             result[i] = byteBuffer?.get()?.toFloat() ?: 0F
         return result
     }
+
+    fun hasEnoughBytes(desiredSize: Int): Boolean {
+        return byteBuffer!!.capacity() >= desiredSize
+    }
 }

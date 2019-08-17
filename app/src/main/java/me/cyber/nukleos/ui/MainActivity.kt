@@ -1,6 +1,7 @@
 package me.cyber.nukleos.ui
 
 import android.content.*
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.os.IBinder
 import android.support.v4.app.Fragment
@@ -81,6 +82,7 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
+        this.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.new_toolbar))
