@@ -25,7 +25,6 @@ class ByteReader {
 
     fun rewind() = this.byteBuffer?.rewind()
 
-    //todo make sure we always have enough bytes
     fun getBytes(size: Int): FloatArray? {
         val result = FloatArray(size)
         for (i in 0 until size)

@@ -198,8 +198,12 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
         super.onDestroy()
         peripheryManagerSubscribeDisposable?.dispose()
         if (usbServiceIntent != null) {
-            stopService(usbServiceIntent)
-            unregisterReceiver(usbReceiver)
+            try {
+                stopService(usbServiceIntent)
+                unregisterReceiver(usbReceiver)
+            } catch (t : Throwable) {
+                Log.d(TAG, "Unbind USB Service error: " + t.message)
+            }
         }
     }
 }

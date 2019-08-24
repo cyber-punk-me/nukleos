@@ -18,7 +18,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
 
     companion object {
         fun newInstance() = SettingsFragment()
-        val serverAddress = "server_address"
+        const val serverAddress = "server_address"
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
