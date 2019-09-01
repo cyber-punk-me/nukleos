@@ -21,8 +21,83 @@
         android:layout_height="match_parent" />
 
     <LinearLayout
+        android:columnCount="2"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="50dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <ToggleButton
+                android:id="@+id/button_action1"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="60dp"
+                android:layout_margin="50dp"
+                android:enabled="true"
+                android:text="@string/action1"
+                android:textOn="@string/action1"
+                android:textOff="@string/action1"
+                />
+
+            <ToggleButton
+                android:id="@+id/button_action2"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="60dp"
+                android:layout_margin="50dp"
+                android:enabled="true"
+                android:text="@string/action2"
+                android:textOn="@string/action2"
+                android:textOff="@string/action2"
+                />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <ToggleButton
+                android:id="@+id/button_action3"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="60dp"
+                android:layout_margin="50dp"
+                android:enabled="true"
+                android:text="@string/action3"
+                android:textOn="@string/action3"
+                android:textOff="@string/action3"
+                />
+
+            <ToggleButton
+                android:id="@+id/button_action4"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="60dp"
+                android:layout_margin="50dp"
+                android:enabled="true"
+                android:text="@string/action4"
+                android:textOn="@string/action4"
+                android:textOff="@string/action4"
+                />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="140dp"
+        android:layout_height="120dp"
         android:layout_gravity="bottom"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
@@ -30,58 +105,29 @@
         android:orientation="vertical"
         android:text="@string/predict">
 
+
         <Switch
             android:id="@+id/predict_toggle"
-            android:layout_width="160dp"
+            android:layout_width="120dp"
             android:layout_height="20dp"
             android:layout_marginBottom="20dp"
             android:enabled="true"
             android:gravity="center"
+            android:textAlignment="textStart"
             android:text="@string/predict" />
 
 
         <Switch
             android:id="@+id/predict_online_toggle"
-            android:layout_width="160dp"
+            android:layout_width="120dp"
             android:layout_height="20dp"
             android:layout_marginBottom="20dp"
             android:enabled="true"
             android:gravity="end"
+            android:textAlignment="textStart"
             android:text="@string/onlinePredict" />
 
-
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:orientation="horizontal">
-
-            <Switch
-                android:id="@+id/motor_toggle"
-                android:layout_width="match_parent"
-                android:layout_height="20dp"
-                android:enabled="true"
-                android:gravity="center"
-                android:text="@string/motor" />
-
-            <Switch
-                android:id="@+id/direction_toggle"
-                android:layout_width="match_parent"
-                android:layout_height="20dp"
-                android:enabled="true"
-                android:gravity="center"
-                android:text="@string/direction" />
-
-            <Switch
-                android:id="@+id/speed_toggle"
-                android:layout_width="match_parent"
-                android:layout_height="20dp"
-                android:enabled="true"
-                android:gravity="center"
-                android:text="@string/speed" />
-        </LinearLayout>
-
+<!--
         <android.support.design.button.MaterialButton
             android:id="@+id/button_connect"
             style="@style/Widget.MaterialComponents.Button"
@@ -90,7 +136,7 @@
             android:layout_margin="@dimen/default_margin"
             android:enabled="false"
             android:minWidth="120dp"
-            android:text="@string/send" />
+            android:text="@string/send" />-->
 
 
     </LinearLayout>

@@ -69,9 +69,10 @@
     <string name="calibrate">CALIBRATE EXISTING MODEL</string>
     <string name="predict">Predict</string>
     <string name="onlinePredict">Online mode</string>
-    <string name="motor">motor</string>
-    <string name="direction">direction</string>
-    <string name="speed">speed</string>
+    <string name="action1">1</string>
+    <string name="action2">2</string>
+    <string name="action3">3</string>
+    <string name="action4">4</string>
 
     <string name="server_address">Server address</string>
     <string name="server_address_key">server_address</string>
