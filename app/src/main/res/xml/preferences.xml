@@ -5,4 +5,79 @@
         android:key="@string/server_address_key"
         android:title="@string/server_address"
         android:defaultValue="http://192.168.1.48:8080" />
+    <CheckBoxPreference
+        android:fragment="me.cyber.nukleos.ui.settings.SettingsFragment"
+        android:key="@string/action_1_toggle_key"
+        android:title="@string/action_1_toggle" />
+    <EditTextPreference
+        android:fragment="me.cyber.nukleos.ui.settings.SettingsFragment"
+        android:key="@string/action_1_length_key"
+        android:title="@string/action_1_length"
+        android:numeric="integer"
+        android:defaultValue="1000" />
+    <EditTextPreference
+        android:fragment="me.cyber.nukleos.ui.settings.SettingsFragment"
+        android:key="@string/action_1_intensity_key"
+        android:title="@string/action_1_intensity"
+        android:numeric="integer"
+        android:defaultValue="127" />
+
+    <CheckBoxPreference
+        android:fragment="me.cyber.nukleos.ui.settings.SettingsFragment"
+        android:key="@string/action_2_toggle_key"
+        android:title="@string/action_2_toggle" />
+    <EditTextPreference
+        android:fragment="me.cyber.nukleos.ui.settings.SettingsFragment"
+        android:key="@string/action_2_length_key"
+        android:title="@string/action_2_length"
+        android:inputType="numberDecimal"
+        android:digits="0123456789"
+        android:defaultValue="1000" />
+    <EditTextPreference
+        android:fragment="me.cyber.nukleos.ui.settings.SettingsFragment"
+        android:key="@string/action_2_intensity_key"
+        android:title="@string/action_2_intensity"
+        android:inputType="numberDecimal"
+        android:digits="0123456789"
+        android:numeric="integer"
+        android:defaultValue="127" />
+
+    <CheckBoxPreference
+        android:fragment="me.cyber.nukleos.ui.settings.SettingsFragment"
+        android:key="@string/action_3_toggle_key"
+        android:title="@string/action_3_toggle" />
+    <EditTextPreference
+        android:fragment="me.cyber.nukleos.ui.settings.SettingsFragment"
+        android:key="@string/action_3_length_key"
+        android:title="@string/action_3_length"
+        android:inputType="numberDecimal"
+        android:digits="0123456789"
+        android:defaultValue="1000" />
+    <EditTextPreference
+        android:fragment="me.cyber.nukleos.ui.settings.SettingsFragment"
+        android:key="@string/action_3_intensity_key"
+        android:title="@string/action_3_intensity"
+        android:inputType="numberDecimal"
+        android:digits="0123456789"
+        android:defaultValue="127" />
+
+    <CheckBoxPreference
+        android:fragment="me.cyber.nukleos.ui.settings.SettingsFragment"
+        android:key="@string/action_4_toggle_key"
+        android:title="@string/action_4_toggle" />
+    <EditTextPreference
+        android:fragment="me.cyber.nukleos.ui.settings.SettingsFragment"
+        android:key="@string/action_4_length_key"
+        android:title="@string/action_4_length"
+        android:inputType="numberDecimal"
+        android:digits="0123456789"
+        android:defaultValue="1000" />
+    <EditTextPreference
+        android:fragment="me.cyber.nukleos.ui.settings.SettingsFragment"
+        android:key="@string/action_4_intensity_key"
+        android:title="@string/action_4_intensity"
+        android:inputType="numberDecimal"
+        android:digits="0123456789"
+        android:defaultValue="127" />
+
 </PreferenceScreen>
