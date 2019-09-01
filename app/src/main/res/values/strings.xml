@@ -69,13 +69,42 @@
     <string name="calibrate">CALIBRATE EXISTING MODEL</string>
     <string name="predict">Predict</string>
     <string name="onlinePredict">Online mode</string>
-    <string name="motor">motor</string>
-    <string name="direction">direction</string>
-    <string name="speed">speed</string>
+    <string name="action1">1</string>
+    <string name="action2">2</string>
+    <string name="action3">3</string>
+    <string name="action4">4</string>
 
+    <string name="settings_menu">Settings</string>
     <string name="server_address">Server address</string>
     <string name="server_address_key">server_address</string>
-    <string name="settings_menu">Settings</string>
+
+    <string name="action_1_toggle">Action 1 toggle</string>
+    <string name="action_1_toggle_key">action_1_toggle</string>
+    <string name="action_1_intensity">Action 1 intensity</string>
+    <string name="action_1_intensity_key">action_1_intensity</string>
+    <string name="action_1_length">Action 1 length, ms</string>
+    <string name="action_1_length_key">action_1_length</string>
+
+    <string name="action_2_toggle">Action 2 toggle</string>
+    <string name="action_2_toggle_key">action_2_toggle</string>
+    <string name="action_2_intensity">Action 2 intensity</string>
+    <string name="action_2_intensity_key">action_2_intensity</string>
+    <string name="action_2_length">Action 2 length, ms</string>
+    <string name="action_2_length_key">action_2_length</string>
+
+    <string name="action_3_toggle">Action 3 toggle</string>
+    <string name="action_3_toggle_key">action_3_toggle</string>
+    <string name="action_3_intensity">Action 3 intensity</string>
+    <string name="action_3_intensity_key">action_3_intensity</string>
+    <string name="action_3_length">Action 3 length, ms</string>
+    <string name="action_3_length_key">action_3_length</string>
+
+    <string name="action_4_toggle">Action 4 toggle</string>
+    <string name="action_4_toggle_key">action_4_toggle</string>
+    <string name="action_4_intensity">Action 4 intensity</string>
+    <string name="action_4_intensity_key">action_4_intensity</string>
+    <string name="action_4_length">Action 4 length, ms</string>
+    <string name="action_4_length_key">action_4_length</string>
 
     <string-array name="dataTypes">
         <item>0</item>

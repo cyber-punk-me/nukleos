@@ -2,8 +2,8 @@ package me.cyber.nukleos.ui.settings
 
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.support.v7.preference.Preference
 import android.support.v7.preference.PreferenceFragmentCompat
-import android.util.Log
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -19,6 +19,10 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     companion object {
         fun newInstance() = SettingsFragment()
         const val serverAddress = "server_address"
+        val defaultDuration = 1000
+        val maxDuration = 1000
+        val defaultIntensity = 127
+        val maxIntensity = 127
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -34,6 +38,38 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         for (entry in sharedPreferences.all.entries) {
             updateSummary(entry.key)
         }
+
+        addActionLengthValidation(findPreference("action_1_length"), findPreference("action_2_length"),
+                findPreference("action_3_length"), findPreference("action_4_length"))
+
+        addActionIntensityValidation(findPreference("action_1_intensity"), findPreference("action_2_intensity"),
+                findPreference("action_3_intensity"), findPreference("action_4_intensity"))
+    }
+
+    fun addActionLengthValidation(vararg prefs: Preference) {
+        prefs.forEach {
+            it.setOnPreferenceChangeListener { preference, any ->
+                try {
+                    val value = Integer.parseInt(any.toString())
+                    value in 1 .. maxDuration
+                } catch (t : Throwable) {
+                    false
+                }
+            }
+        }
+    }
+
+    fun addActionIntensityValidation(vararg prefs: Preference) {
+        prefs.forEach {
+            it.setOnPreferenceChangeListener { preference, any ->
+                try {
+                    val value = Integer.parseInt(any.toString())
+                    value in 1 .. maxIntensity
+                } catch (t: Throwable) {
+                    false
+                }
+            }
+        }
     }
 
     override fun onPause() {
@@ -45,7 +81,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences,
                                            key: String) {
         updateSummary(key)
-        when(key) {
+        when (key) {
             serverAddress -> checkConnection()
         }
     }
@@ -65,7 +101,21 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
 
         val sharedPreferences = preferenceManager.sharedPreferences
         val preference = findPreference(key) ?: return
-        preference.summary = sharedPreferences.getString(key, "")
+        when (key) {
+            serverAddress -> preference.summary = sharedPreferences.getString(key, "")
+            else -> {
+                try {
+                    preference.summary = "" + sharedPreferences.getString(key, "")
+                } catch (t: Throwable) {
+                    try {
+                        preference.summary = "" + sharedPreferences.getBoolean(key, false)
+                    } catch (t: Throwable) {
+                    }
+                }
+
+            }
+        }
+
     }
 
 }
