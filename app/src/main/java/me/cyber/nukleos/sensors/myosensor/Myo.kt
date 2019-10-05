@@ -9,8 +9,8 @@ import io.reactivex.subjects.BehaviorSubject
 import me.cyber.nukleos.App
 import me.cyber.nukleos.sensors.LastKnownSensorManager
 import me.cyber.nukleos.sensors.Sensor
+import me.cyber.nukleos.sensors.Sensor.Companion.onData
 import me.cyber.nukleos.sensors.Status
-import me.cyber.nukleos.ui.predict.PredictionService
 import me.cyber.nukleos.utils.isStartStreamingCommand
 import me.cyber.nukleos.utils.isStopStreamingCommand
 import java.util.*
@@ -232,8 +232,12 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
                 byteReader.byteData = emgData
                 try {
                     // We receive 16 bytes of data. Let's cut them in 2 and deliver both of them.
-                    dataProcessor.onNext(byteReader.getBytes(EMG_ARRAY_SIZE / 2))
-                    dataProcessor.onNext(byteReader.getBytes(EMG_ARRAY_SIZE / 2))
+                    val bytes0 = byteReader.getBytes(EMG_ARRAY_SIZE / 2)
+                    //dataProcessor.onNext(bytes0)
+                    onData(bytes0!!)
+                    val bytes1 = byteReader.getBytes(EMG_ARRAY_SIZE / 2)
+                    //dataProcessor.onNext(bytes1)
+                    onData(bytes1!!)
                 } catch (t: Throwable) {
                     //todo figure why sometimes we see buffer underflows
                     Log.w(TAG, "Myo data handling problem", t)

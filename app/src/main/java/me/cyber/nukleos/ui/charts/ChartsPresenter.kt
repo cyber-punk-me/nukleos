@@ -7,6 +7,8 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.App
 import me.cyber.nukleos.dagger.PeripheryManager
+import me.cyber.nukleos.sensors.Sensor
+import me.cyber.nukleos.sensors.SensorListener
 import me.cyber.nukleos.ui.charts.ChartsFragment.Companion.LEARNING_TIME
 import me.cyber.nukleos.ui.charts.ChartsFragment.Companion.TIMER_COUNT
 import me.cyber.nukleos.ui.predict.PredictionService
@@ -15,7 +17,8 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
-class ChartsPresenter(override val view: ChartInterface.View, private val mPeripheryManager: PeripheryManager) : ChartInterface.Presenter(view) {
+class ChartsPresenter(override val view: ChartInterface.View, private val mPeripheryManager: PeripheryManager)
+    : ChartInterface.Presenter(view), SensorListener {
 
     private val TAG = "ChartsPresenter"
     private val millsBetweenReads = 5
@@ -131,7 +134,14 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
 
     override fun create() {}
 
+    override fun onSensorData(data: FloatArray) {
+        with(view) {
+            showData(data)
+        }
+    }
+
     override fun start() {
+        Sensor.registerSensorListener(TAG, this)
         with(view) {
             //TODO we should support several sensors
             val firstStreamingSensor = mPeripheryManager.getActiveSensor()
@@ -141,14 +151,17 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
             }
 
             hideNoStreamingMessage()
-            mChartsDataSubscription?.apply {
+/*            mChartsDataSubscription?.apply {
                 if (isDisposed) this.dispose()
             }
             mChartsDataSubscription = firstStreamingSensor.getDataFlowable()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnSubscribe { startCharts(true) }
-                    .subscribe { showData(it) }
+                    .subscribe { showData(it) }*/
+
+            startCharts(true)
+
         }
         getServerTimeDiff()
     }
@@ -237,6 +250,7 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
 
     override fun destroy() {
         view.startCharts(false)
+        Sensor.removeSensorListener(TAG)
         mDataSubscription?.dispose()
         mChartsDataSubscription?.dispose()
         mPostDataSubscription?.dispose()
