@@ -5,8 +5,7 @@ import android.os.Message
 import android.util.Log
 import com.felhr.usbserial.UsbSerialDevice
 import com.felhr.usbserial.UsbSerialInterface
-import io.reactivex.Flowable
-import io.reactivex.processors.PublishProcessor
+import me.cyber.nukleos.sensors.Sensor
 import me.cyber.nukleos.utils.showLongToast
 
 /*
@@ -42,20 +41,14 @@ class UsbHandler : Handler() {
         obtainMessage(UsbService.DSR_CHANGE)?.sendToTarget()
     }
 
+    var thisSensor: Sensor? = null
 
     private var i = 1
-
-    private val dataProcessor: PublishProcessor<FloatArray> = PublishProcessor.create()
 
     private fun getGraphData(input: IntArray): FloatArray {
         val reads = input.slice(0..7)
         //todo magic number
         return reads.map { i -> i / 80000f }.toFloatArray()
-    }
-
-    fun dataFlowable(): Flowable<FloatArray> {
-        return dataProcessor.onBackpressureDrop()
-        //return dataProcessor.sample((MILLION / frequency).toLong(), TimeUnit.MICROSECONDS).onBackpressureDrop()
     }
 
     override fun handleMessage(msg: Message) {
@@ -69,7 +62,7 @@ class UsbHandler : Handler() {
                 val packet = UsbService.readPacket(data)
                 if (packet != null) {
                     val graphData = getGraphData(packet)
-                    dataProcessor.onNext(graphData)
+                    Sensor.onData(thisSensor?.name ?: "usb-sensor", graphData)
                     //Log.d("Synaps", graphData.toString())
                     if (i < frequency) {
                         i++

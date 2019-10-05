@@ -1,18 +1,21 @@
 package me.cyber.nukleos.ui.predict
 
 import android.content.Intent
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.App
 import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.api.PredictResponse
 import me.cyber.nukleos.api.Prediction
 import me.cyber.nukleos.control.TryControl
 import me.cyber.nukleos.dagger.PeripheryManager
+import me.cyber.nukleos.sensors.Sensor
+import me.cyber.nukleos.sensors.SensorListener
 import me.cyber.nukleos.utils.LimitedQueue
 
-class PredictPresenter(override val view: PredictInterface.View, private val mPeripheryManager: PeripheryManager) : PredictInterface.Presenter(view) {
+class PredictPresenter(override val view: PredictInterface.View, private val mPeripheryManager: PeripheryManager)
+    : PredictInterface.Presenter(view), SensorListener {
+
+    private val TAG = "PredictPresenter"
 
     private var mChartsDataSubscription: Disposable? = null
     private var mDownloadModelSubscription: Disposable? = null
@@ -33,7 +36,17 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
     override fun create() {}
 
     override fun start() {
+        Sensor.registerSensorListener(TAG, this)
+        with(view) {
+            startCharts(true)
+        }
         initializePrediction()
+    }
+
+    override fun onSensorData(sensorName: String, data: FloatArray) {
+        with(view) {
+            showData(data)
+        }
     }
 
     private fun initializePrediction() {
@@ -41,7 +54,7 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
             val selectedSensor = mPeripheryManager.getActiveSensor() ?: return
             selectedSensor.apply {
                 hideNoStreamingMessage()
-                mChartsDataSubscription?.apply {
+ /*               mChartsDataSubscription?.apply {
                     if (isDisposed) this.dispose()
                 }
                 mChartsDataSubscription = this.getDataFlowable()
@@ -59,7 +72,7 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
                             if (predictEnabled) {
                                 predict()
                             }
-                        }
+                        }*/
             }
         }
     }
@@ -123,6 +136,7 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
 
     override fun destroy() {
         predictEnabled = false
+        Sensor.removeSensorListener(TAG)
         view.startCharts(false)
         mChartsDataSubscription?.dispose()
         mDownloadModelSubscription?.dispose()

@@ -47,7 +47,9 @@ class PredictFragment : BaseFragment<PredictInterface.Presenter>(), PredictInter
     }
 
     override fun showData(data: FloatArray) {
-        sensor_charts_predict_view?.addNewPoint(data)
+        activity?.runOnUiThread {
+            sensor_charts_predict_view?.addNewPoint(data)
+        }
     }
 
     override fun updateMotors(iMotor: Int, direction: Int, speed: Int) = "motor $iMotor moving $direction at $speed".showShortToast()

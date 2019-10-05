@@ -1,7 +1,6 @@
 package me.cyber.nukleos.sensors.synaps
 
 import com.felhr.usbserial.UsbSerialDevice
-import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 import me.cyber.nukleos.sensors.LastKnownSensorManager
@@ -35,10 +34,7 @@ class UsbSensor(private val usbHandler: UsbHandler, private val serialPort: UsbS
 
     init {
         connectionStatusSubject.onNext(Status.STREAMING)
-    }
-
-    override fun getDataFlowable(): Flowable<FloatArray> {
-        return usbHandler.dataFlowable()
+        usbHandler.thisSensor = this
     }
 
     override val name: String = "Synaps ${serialPort.deviceId}"

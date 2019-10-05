@@ -10,11 +10,9 @@ import me.cyber.nukleos.dagger.PeripheryManager
 import me.cyber.nukleos.sensors.Sensor
 import me.cyber.nukleos.sensors.SensorListener
 import me.cyber.nukleos.ui.charts.ChartsFragment.Companion.LEARNING_TIME
-import me.cyber.nukleos.ui.charts.ChartsFragment.Companion.TIMER_COUNT
 import me.cyber.nukleos.ui.predict.PredictionService
 import me.cyber.nukleos.utils.showShortToast
 import java.util.*
-import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
 class ChartsPresenter(override val view: ChartInterface.View, private val mPeripheryManager: PeripheryManager)
@@ -134,7 +132,7 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
 
     override fun create() {}
 
-    override fun onSensorData(data: FloatArray) {
+    override fun onSensorData(sensorName: String, data: FloatArray) {
         with(view) {
             showData(data)
         }
@@ -187,6 +185,8 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
                 goToState(ChartInterface.State.COUNTDOWN)
                 hideNoStreamingMessage()
                 mDataSubscription?.dispose()
+                /*
+                todo collect data
                 mDataSubscription = this.getDataFlowable()
                         .skip(TIMER_COUNT, TimeUnit.SECONDS)
                         .subscribeOn(Schedulers.io())
@@ -198,7 +198,7 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
                         }
                         .subscribe {
                             dataBuffer.add(it)
-                        }
+                        }*/
             }
         }
     }

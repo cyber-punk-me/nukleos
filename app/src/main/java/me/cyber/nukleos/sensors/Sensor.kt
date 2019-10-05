@@ -1,14 +1,10 @@
 package me.cyber.nukleos.sensors
 
-import io.reactivex.Flowable
 import io.reactivex.Observable
-import it.unimi.dsi.fastutil.ints.Int2IntMaps
 import java.util.*
 import kotlin.collections.HashMap
 
 interface Sensor {
-
-    fun getDataFlowable(): Flowable<FloatArray>
 
     val name: String
 
@@ -33,16 +29,18 @@ interface Sensor {
     fun getAvailableFrequencies(): List<Int>
 
     companion object {
-        fun registerSensorListener(name : String, sensorListener: SensorListener) {
-            sensorListeners[name] = sensorListener
+        fun registerSensorListener(listenerName : String, sensorListener: SensorListener) {
+            sensorListeners[listenerName] = sensorListener
         }
 
-        fun removeSensorListener(name : String) {
-            sensorListeners.remove(name)
+        fun removeSensorListener(listenerName : String) {
+            sensorListeners.remove(listenerName)
         }
 
-        fun onData(data: FloatArray) {
-            sensorListeners.forEach{n, s -> s.onSensorData(data)}
+        fun onData(sensorName: String, data: FloatArray) {
+            synchronized(sensorListeners) {
+                sensorListeners.forEach { (_, s) -> s.onSensorData(sensorName, data) }
+            }
         }
 
         private val sensorListeners: MutableMap<String, SensorListener>
@@ -51,7 +49,7 @@ interface Sensor {
 }
 
 interface SensorListener {
-    fun onSensorData(data : FloatArray)
+    fun onSensorData(sensorName: String, data : FloatArray)
 }
 
 enum class Status {

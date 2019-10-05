@@ -2,9 +2,7 @@ package me.cyber.nukleos.sensors.myosensor
 
 import android.bluetooth.*
 import android.util.Log
-import io.reactivex.Flowable
 import io.reactivex.Observable
-import io.reactivex.processors.PublishProcessor
 import io.reactivex.subjects.BehaviorSubject
 import me.cyber.nukleos.App
 import me.cyber.nukleos.sensors.LastKnownSensorManager
@@ -14,7 +12,6 @@ import me.cyber.nukleos.sensors.Status
 import me.cyber.nukleos.utils.isStartStreamingCommand
 import me.cyber.nukleos.utils.isStopStreamingCommand
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 
 class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback() {
@@ -34,14 +31,13 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
 
     override val address: String
         get() = device.address
-    //todo fix flowable & frequency bug. for now 0 fixes it temporarily
+
     private var frequency: Int = 0//MYO_MAX_FREQUENCY
 
     private var keepAlive = true
     private var lastKeepAlive = 0L
 
     private val connectionStatusSubject: BehaviorSubject<Status> = BehaviorSubject.createDefault(Status.AVAILABLE)
-    private val dataProcessor: PublishProcessor<FloatArray> = PublishProcessor.create()
 
     private var gatt: BluetoothGatt? = null
     private var byteReader = ByteReader()
@@ -72,14 +68,6 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
     override fun isConnected() = connectionStatusSubject.value == Status.STREAMING
 
     override fun statusObservable(): Observable<Status> = connectionStatusSubject
-
-    override fun getDataFlowable(): Flowable<FloatArray> {
-        return if (frequency == 0) {
-            dataProcessor.onBackpressureDrop()
-        } else {
-            dataProcessor.sample((1000 / frequency).toLong(), TimeUnit.MILLISECONDS).onBackpressureDrop()
-        }
-    }
 
     private fun sendCommand(command: Command): Boolean {
         characteristicCommand?.apply {
@@ -234,10 +222,10 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
                     // We receive 16 bytes of data. Let's cut them in 2 and deliver both of them.
                     val bytes0 = byteReader.getBytes(EMG_ARRAY_SIZE / 2)
                     //dataProcessor.onNext(bytes0)
-                    onData(bytes0!!)
+                    onData(name, bytes0!!)
                     val bytes1 = byteReader.getBytes(EMG_ARRAY_SIZE / 2)
                     //dataProcessor.onNext(bytes1)
-                    onData(bytes1!!)
+                    onData(name, bytes1!!)
                 } catch (t: Throwable) {
                     //todo figure why sometimes we see buffer underflows
                     Log.w(TAG, "Myo data handling problem", t)
