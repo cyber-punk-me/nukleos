@@ -17,7 +17,13 @@ interface Sensor {
 
     fun disconnect()
 
-    fun isConnected() : Boolean = statusObservable().last(AVAILABLE).equals(STREAMING)
+    fun isConnected() : Boolean {
+        return if (statusObservable().hasValue()) {
+            STREAMING == statusObservable().value
+        } else {
+            false
+        }
+    }
 
     fun isSignalSupported(): Boolean
 
