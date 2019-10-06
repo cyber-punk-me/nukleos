@@ -2,7 +2,6 @@ package me.cyber.nukleos.sensors.myosensor
 
 import android.bluetooth.*
 import android.util.Log
-import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 import me.cyber.nukleos.App
 import me.cyber.nukleos.sensors.LastKnownSensorManager
@@ -65,9 +64,7 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
         connectionStatusSubject.onNext(Status.AVAILABLE)
     }
 
-    override fun isConnected() = connectionStatusSubject.value == Status.STREAMING
-
-    override fun statusObservable(): Observable<Status> = connectionStatusSubject
+    override fun statusObservable() = connectionStatusSubject
 
     private fun sendCommand(command: Command): Boolean {
         characteristicCommand?.apply {
@@ -246,10 +243,10 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
 
     override fun hashCode(): Int = address.hashCode()
 
-    override fun isVibrationSupported(): Boolean = true
+    override fun isSignalSupported(): Boolean = true
 
-    override fun vibration(duration: Int) {
-        sendCommand(when (duration) {
+    override fun signal(param: String) {
+        sendCommand(when (Integer.parseInt(param)) {
             1 -> CommandList.vibration1()
             2 -> CommandList.vibration2()
             else -> CommandList.vibration3()

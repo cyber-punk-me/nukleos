@@ -40,7 +40,7 @@ class UsbSensor(private val usbHandler: UsbHandler, private val serialPort: UsbS
     override val name: String = "Synaps ${serialPort.deviceId}"
     override val address: String = serialPort.portName
 
-    override fun statusObservable(): Observable<Status> = connectionStatusSubject
+    override fun statusObservable() = connectionStatusSubject
 
     private fun stopStreaming() {
         write("s".toByteArray(), serialPort)
@@ -54,11 +54,9 @@ class UsbSensor(private val usbHandler: UsbHandler, private val serialPort: UsbS
     override fun disconnect() {
     }
 
-    override fun isConnected(): Boolean = true
+    override fun isSignalSupported(): Boolean = false
 
-    override fun isVibrationSupported(): Boolean = false
-
-    override fun vibration(duration: Int) = throw NotImplementedError()
+    override fun signal(param: String) = throw NotImplementedError()
 
     override fun getFrequency(): Int = getAvailableFrequencies().first()
 

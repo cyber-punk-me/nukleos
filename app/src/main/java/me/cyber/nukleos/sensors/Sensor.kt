@@ -1,6 +1,7 @@
 package me.cyber.nukleos.sensors
 
-import io.reactivex.Observable
+import io.reactivex.subjects.BehaviorSubject
+import me.cyber.nukleos.sensors.Status.*
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -10,17 +11,17 @@ interface Sensor {
 
     val address: String
 
-    fun statusObservable(): Observable<Status>
+    fun statusObservable(): BehaviorSubject<Status>
 
     fun connect()
 
     fun disconnect()
 
-    fun isConnected(): Boolean
+    fun isConnected() : Boolean = statusObservable().last(AVAILABLE).equals(STREAMING)
 
-    fun isVibrationSupported(): Boolean
+    fun isSignalSupported(): Boolean
 
-    fun vibration(duration: Int)
+    fun signal(param: String)
 
     fun getFrequency(): Int
 

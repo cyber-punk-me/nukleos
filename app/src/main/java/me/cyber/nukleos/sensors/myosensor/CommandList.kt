@@ -39,7 +39,7 @@ object CommandList {
         return byteArrayOf(command_data, payload_data, emg_mode, imu_mode, class_mode)
     }
 
-    // short vibration
+    // short signal
     fun vibration1(): Command {
         val command_vibrate = 0x03.toByte()
         val payload_vibrate = 1.toByte()
@@ -47,7 +47,7 @@ object CommandList {
         return byteArrayOf(command_vibrate, payload_vibrate, vibrate_type)
     }
 
-    //medium vibration
+    //medium signal
     fun vibration2(): Command {
         val command_vibrate = 0x03.toByte()
         val payload_vibrate = 1.toByte()
@@ -55,7 +55,7 @@ object CommandList {
         return byteArrayOf(command_vibrate, payload_vibrate, vibrate_type)
     }
 
-    // long vibration
+    // long signal
     fun vibration3(): Command {
         val command_vibrate = 0x03.toByte()
         val payload_vibrate = 1.toByte()

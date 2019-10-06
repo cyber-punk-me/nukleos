@@ -76,7 +76,7 @@ class FindSensorFragment : BaseFragment<FindSensorInterface.Presenter>(), FindSe
         deviceList.removeIf { !sensors.contains(it.id) }
         val newSensorModels = sensors.
                 filter { sensorPair -> deviceList.all { it.id != sensorPair.key } }.
-                map { SensorModel(it.value.name, it.value.address, it.key) }
+                map { SensorModel(it.value.name, it.value.address, it.key, it.value.statusObservable()) }
         deviceList.addAll(newSensorModels)
         notifyDataSetChanged()
     }

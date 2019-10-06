@@ -83,7 +83,7 @@ class SensorStuffPresenter(override val view: SensorControlInterface.View, priva
 
     override fun onVibrationClicked(vibrationDuration: Int) {
         mPeripheryManager.getLastSelectedSensor()?.apply {
-            vibration(vibrationDuration)
+            signal("$vibrationDuration")
         }
     }
 }
