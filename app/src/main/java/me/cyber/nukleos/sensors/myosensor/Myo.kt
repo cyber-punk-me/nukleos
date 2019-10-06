@@ -220,14 +220,10 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
                 byteReader.byteData = emgData
                 try {
                     // We receive 16 bytes of data. Let's cut them in 2 and deliver both of them.
-                    val bytes0 = byteReader.getBytes(EMG_ARRAY_SIZE / 2)
-                    //dataProcessor.onNext(bytes0)
-                    onData(name, bytes0!!)
-                    val bytes1 = byteReader.getBytes(EMG_ARRAY_SIZE / 2)
-                    //dataProcessor.onNext(bytes1)
-                    onData(name, bytes1!!)
+                    val bytes0 = byteReader.getBytes(EMG_ARRAY_SIZE / 2)!!
+                    val bytes1 = byteReader.getBytes(EMG_ARRAY_SIZE / 2)!!
+                    onData(name, bytes0, bytes1)
                 } catch (t: Throwable) {
-                    //todo figure why sometimes we see buffer underflows
                     Log.w(TAG, "Myo data handling problem", t)
                 }
             } else {

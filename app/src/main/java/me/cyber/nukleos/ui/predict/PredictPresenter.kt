@@ -43,9 +43,11 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
         initializePrediction()
     }
 
-    override fun onSensorData(sensorName: String, data: FloatArray) {
-        with(view) {
-            showData(data)
+    override fun onSensorData(sensorName: String, vararg data: FloatArray) {
+        data.forEach {
+            with(view) {
+                showData(it)
+            }
         }
     }
 

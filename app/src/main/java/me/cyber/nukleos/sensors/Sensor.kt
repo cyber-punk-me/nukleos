@@ -37,9 +37,11 @@ interface Sensor {
             sensorListeners.remove(listenerName)
         }
 
-        fun onData(sensorName: String, data: FloatArray) {
+        fun onData(sensorName: String, vararg data: FloatArray) {
             synchronized(sensorListeners) {
-                sensorListeners.forEach { (_, s) -> s.onSensorData(sensorName, data) }
+                sensorListeners.forEach {
+                    (_, s) ->
+                    s.onSensorData(sensorName, *data) }
             }
         }
 
@@ -49,7 +51,7 @@ interface Sensor {
 }
 
 interface SensorListener {
-    fun onSensorData(sensorName: String, data : FloatArray)
+    fun onSensorData(sensorName: String, vararg data : FloatArray)
 }
 
 enum class Status {
