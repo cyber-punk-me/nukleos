@@ -6,7 +6,6 @@ import io.reactivex.subjects.BehaviorSubject
 import me.cyber.nukleos.App
 import me.cyber.nukleos.sensors.LastKnownSensorManager
 import me.cyber.nukleos.sensors.Sensor
-import me.cyber.nukleos.sensors.Sensor.Companion.onData
 import me.cyber.nukleos.sensors.Status
 import me.cyber.nukleos.utils.isStartStreamingCommand
 import me.cyber.nukleos.utils.isStopStreamingCommand
@@ -219,7 +218,7 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
                     // We receive 16 bytes of data. Let's cut them in 2 and deliver both of them.
                     val bytes0 = byteReader.getBytes(EMG_ARRAY_SIZE / 2)!!
                     val bytes1 = byteReader.getBytes(EMG_ARRAY_SIZE / 2)!!
-                    onData(name, listOf(bytes0, bytes1))
+                    Sensor.onData(name, listOf(bytes0, bytes1))
                 } catch (t: Throwable) {
                     Log.w(TAG, "Myo data handling problem", t)
                 }
