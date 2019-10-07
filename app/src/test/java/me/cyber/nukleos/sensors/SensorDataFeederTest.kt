@@ -63,10 +63,32 @@ class SensorDataFeederTest {
                 assertEquals(4, it.size)
             }
 
+        assertEquals(listOf(1.0f, 2.0f, 3.0f, 4.0f),
+                listener1Data[0].map { it[0] })
+
+        assertEquals(listOf(3.0f, 4.0f, 5.0f, 6.0f),
+                listener1Data[1].map { it[0] })
+
+        assertEquals(listOf(5.0f, 6.0f, 7.0f, 8.0f),
+                listener1Data[2].map { it[0] })
+
+        assertEquals(listOf(7.0f, 8.0f, 9.0f, 10.0f),
+                listener1Data[3].map { it[0] })
+
+
         assertEquals(8, listener2Data.size)
             listener2Data.forEach{
                 assertEquals(3, it.size)
             }
+
+        assertEquals(listOf(1.0f, 2.0f, 3.0f),
+                listener2Data[0].map { it[0] })
+
+        assertEquals(listOf(5.0f, 6.0f, 7.0f),
+                listener2Data[4].map { it[0] })
+
+        assertEquals(listOf(8.0f, 9.0f, 10.0f),
+                listener2Data[7].map { it[0] })
     }
 
 

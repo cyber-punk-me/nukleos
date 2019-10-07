@@ -111,8 +111,9 @@ class SensorDataFeeder {
                 for (iStart in 0 until queueSize step params.slide) {
                     if (iStart + params.window <= queueSize) {
                         val result = ArrayList<FloatArray>(params.window)
+                        val queIter = queue.iterator()
                         for (i in 0 until params.window) {
-                            result.add(queue[i])
+                            result.add(queIter.next())
                         }
                         for (i in 0 until params.slide) {
                             queue.pop()
