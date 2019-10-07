@@ -3,8 +3,6 @@ package me.cyber.nukleos.sensors
 import io.reactivex.subjects.BehaviorSubject
 import me.cyber.nukleos.sensors.Status.*
 import java.util.*
-import java.util.concurrent.ConcurrentLinkedDeque
-import java.util.concurrent.atomic.AtomicInteger
 import kotlin.collections.HashMap
 
 interface Sensor {
@@ -19,7 +17,7 @@ interface Sensor {
 
     fun disconnect()
 
-    fun isConnected() : Boolean {
+    fun isConnected(): Boolean {
         return if (statusObservable().hasValue()) {
             STREAMING == statusObservable().value
         } else {
@@ -41,8 +39,7 @@ interface Sensor {
 
         private val sensorDataFeeder: SensorDataFeeder = SensorDataFeeder()
 
-        fun registerSensorListener(listenerName: String, sensorListener: SensorListener, subscriptionParams: SubscriptionParams = SubscriptionParams(1, 1))
-                = sensorDataFeeder.registerSensorListener(listenerName, sensorListener, subscriptionParams)
+        fun registerSensorListener(listenerName: String, sensorListener: SensorListener, subscriptionParams: SubscriptionParams = SubscriptionParams(1, 1)) = sensorDataFeeder.registerSensorListener(listenerName, sensorListener, subscriptionParams)
 
         fun removeSensorListener(listenerName: String) = sensorDataFeeder.removeSensorListener(listenerName)
 
@@ -53,7 +50,7 @@ interface Sensor {
 
 interface SensorListener {
     //no slow operations here please
-    fun onSensorData(sensorName: String, data : List<FloatArray>)
+    fun onSensorData(sensorName: String, data: List<FloatArray>)
 }
 
 enum class Status {
@@ -69,47 +66,60 @@ data class SubscriptionParams(
 
 class SensorDataFeeder {
 
-    private val maxWindow = AtomicInteger(1)
-    private val dataQueue = LinkedList<FloatArray>()
+    private var maxWindow: Int = 1
+    private val dataQueues : MutableMap<String, LinkedList<FloatArray>> = HashMap()
+    private val listeners: MutableMap<String, Pair<SensorListener, SubscriptionParams>> = HashMap()
+    private val listenerSteps: MutableMap<String, Int> = HashMap()
 
-    fun size() = synchronized(sensorListeners) { maxWindow }
-
-    private val sensorListeners: MutableMap<String, Pair<SensorListener, SubscriptionParams>> = Collections.synchronizedMap(HashMap<String, Pair<SensorListener, SubscriptionParams>>())
+    fun size() = synchronized(listeners) { maxWindow }
 
     private fun updateMaxWindow() {
-        val maxWindowCurrent = sensorListeners.maxBy { it.value.second.window }?.value?.second?.window ?: 1
-        maxWindow.set(maxWindowCurrent)
+        val maxWindowCurrent = listeners.maxBy { it.value.second.window }?.value?.second?.window
+                ?: 1
+        maxWindow = maxWindowCurrent
     }
 
     fun registerSensorListener(listenerName: String, sensorListener: SensorListener, subscriptionParams: SubscriptionParams = SubscriptionParams(1, 1)) {
-        synchronized(sensorListeners) {
-            sensorListeners[listenerName] = Pair(sensorListener, subscriptionParams)
+        synchronized(listeners) {
+            listeners[listenerName] = Pair(sensorListener, subscriptionParams)
+            listenerSteps[listenerName] = 0
+            dataQueues[listenerName] = LinkedList()
             updateMaxWindow()
         }
     }
 
     fun removeSensorListener(listenerName: String) {
-        synchronized(sensorListeners) {
-            sensorListeners.remove(listenerName)
+        synchronized(listeners) {
+            listeners.remove(listenerName)
+            listenerSteps.remove(listenerName)
+            dataQueues.remove(listenerName)
             updateMaxWindow()
         }
     }
 
-    /**
-     * TODO : Invoke each time a window with given step is ready for this listener.
-     */
+    //todo multiple sensors names
     fun onData(sensorName: String, data: List<FloatArray>) {
-        synchronized(sensorListeners) {
-            data.forEach {
-                dataQueue.push(it)
+        synchronized(listeners) {
+            dataQueues.forEach { (_, q) ->
+                data.forEach {
+                    q.add(it)
+                }
             }
-            //todo chop the queue data
-            sensorListeners.forEach {
-                (_, s) ->
-                s.first.onSensorData(sensorName, data) }
-
-            while (dataQueue.size > maxWindow.get()) {
-                dataQueue.remove()
+            dataQueues.forEach { (listenerName, queue) ->
+                val params = listeners[listenerName]!!.second
+                val queueSize = queue.size
+                for (iStart in 0 until queueSize step params.slide) {
+                    if (iStart + params.window <= queueSize) {
+                        val result = ArrayList<FloatArray>(params.window)
+                        for (i in 0 until params.window) {
+                            result.add(queue[i])
+                        }
+                        for (i in 0 until params.slide) {
+                            queue.pop()
+                        }
+                        listeners[listenerName]!!.first.onSensorData(sensorName, result)
+                    }
+                }
             }
         }
     }

@@ -33,6 +33,42 @@ class SensorDataFeederTest {
         assertEquals(assumedData, listener1Data)
     }
 
+    @Test
+    fun testFeederListenersWindow() {
+        val listener1Data = ArrayList<List<FloatArray>>()
+        val listener2Data = ArrayList<List<FloatArray>>()
+
+        val feeder = SensorDataFeeder()
+        feeder.registerSensorListener("42", object : SensorListener{
+            override fun onSensorData(sensorName: String, data: List<FloatArray>) {
+                    listener1Data.add(data)
+            }
+        }, SubscriptionParams(4, 2))
+
+        feeder.registerSensorListener("31", object : SensorListener{
+            override fun onSensorData(sensorName: String, data: List<FloatArray>) {
+                    listener2Data.add(data)
+            }
+        }, SubscriptionParams(3, 1))
+
+        assertEquals(4, feeder.size())
+
+        feeder.onData("sensor1", listOf(floatArrayOf(1.0f), floatArrayOf(2.0f), floatArrayOf(3.0f)))
+        feeder.onData("sensor1", listOf(floatArrayOf(4.0f), floatArrayOf(5.0f), floatArrayOf(6.0f)))
+        feeder.onData("sensor1", listOf(floatArrayOf(7.0f), floatArrayOf(8.0f), floatArrayOf(9.0f), floatArrayOf(10.0f)))
+
+
+        assertEquals(4, listener1Data.size)
+            listener1Data.forEach{
+                assertEquals(4, it.size)
+            }
+
+        assertEquals(8, listener2Data.size)
+            listener2Data.forEach{
+                assertEquals(3, it.size)
+            }
+    }
+
 
 }
 
