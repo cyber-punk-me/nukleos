@@ -25,9 +25,9 @@ interface Sensor {
         }
     }
 
-    fun isSignalSupported(): Boolean
+    fun isFeedbackSupported(): Boolean
 
-    fun signal(param: String)
+    fun feedback(param: String)
 
     fun getFrequency(): Int
 
@@ -36,7 +36,7 @@ interface Sensor {
     fun getAvailableFrequencies(): List<Int>
 
     companion object {
-        fun registerSensorListener(listenerName : String, sensorListener: SensorListener) {
+        fun registerSensorListener(listenerName : String, sensorListener: SensorListener, subscriptionParams: SubscriptionParams = SubscriptionParams(1, 1)) {
             sensorListeners[listenerName] = sensorListener
         }
 
@@ -44,11 +44,14 @@ interface Sensor {
             sensorListeners.remove(listenerName)
         }
 
-        fun onData(sensorName: String, vararg data: FloatArray) {
+        /**
+         * TODO : Invoke each time a window with given step is ready for this listener.
+         */
+        fun onData(sensorName: String, data: List<FloatArray>) {
             synchronized(sensorListeners) {
                 sensorListeners.forEach {
                     (_, s) ->
-                    s.onSensorData(sensorName, *data) }
+                    s.onSensorData(sensorName, data) }
             }
         }
 
@@ -58,7 +61,7 @@ interface Sensor {
 }
 
 interface SensorListener {
-    fun onSensorData(sensorName: String, vararg data : FloatArray)
+    fun onSensorData(sensorName: String, data : List<FloatArray>)
 }
 
 enum class Status {
@@ -66,3 +69,8 @@ enum class Status {
     CONNECTING,
     STREAMING
 }
+
+data class SubscriptionParams(
+        val window: Int,
+        val slide: Int
+)

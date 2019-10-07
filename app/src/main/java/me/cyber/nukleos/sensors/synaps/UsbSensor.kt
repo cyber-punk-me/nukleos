@@ -54,9 +54,9 @@ class UsbSensor(private val usbHandler: UsbHandler, private val serialPort: UsbS
     override fun disconnect() {
     }
 
-    override fun isSignalSupported(): Boolean = false
+    override fun isFeedbackSupported(): Boolean = false
 
-    override fun signal(param: String) = throw NotImplementedError()
+    override fun feedback(param: String) = throw NotImplementedError()
 
     override fun getFrequency(): Int = getAvailableFrequencies().first()
 

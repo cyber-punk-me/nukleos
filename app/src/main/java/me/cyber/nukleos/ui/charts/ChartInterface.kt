@@ -10,7 +10,7 @@ interface ChartInterface {
     }
 
     interface View : BaseView {
-        fun showData(data: FloatArray)
+        fun showData(data: List<FloatArray>)
         fun startCharts(isRunning: Boolean)
         fun hideNoStreamingMessage()
         fun showNoStreamingMessage()

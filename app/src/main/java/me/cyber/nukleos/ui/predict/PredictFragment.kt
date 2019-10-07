@@ -46,9 +46,11 @@ class PredictFragment : BaseFragment<PredictInterface.Presenter>(), PredictInter
         predict_online_toggle.setOnClickListener { predictPresenter.onPredictSwitched(predict_toggle.isChecked, predict_online_toggle.isChecked) }
     }
 
-    override fun showData(data: FloatArray) {
+    override fun showData(data: List<FloatArray>) {
         activity?.runOnUiThread {
-            sensor_charts_predict_view?.addNewPoint(data)
+            data.forEach {
+                sensor_charts_predict_view?.addNewPoint(it)
+            }
         }
     }
 

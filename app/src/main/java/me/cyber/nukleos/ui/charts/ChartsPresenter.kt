@@ -132,11 +132,9 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
 
     override fun create() {}
 
-    override fun onSensorData(sensorName: String, vararg data: FloatArray) {
-        data.forEach {
-            with(view) {
-                showData(it)
-            }
+    override fun onSensorData(sensorName: String, data: List<FloatArray>) {
+        with(view) {
+            showData(data)
         }
     }
 

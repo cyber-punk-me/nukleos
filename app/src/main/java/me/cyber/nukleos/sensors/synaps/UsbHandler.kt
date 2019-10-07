@@ -62,7 +62,7 @@ class UsbHandler : Handler() {
                 val packet = UsbService.readPacket(data)
                 if (packet != null) {
                     val graphData = getGraphData(packet)
-                    Sensor.onData(thisSensor?.name ?: "usb-sensor", graphData)
+                    Sensor.onData(thisSensor?.name ?: "usb-sensor", listOf(graphData))
                     //Log.d("Synaps", graphData.toString())
                     if (i < frequency) {
                         i++

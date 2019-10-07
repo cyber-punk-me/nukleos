@@ -219,7 +219,7 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
                     // We receive 16 bytes of data. Let's cut them in 2 and deliver both of them.
                     val bytes0 = byteReader.getBytes(EMG_ARRAY_SIZE / 2)!!
                     val bytes1 = byteReader.getBytes(EMG_ARRAY_SIZE / 2)!!
-                    onData(name, bytes0, bytes1)
+                    onData(name, listOf(bytes0, bytes1))
                 } catch (t: Throwable) {
                     Log.w(TAG, "Myo data handling problem", t)
                 }
@@ -243,9 +243,9 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
 
     override fun hashCode(): Int = address.hashCode()
 
-    override fun isSignalSupported(): Boolean = true
+    override fun isFeedbackSupported(): Boolean = true
 
-    override fun signal(param: String) {
+    override fun feedback(param: String) {
         sendCommand(when (Integer.parseInt(param)) {
             1 -> CommandList.vibration1()
             2 -> CommandList.vibration2()

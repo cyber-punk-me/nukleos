@@ -21,7 +21,8 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
     private var mDownloadModelSubscription: Disposable? = null
     private val predictionResultReceiver = PredictionResultReceiver(
             { predictedClass, distribution ->
-                onPredictionResult(predictedClass, distribution) },
+                onPredictionResult(predictedClass, distribution)
+            },
             { onPredictionError(Exception(it)) })
     private var mPostPredict: Disposable? = null
     private var predictEnabled = false
@@ -31,7 +32,8 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
     private val updatesUntilPredictOnline = 4
     private val control = TryControl()
 
-    @Volatile private var predictionInProgress = false
+    @Volatile
+    private var predictionInProgress = false
 
     override fun create() {}
 
@@ -43,11 +45,9 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
         initializePrediction()
     }
 
-    override fun onSensorData(sensorName: String, vararg data: FloatArray) {
-        data.forEach {
-            with(view) {
-                showData(it)
-            }
+    override fun onSensorData(sensorName: String, data: List<FloatArray>) {
+        with(view) {
+            showData(data)
         }
     }
 
@@ -56,7 +56,8 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
             val selectedSensor = mPeripheryManager.getActiveSensor() ?: return
             selectedSensor.apply {
                 hideNoStreamingMessage()
- /*               mChartsDataSubscription?.apply {
+                /*
+                mChartsDataSubscription?.apply {
                     if (isDisposed) this.dispose()
                 }
                 mChartsDataSubscription = this.getDataFlowable()
@@ -74,7 +75,8 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
                             if (predictEnabled) {
                                 predict()
                             }
-                        }*/
+                        }
+                */
             }
         }
     }
