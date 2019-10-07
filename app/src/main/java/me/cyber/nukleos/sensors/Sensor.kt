@@ -36,27 +36,16 @@ interface Sensor {
     fun getAvailableFrequencies(): List<Int>
 
     companion object {
-        fun registerSensorListener(listenerName : String, sensorListener: SensorListener, subscriptionParams: SubscriptionParams = SubscriptionParams(1, 1)) {
-            sensorListeners[listenerName] = sensorListener
-        }
 
-        fun removeSensorListener(listenerName : String) {
-            sensorListeners.remove(listenerName)
-        }
+        private val sensorDataFeeder: SensorDataFeeder = SensorDataFeeder()
 
-        /**
-         * TODO : Invoke each time a window with given step is ready for this listener.
-         */
-        fun onData(sensorName: String, data: List<FloatArray>) {
-            synchronized(sensorListeners) {
-                sensorListeners.forEach {
-                    (_, s) ->
-                    s.onSensorData(sensorName, data) }
-            }
-        }
+        fun registerSensorListener(listenerName: String, sensorListener: SensorListener, subscriptionParams: SubscriptionParams = SubscriptionParams(1, 1))
+                = sensorDataFeeder.registerSensorListener(listenerName, sensorListener, subscriptionParams)
 
-        private val sensorListeners: MutableMap<String, SensorListener>
-                = Collections.synchronizedMap(HashMap<String, SensorListener>())
+        fun removeSensorListener(listenerName: String) = sensorDataFeeder.removeSensorListener(listenerName)
+
+        fun onData(sensorName: String, data: List<FloatArray>) = sensorDataFeeder.onData(sensorName, data)
+
     }
 }
 
@@ -74,3 +63,27 @@ data class SubscriptionParams(
         val window: Int,
         val slide: Int
 )
+
+class SensorDataFeeder {
+
+    private val sensorListeners: MutableMap<String, Pair<SensorListener, SubscriptionParams>> = Collections.synchronizedMap(HashMap<String, Pair<SensorListener, SubscriptionParams>>())
+
+    fun registerSensorListener(listenerName: String, sensorListener: SensorListener, subscriptionParams: SubscriptionParams) {
+        sensorListeners[listenerName] = Pair(sensorListener, subscriptionParams)
+    }
+
+    fun removeSensorListener(listenerName: String) {
+        sensorListeners.remove(listenerName)
+    }
+
+    /**
+     * TODO : Invoke each time a window with given step is ready for this listener.
+     */
+    fun onData(sensorName: String, data: List<FloatArray>) {
+        synchronized(sensorListeners) {
+            sensorListeners.forEach {
+                (_, s) ->
+                s.first.onSensorData(sensorName, data) }
+        }
+    }
+}
