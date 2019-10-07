@@ -3,6 +3,8 @@ package me.cyber.nukleos.sensors
 import io.reactivex.subjects.BehaviorSubject
 import me.cyber.nukleos.sensors.Status.*
 import java.util.*
+import java.util.concurrent.ConcurrentLinkedDeque
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.collections.HashMap
 
 interface Sensor {
@@ -50,6 +52,7 @@ interface Sensor {
 }
 
 interface SensorListener {
+    //no slow operations here please
     fun onSensorData(sensorName: String, data : List<FloatArray>)
 }
 
@@ -66,14 +69,30 @@ data class SubscriptionParams(
 
 class SensorDataFeeder {
 
+    private val maxWindow = AtomicInteger(1)
+    private val dataQueue = LinkedList<FloatArray>()
+
+    fun size() = synchronized(sensorListeners) { maxWindow }
+
     private val sensorListeners: MutableMap<String, Pair<SensorListener, SubscriptionParams>> = Collections.synchronizedMap(HashMap<String, Pair<SensorListener, SubscriptionParams>>())
 
-    fun registerSensorListener(listenerName: String, sensorListener: SensorListener, subscriptionParams: SubscriptionParams) {
-        sensorListeners[listenerName] = Pair(sensorListener, subscriptionParams)
+    private fun updateMaxWindow() {
+        val maxWindowCurrent = sensorListeners.maxBy { it.value.second.window }?.value?.second?.window ?: 1
+        maxWindow.set(maxWindowCurrent)
+    }
+
+    fun registerSensorListener(listenerName: String, sensorListener: SensorListener, subscriptionParams: SubscriptionParams = SubscriptionParams(1, 1)) {
+        synchronized(sensorListeners) {
+            sensorListeners[listenerName] = Pair(sensorListener, subscriptionParams)
+            updateMaxWindow()
+        }
     }
 
     fun removeSensorListener(listenerName: String) {
-        sensorListeners.remove(listenerName)
+        synchronized(sensorListeners) {
+            sensorListeners.remove(listenerName)
+            updateMaxWindow()
+        }
     }
 
     /**
@@ -81,9 +100,17 @@ class SensorDataFeeder {
      */
     fun onData(sensorName: String, data: List<FloatArray>) {
         synchronized(sensorListeners) {
+            data.forEach {
+                dataQueue.push(it)
+            }
+            //todo chop the queue data
             sensorListeners.forEach {
                 (_, s) ->
                 s.first.onSensorData(sensorName, data) }
+
+            while (dataQueue.size > maxWindow.get()) {
+                dataQueue.remove()
+            }
         }
     }
 }

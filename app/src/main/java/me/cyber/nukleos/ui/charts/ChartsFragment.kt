@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.layout_charts.*
-import kotlinx.android.synthetic.main.layout_predict.*
 import me.cyber.nukleos.BaseFragment
 import me.cyber.nukleos.sensors.myosensor.MYO_CHANNELS
 import me.cyber.nukleos.sensors.myosensor.MYO_MAX_VALUE
@@ -97,7 +96,7 @@ class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.
     override fun showData(data: List<FloatArray>) {
         activity?.runOnUiThread {
             data.forEach {
-                sensor_charts_predict_view?.addNewPoint(it)
+                sensor_charts_view?.addNewPoint(it)
             }
         }
     }
