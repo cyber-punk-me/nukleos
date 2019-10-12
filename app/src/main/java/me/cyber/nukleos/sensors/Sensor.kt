@@ -41,6 +41,8 @@ interface Sensor {
 
         fun registerSensorListener(listenerName: String, sensorListener: SensorListener, subscriptionParams: SubscriptionParams = SubscriptionParams(1, 1)) = sensorDataFeeder.registerSensorListener(listenerName, sensorListener, subscriptionParams)
 
+        fun listenOnce(sensorListener: SensorListener, window: Int) = sensorDataFeeder.listenOnce(sensorListener, window)
+
         fun removeSensorListener(listenerName: String) = sensorDataFeeder.removeSensorListener(listenerName)
 
         fun onData(sensorName: String, data: List<FloatArray>) = sensorDataFeeder.onData(sensorName, data)

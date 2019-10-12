@@ -26,8 +26,6 @@ class TrainingPresenter(override val view: TrainingInterface.View, private val m
     private val mScriptId = UUID.fromString("7de76908-d4d9-4ce9-98de-118a4fb3b8f8")
     private var mServerTimeMinusLocal: Long = 0
 
-    private var mDataSubscription: Disposable? = null
-    private var mChartsDataSubscription: Disposable? = null
     private var mPostDataSubscription: Disposable? = null
     private var mTrainModelSubscription: Disposable? = null
     private var mServerTimeSubscription: Disposable? = null
@@ -128,8 +126,6 @@ class TrainingPresenter(override val view: TrainingInterface.View, private val m
                 })
     }
 
-    fun onCountdownFinished() = view.goToState(TrainingInterface.State.RECORDING)
-
     override fun create() {}
 
     override fun onSensorData(sensorName: String, data: List<FloatArray>) {
@@ -147,19 +143,8 @@ class TrainingPresenter(override val view: TrainingInterface.View, private val m
                 showNoStreamingMessage()
                 return
             }
-
             hideNoStreamingMessage()
-/*            mChartsDataSubscription?.apply {
-                if (isDisposed) this.dispose()
-            }
-            mChartsDataSubscription = firstStreamingSensor.getDataFlowable()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .doOnSubscribe { startCharts(true) }
-                    .subscribe { showData(it) }*/
-
             startCharts(true)
-
         }
         getServerTimeDiff()
     }
@@ -167,38 +152,31 @@ class TrainingPresenter(override val view: TrainingInterface.View, private val m
     override fun onCollectPressed() {
         collectData(LEARNING_TIME) {
             view.goToState(TrainingInterface.State.SENDING)
-            sendData(convertData(it,
-                    view.getDataType(), 64, 64),
-                    mLearningSessId)
+            val dataToSend = convertData(it,
+                    view.getDataType(), 64, 64)
+            sendData(dataToSend, mLearningSessId)
         }
     }
 
-    private fun collectData(collectTimeSeconds: Int, onCollected: (ArrayList<FloatArray>) -> Unit) {
-        val dataBuffer: ArrayList<FloatArray> = arrayListOf()
+    override fun onCollectStarted(dataWindow: Int, onCollected: (List<FloatArray>) -> Unit) {
+        Sensor.listenOnce(object : SensorListener{
+            override fun onSensorData(sensorName: String, data: List<FloatArray>) {
+                onCollected(data)
+            }
+        }, dataWindow)
+    }
+
+    private fun collectData(collectTimeSeconds: Int, onCollected: (List<FloatArray>) -> Unit) {
         with(view) {
             val selectedSensor = mPeripheryManager.getActiveSensor()
             if (selectedSensor == null) {
                 showNoStreamingMessage()
                 return
             }
+            val dataWindow = collectTimeSeconds * selectedSensor.getFrequency()
             selectedSensor.apply {
-                goToState(TrainingInterface.State.COUNTDOWN)
+                goToState(TrainingInterface.State.COUNTDOWN, dataWindow, onCollected)
                 hideNoStreamingMessage()
-                mDataSubscription?.dispose()
-                /*
-                todo collect data
-                mDataSubscription = this.getDataFlowable()
-                        .skip(TIMER_COUNT, TimeUnit.SECONDS)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .take(TIMER_COUNT + collectTimeSeconds, TimeUnit.SECONDS)
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .doOnComplete {
-                            onCollected(dataBuffer)
-                        }
-                        .subscribe {
-                            dataBuffer.add(it)
-                        }*/
             }
         }
     }
@@ -251,8 +229,6 @@ class TrainingPresenter(override val view: TrainingInterface.View, private val m
     override fun destroy() {
         view.startCharts(false)
         Sensor.removeSensorListener(TAG)
-        mDataSubscription?.dispose()
-        mChartsDataSubscription?.dispose()
         mPostDataSubscription?.dispose()
         mServerTimeSubscription?.dispose()
     }

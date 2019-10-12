@@ -32,15 +32,17 @@ class TrainingFragment : BaseFragment<TrainingInterface.Presenter>(), TrainingIn
     }
 
     @Inject
-    lateinit var graphPresenter: TrainingPresenter
+    lateinit var trainingPresenter: TrainingPresenter
 
     private var mDataType = ""
 
     private fun blockNavigation(blocked: Boolean) = (activity as MainActivity).blockNavigaion(blocked)
-    private fun showCountdown() {
+
+    private fun showCountdown(dataWindow: Int, onDataCollected: (List<FloatArray>) -> Unit) {
         object : CountDownTimer(TIMER_COUNT * 1000, 1000) {
             override fun onFinish() {
-                graphPresenter.onCountdownFinished()
+                trainingPresenter.view.goToState(TrainingInterface.State.RECORDING, dataWindow, onDataCollected)
+                trainingPresenter.onCollectStarted(dataWindow, onDataCollected)
             }
 
             override fun onTick(millisUntilFinished: Long) {
@@ -56,7 +58,7 @@ class TrainingFragment : BaseFragment<TrainingInterface.Presenter>(), TrainingIn
 
     override fun onAttach(context: Context?) {
         AndroidSupportInjection.inject(this)
-        attachPresenter(graphPresenter)
+        attachPresenter(trainingPresenter)
         super.onAttach(context)
     }
 
@@ -81,11 +83,11 @@ class TrainingFragment : BaseFragment<TrainingInterface.Presenter>(), TrainingIn
             }
 
         }
-        record_button.setOnClickListener { graphPresenter.onCollectPressed() }
-        train_button.setOnClickListener { graphPresenter.onTrainPressed() }
+        record_button.setOnClickListener { trainingPresenter.onCollectPressed() }
+        train_button.setOnClickListener { trainingPresenter.onTrainPressed() }
         train_button.isEnabled = false
 
-        calibrate_button.setOnClickListener { graphPresenter.onCalibratePressed() }
+        calibrate_button.setOnClickListener { trainingPresenter.onCalibratePressed() }
     }
 
     override fun notifyTrainModelStarted() = "Model training started.".showShortToast()
@@ -117,7 +119,7 @@ class TrainingFragment : BaseFragment<TrainingInterface.Presenter>(), TrainingIn
 
     override fun getDataType() = mDataType.safeToInt(-1)
 
-    override fun goToState(state: TrainingInterface.State) {
+    override fun goToState(state: TrainingInterface.State, dataWindow: Int?, onDataCollected: ((List<FloatArray>) -> Unit)?) {
         when (state) {
             TrainingInterface.State.IDLE -> {
                 countdown_layout.visibility = View.INVISIBLE
@@ -131,7 +133,7 @@ class TrainingFragment : BaseFragment<TrainingInterface.Presenter>(), TrainingIn
             TrainingInterface.State.COUNTDOWN -> {
                 record_button.isEnabled = false
                 data_type_spinner.isEnabled = false
-                showCountdown()
+                showCountdown(dataWindow!!, onDataCollected!!)
                 startCharts(false)
                 train_button.isEnabled = false
                 calibrate_button.isEnabled = false

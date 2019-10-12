@@ -14,8 +14,9 @@ interface TrainingInterface {
         fun startCharts(isRunning: Boolean)
         fun hideNoStreamingMessage()
         fun showNoStreamingMessage()
-
-        fun goToState(state : State)
+        //todo state params
+        fun goToState(state: State, dataWindow: Int? = null,
+                      onDataCollected: ((List<FloatArray>) -> Unit)? = {})
         fun getDataType(): Int
         fun setDataType(selectedType: Int)
         fun notifyDataSent()
@@ -26,6 +27,7 @@ interface TrainingInterface {
 
     abstract class Presenter(override val view: BaseView) : BasePresenter<BaseView>(view) {
         abstract fun onCollectPressed()
+        abstract fun onCollectStarted(dataWindow: Int, onCollected: (List<FloatArray>) -> Unit)
         abstract fun onTrainPressed()
         abstract fun onCalibratePressed()
 
