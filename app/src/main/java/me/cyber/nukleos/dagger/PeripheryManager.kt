@@ -26,7 +26,7 @@ class PeripheryManager {
 
     fun getSensors() = sensors.values
 
-    fun setLastSelectedSensorById(id: Long) {
+    fun setLastSelectedSensorById(id: Long?) {
         lastSelectedSensorId = id
     }
 

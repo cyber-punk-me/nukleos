@@ -46,8 +46,12 @@ class PredictFragment : BaseFragment<PredictInterface.Presenter>(), PredictInter
         predict_online_toggle.setOnClickListener { predictPresenter.onPredictSwitched(predict_toggle.isChecked, predict_online_toggle.isChecked) }
     }
 
-    override fun showData(data: FloatArray) {
-        sensor_charts_predict_view?.addNewPoint(data)
+    override fun showData(data: List<FloatArray>) {
+        activity?.runOnUiThread {
+            data.forEach {
+                sensor_charts_predict_view?.addNewPoint(it)
+            }
+        }
     }
 
     override fun updateMotors(iMotor: Int, direction: Int, speed: Int) = "motor $iMotor moving $direction at $speed".showShortToast()

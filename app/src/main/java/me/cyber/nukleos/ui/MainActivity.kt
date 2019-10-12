@@ -20,7 +20,7 @@ import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_main.*
 import me.cyber.nukleos.dagger.PeripheryManager
 import me.cyber.nukleos.sensors.synaps.UsbService
-import me.cyber.nukleos.ui.charts.ChartsFragment
+import me.cyber.nukleos.ui.training.TrainingFragment
 import me.cyber.nukleos.ui.control.SensorControlFragment
 import me.cyber.nukleos.ui.find.FindSensorFragment
 import me.cyber.nukleos.ui.predict.PredictFragment
@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
         val fragmentList = listOf(
                 findSensorFragment,
                 SensorControlFragment.newInstance(),
-                ChartsFragment.newInstance(),
+                TrainingFragment.newInstance(),
                 PredictFragment.newInstance(),
                 SettingsFragment.newInstance()
         )

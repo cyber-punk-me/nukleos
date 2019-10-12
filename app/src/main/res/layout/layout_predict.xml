@@ -108,24 +108,24 @@
 
         <Switch
             android:id="@+id/predict_toggle"
-            android:layout_width="120dp"
+            android:layout_width="150dp"
             android:layout_height="20dp"
             android:layout_marginBottom="20dp"
             android:enabled="true"
             android:gravity="center"
-            android:textAlignment="textStart"
-            android:text="@string/predict" />
+            android:text="@string/predict"
+            android:textAlignment="textStart" />
 
 
         <Switch
             android:id="@+id/predict_online_toggle"
-            android:layout_width="120dp"
+            android:layout_width="150dp"
             android:layout_height="20dp"
             android:layout_marginBottom="20dp"
             android:enabled="true"
             android:gravity="end"
-            android:textAlignment="textStart"
-            android:text="@string/onlinePredict" />
+            android:text="@string/onlinePredict"
+            android:textAlignment="textStart" />
 
 <!--
         <android.support.design.button.MaterialButton

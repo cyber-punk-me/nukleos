@@ -196,13 +196,16 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
         }
     }
 
+    @Synchronized
     private fun predict(predictRequest: PredictRequest, receiver: ResultReceiver, preferOfflinePrediction: Boolean) {
         val interpreter = if (preferOfflinePrediction) getOrCreateTfliteModel() else null
         try {
-            val prediction = if (interpreter != null) {
+            val prediction = if (preferOfflinePrediction && interpreter != null) {
                 doLocalPredictWithTflite(predictRequest, interpreter)
-            } else {
+            } else if (!preferOfflinePrediction) {
                 doOnlinePredict(predictRequest)
+            } else {
+                null
             }
 
             //todo fix calibration
@@ -258,10 +261,12 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
         })
     }
 
-    private fun onPredictionResult(prediction: Prediction, receiver: ResultReceiver) {
+    private fun onPredictionResult(prediction: Prediction?, receiver: ResultReceiver) {
         receiver.send(ServiceResponses.SUCCESS.ordinal, Bundle().apply {
-            putInt(PREDICTED_CLASS_KEY, prediction.output)
-            putFloatArray(DISTRIBUTION_KEY, prediction.distr.toFloatArray())
+            if (prediction != null) {
+                putInt(PREDICTED_CLASS_KEY, prediction.output)
+                putFloatArray(DISTRIBUTION_KEY, prediction.distr.toFloatArray())
+            }
         })
     }
 
@@ -331,7 +336,7 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
             Log.i(predictionServiceTag, "TF Model Downloaded.")
             return loadInterpreterFromByteArray(byteArray)
         } catch (t: Throwable) {
-            "Failed to download TF model: ${t.message}. Fallback to online prediction".showShortToast()
+            "Failed to download TF model: ${t.message}".showShortToast()
             Log.e(predictionServiceTag, t.message, t)
             return null
         }

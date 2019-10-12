@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import dagger.android.support.AndroidSupportInjection
+import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.layout_scan_device.*
 import me.cyber.nukleos.BaseFragment
 import me.cyber.nukleos.sensors.Sensor
@@ -17,6 +18,7 @@ import me.cyber.nukleos.utils.DeviceSelectedListener
 import me.cyber.nukleos.utils.RecyclerItemFadeAnimator
 import me.cyber.nukleos.utils.showShortToast
 import me.cyber.nukleus.R
+import java.util.*
 import javax.inject.Inject
 
 class FindSensorFragment : BaseFragment<FindSensorInterface.Presenter>(), FindSensorInterface.View {
@@ -35,6 +37,8 @@ class FindSensorFragment : BaseFragment<FindSensorInterface.Presenter>(), FindSe
             }
         })
     }
+
+    var sensorDisposales: MutableMap<String, Disposable> = Collections.synchronizedMap(HashMap())
 
     override fun isStartupFragment() = true
 
@@ -58,6 +62,16 @@ class FindSensorFragment : BaseFragment<FindSensorInterface.Presenter>(), FindSe
         super.onAttach(context)
     }
 
+    override fun onDetach() {
+        super.onDetach()
+        synchronized(sensorDisposales) {
+            sensorDisposales.forEach{
+                it.value.dispose()
+            }
+            sensorDisposales.clear()
+        }
+    }
+
     override fun showEmptyListText() = with(text_empty_list) {
         text = getString(R.string.sensor_is_not_found)
         visibility = View.VISIBLE
@@ -76,7 +90,16 @@ class FindSensorFragment : BaseFragment<FindSensorInterface.Presenter>(), FindSe
         deviceList.removeIf { !sensors.contains(it.id) }
         val newSensorModels = sensors.
                 filter { sensorPair -> deviceList.all { it.id != sensorPair.key } }.
-                map { SensorModel(it.value.name, it.value.address, it.key) }
+                map { sensor ->
+                    SensorModel(sensor.value.name, sensor.value.address, sensor.key, sensor.value.statusObservable())
+                        .also {
+                            val disposeMe = it.statusObs.subscribe {
+                                activity?.runOnUiThread {
+                                    notifyDataSetChanged()
+                                }
+                            }
+                            sensorDisposales[it.name] = disposeMe
+                        }}
         deviceList.addAll(newSensorModels)
         notifyDataSetChanged()
     }

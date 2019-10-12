@@ -1,7 +1,6 @@
 package me.cyber.nukleos.sensors.synaps
 
 import com.felhr.usbserial.UsbSerialDevice
-import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 import me.cyber.nukleos.sensors.LastKnownSensorManager
@@ -35,16 +34,13 @@ class UsbSensor(private val usbHandler: UsbHandler, private val serialPort: UsbS
 
     init {
         connectionStatusSubject.onNext(Status.STREAMING)
-    }
-
-    override fun getDataFlowable(): Flowable<FloatArray> {
-        return usbHandler.dataFlowable()
+        usbHandler.thisSensor = this
     }
 
     override val name: String = "Synaps ${serialPort.deviceId}"
     override val address: String = serialPort.portName
 
-    override fun statusObservable(): Observable<Status> = connectionStatusSubject
+    override fun statusObservable() = connectionStatusSubject
 
     private fun stopStreaming() {
         write("s".toByteArray(), serialPort)
@@ -58,11 +54,9 @@ class UsbSensor(private val usbHandler: UsbHandler, private val serialPort: UsbS
     override fun disconnect() {
     }
 
-    override fun isConnected(): Boolean = true
+    override fun isFeedbackSupported(): Boolean = false
 
-    override fun isVibrationSupported(): Boolean = false
-
-    override fun vibration(duration: Int) = throw NotImplementedError()
+    override fun feedback(param: String) = throw NotImplementedError()
 
     override fun getFrequency(): Int = getAvailableFrequencies().first()
 

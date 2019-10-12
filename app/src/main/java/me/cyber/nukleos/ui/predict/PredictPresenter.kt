@@ -1,85 +1,64 @@
 package me.cyber.nukleos.ui.predict
 
 import android.content.Intent
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.App
 import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.api.PredictResponse
 import me.cyber.nukleos.api.Prediction
 import me.cyber.nukleos.control.TryControl
 import me.cyber.nukleos.dagger.PeripheryManager
-import me.cyber.nukleos.utils.LimitedQueue
+import me.cyber.nukleos.sensors.Sensor
+import me.cyber.nukleos.sensors.SensorListener
+import me.cyber.nukleos.sensors.SubscriptionParams
 
-class PredictPresenter(override val view: PredictInterface.View, private val mPeripheryManager: PeripheryManager) : PredictInterface.Presenter(view) {
+class PredictPresenter(override val view: PredictInterface.View, private val mPeripheryManager: PeripheryManager)
+    : PredictInterface.Presenter(view), SensorListener {
 
-    private var mChartsDataSubscription: Disposable? = null
-    private var mDownloadModelSubscription: Disposable? = null
+    private val TAG = "PredictPresenter"
+    private val PREDICTION_TAG = "PREDICTION"
+
     private val predictionResultReceiver = PredictionResultReceiver(
             { predictedClass, distribution ->
-                onPredictionResult(predictedClass, distribution) },
+                onPredictionResult(predictedClass, distribution)
+            },
             { onPredictionError(Exception(it)) })
     private var mPostPredict: Disposable? = null
     private var predictEnabled = false
     private var predictOnlineEnabled = false
-    private var predictBuffer = LimitedQueue<FloatArray>(8)
-    private var iUpdate = 0
-    private val updatesUntilPredictOnline = 4
     private val control = TryControl()
 
-    @Volatile private var predictionInProgress = false
+    @Volatile
+    private var predictionInProgress = false
 
     override fun create() {}
 
     override fun start() {
-        initializePrediction()
-    }
-
-    private fun initializePrediction() {
+        Sensor.registerSensorListener(TAG, this)
+        with(view) {
+            startCharts(true)
+        }
         with(view) {
             val selectedSensor = mPeripheryManager.getActiveSensor() ?: return
             selectedSensor.apply {
                 hideNoStreamingMessage()
-                mChartsDataSubscription?.apply {
-                    if (isDisposed) this.dispose()
-                }
-                mChartsDataSubscription = this.getDataFlowable()
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .doOnSubscribe { startCharts(true) }
-                        .subscribe {
-                            showData(it)
-
-                            if (predictionInProgress) {
-                                return@subscribe
-                            }
-
-                            predictBuffer.add(it)
-                            if (predictEnabled) {
-                                predict()
-                            }
-                        }
             }
         }
     }
 
-    private fun predict() {
-        iUpdate++
-        if (iUpdate >= updatesUntilPredictOnline || !predictOnlineEnabled) {
-            iUpdate = 0
-            doPredict()
+    override fun onSensorData(sensorName: String, data: List<FloatArray>) {
+        with(view) {
+            showData(data)
         }
     }
 
-    private fun doPredict() {
-        if (predictBuffer.size == 8) {
+    private fun predict(data: List<FloatArray>) {
+        if (!predictionInProgress) {
             predictionInProgress = true
-            val data = predictBuffer.flatMap { d -> d.asList() }.toFloatArray()
             val appContext = App.applicationComponent.getAppContext()
             val nextIntent = Intent(appContext, PredictionService::class.java).apply {
                 type = PredictionService.ServiceCommands.PREDICT.name
-                putExtra(PredictionService.PREDICT_DATA_KEY, data)
+                putExtra(PredictionService.PREDICT_DATA_KEY, data.flatMap { d -> d.asList() }.toFloatArray())
                 putExtra(PredictionService.RECEIVER_KEY, predictionResultReceiver)
                 putExtra(PredictionService.PREFER_OFFLINE_PREDICTION_KEY, !predictOnlineEnabled)
             }
@@ -117,15 +96,25 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
     override fun onPredictSwitched(on: Boolean, predictOnline: Boolean) {
         predictEnabled = on
         predictOnlineEnabled = predictOnline
-        predictBuffer = LimitedQueue(8)
         predictionInProgress = false
+        if (on) {
+            Sensor.registerSensorListener(PREDICTION_TAG, object : SensorListener{
+                override fun onSensorData(sensorName: String, data: List<FloatArray>) {
+                    if (predictEnabled && !predictionInProgress) {
+                        predict(data)
+                    }
+                }
+
+            }, SubscriptionParams(8, 2))
+        } else {
+            Sensor.removeSensorListener(PREDICTION_TAG)
+        }
     }
 
     override fun destroy() {
         predictEnabled = false
+        Sensor.removeSensorListener(TAG)
         view.startCharts(false)
-        mChartsDataSubscription?.dispose()
-        mDownloadModelSubscription?.dispose()
         mPostPredict?.dispose()
     }
 }

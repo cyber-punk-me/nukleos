@@ -21,6 +21,7 @@ class DeviceAdapter(private val deviceSelectedListener: DeviceSelectedListener) 
             setOnClickListener { mDeviceSelectedListener.onDeviceSelected(it, adapterPosition) }
             findViewById<TextView>(R.id.name_tv).text = device.name
             findViewById<TextView>(R.id.address_tv).text = device.address
+            findViewById<TextView>(R.id.item_status).text = device.statusObs.value.toString()
         }
     }
 }
