@@ -128,7 +128,7 @@ class SensorDataFeeder {
                         for (i in 0 until params.slide) {
                             queue.pop()
                         }
-                        listeners[listenerName]!!.first.onSensorData(sensorName, result)
+                        listeners[listenerName]?.first?.onSensorData(sensorName, result)
                     }
                 }
             }
