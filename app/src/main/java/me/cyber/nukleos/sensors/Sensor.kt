@@ -67,7 +67,7 @@ data class SubscriptionParams(
 class SensorDataFeeder {
 
     private var maxWindow: Int = 1
-    private val dataQueues : MutableMap<String, LinkedList<FloatArray>> = HashMap()
+    private val dataQueues: MutableMap<String, LinkedList<FloatArray>> = HashMap()
     private val listeners: MutableMap<String, Pair<SensorListener, SubscriptionParams>> = HashMap()
     private val listenerSteps: MutableMap<String, Int> = HashMap()
 
@@ -95,6 +95,16 @@ class SensorDataFeeder {
             dataQueues.remove(listenerName)
             updateMaxWindow()
         }
+    }
+
+    fun listenOnce(sensorListener: SensorListener, window: Int) {
+        val listenerName = UUID.randomUUID().toString()
+        registerSensorListener(listenerName, object : SensorListener {
+            override fun onSensorData(sensorName: String, data: List<FloatArray>) {
+                removeSensorListener(listenerName)
+                sensorListener.onSensorData(sensorName, data)
+            }
+        }, SubscriptionParams(window, window))
     }
 
     //todo multiple sensors names
