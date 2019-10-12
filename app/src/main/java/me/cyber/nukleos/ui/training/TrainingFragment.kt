@@ -1,4 +1,4 @@
-package me.cyber.nukleos.ui.charts
+package me.cyber.nukleos.ui.training
 
 import android.content.Context
 import android.os.Bundle
@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import dagger.android.support.AndroidSupportInjection
-import kotlinx.android.synthetic.main.layout_charts.*
+import kotlinx.android.synthetic.main.layout_train.*
 import me.cyber.nukleos.BaseFragment
 import me.cyber.nukleos.sensors.myosensor.MYO_CHANNELS
 import me.cyber.nukleos.sensors.myosensor.MYO_MAX_VALUE
@@ -20,7 +20,7 @@ import me.cyber.nukleus.R
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.View {
+class TrainingFragment : BaseFragment<TrainingInterface.Presenter>(), TrainingInterface.View {
 
     companion object {
 
@@ -28,11 +28,11 @@ class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.
         const val TIMER_COUNT = 5L
         const val LEARNING_TIME = 10
 
-        fun newInstance() = ChartsFragment()
+        fun newInstance() = TrainingFragment()
     }
 
     @Inject
-    lateinit var graphPresenter: ChartsPresenter
+    lateinit var graphPresenter: TrainingPresenter
 
     private var mDataType = ""
 
@@ -61,7 +61,7 @@ class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
-            inflater.inflate(R.layout.layout_charts, container, false).apply { setHasOptionsMenu(true) }
+            inflater.inflate(R.layout.layout_train, container, false).apply { setHasOptionsMenu(true) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -117,9 +117,9 @@ class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.
 
     override fun getDataType() = mDataType.safeToInt(-1)
 
-    override fun goToState(state: ChartInterface.State) {
+    override fun goToState(state: TrainingInterface.State) {
         when (state) {
-            ChartInterface.State.IDLE -> {
+            TrainingInterface.State.IDLE -> {
                 countdown_layout.visibility = View.INVISIBLE
                 record_button.isEnabled = true
                 data_type_spinner.isEnabled = true
@@ -128,7 +128,7 @@ class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.
                 calibrate_button.isEnabled = true
                 blockNavigation(false)
             }
-            ChartInterface.State.COUNTDOWN -> {
+            TrainingInterface.State.COUNTDOWN -> {
                 record_button.isEnabled = false
                 data_type_spinner.isEnabled = false
                 showCountdown()
@@ -137,7 +137,7 @@ class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.
                 calibrate_button.isEnabled = false
                 blockNavigation(true)
             }
-            ChartInterface.State.RECORDING -> {
+            TrainingInterface.State.RECORDING -> {
                 record_button.isEnabled = false
                 data_type_spinner.isEnabled = false
                 countdown_layout.visibility = View.INVISIBLE
@@ -146,7 +146,7 @@ class ChartsFragment : BaseFragment<ChartInterface.Presenter>(), ChartInterface.
                 calibrate_button.isEnabled = false
                 blockNavigation(true)
             }
-            ChartInterface.State.SENDING -> {
+            TrainingInterface.State.SENDING -> {
                 record_button.isEnabled = false
                 data_type_spinner.isEnabled = false
                 countdown_layout.visibility = View.INVISIBLE

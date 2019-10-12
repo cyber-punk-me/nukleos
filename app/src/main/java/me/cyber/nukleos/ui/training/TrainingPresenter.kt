@@ -1,4 +1,4 @@
-package me.cyber.nukleos.ui.charts
+package me.cyber.nukleos.ui.training
 
 import android.content.Intent
 import android.util.Log
@@ -9,16 +9,16 @@ import me.cyber.nukleos.App
 import me.cyber.nukleos.dagger.PeripheryManager
 import me.cyber.nukleos.sensors.Sensor
 import me.cyber.nukleos.sensors.SensorListener
-import me.cyber.nukleos.ui.charts.ChartsFragment.Companion.LEARNING_TIME
+import me.cyber.nukleos.ui.training.TrainingFragment.Companion.LEARNING_TIME
 import me.cyber.nukleos.ui.predict.PredictionService
 import me.cyber.nukleos.utils.showShortToast
 import java.util.*
 import kotlin.collections.ArrayList
 
-class ChartsPresenter(override val view: ChartInterface.View, private val mPeripheryManager: PeripheryManager)
-    : ChartInterface.Presenter(view), SensorListener {
+class TrainingPresenter(override val view: TrainingInterface.View, private val mPeripheryManager: PeripheryManager)
+    : TrainingInterface.Presenter(view), SensorListener {
 
-    private val TAG = "ChartsPresenter"
+    private val TAG = "TrainingPresenter"
     private val millsBetweenReads = 5
     private val numSensors = 8
     private val mApi by lazy { App.applicationComponent.getApiHelper().getApi() }
@@ -47,10 +47,10 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
     private val calibrationResultReceiver = CalibrationResultReceiver(
             {
                 "Calibration is finished".showShortToast()
-                view.goToState(ChartInterface.State.IDLE)
+                view.goToState(TrainingInterface.State.IDLE)
             }, {
         it.showShortToast()
-        view.goToState(ChartInterface.State.IDLE)
+        view.goToState(TrainingInterface.State.IDLE)
     })
     private val deleteTfModelResultReceiver = DeleteModelResultReceiver(
             {
@@ -87,10 +87,10 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    goToState(ChartInterface.State.IDLE)
+                    goToState(TrainingInterface.State.IDLE)
                     notifyDataSent()
                 }, {
-                    goToState(ChartInterface.State.IDLE)
+                    goToState(TrainingInterface.State.IDLE)
                     notifyDataFailed()
                 })
     }
@@ -108,10 +108,10 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    view.goToState(ChartInterface.State.IDLE)
+                    view.goToState(TrainingInterface.State.IDLE)
                     view.notifyTrainModelStarted()
                 }, {
-                    view.goToState(ChartInterface.State.IDLE)
+                    view.goToState(TrainingInterface.State.IDLE)
                     view.notifyTrainModelFailed()
                 })
     }
@@ -128,7 +128,7 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
                 })
     }
 
-    fun onCountdownFinished() = view.goToState(ChartInterface.State.RECORDING)
+    fun onCountdownFinished() = view.goToState(TrainingInterface.State.RECORDING)
 
     override fun create() {}
 
@@ -166,7 +166,7 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
 
     override fun onCollectPressed() {
         collectData(LEARNING_TIME) {
-            view.goToState(ChartInterface.State.SENDING)
+            view.goToState(TrainingInterface.State.SENDING)
             sendData(convertData(it,
                     view.getDataType(), 64, 64),
                     mLearningSessId)
@@ -182,7 +182,7 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
                 return
             }
             selectedSensor.apply {
-                goToState(ChartInterface.State.COUNTDOWN)
+                goToState(TrainingInterface.State.COUNTDOWN)
                 hideNoStreamingMessage()
                 mDataSubscription?.dispose()
                 /*

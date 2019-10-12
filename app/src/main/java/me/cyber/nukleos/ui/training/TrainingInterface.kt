@@ -1,9 +1,9 @@
-package me.cyber.nukleos.ui.charts
+package me.cyber.nukleos.ui.training
 
 import me.cyber.nukleos.BasePresenter
 import me.cyber.nukleos.BaseView
 
-interface ChartInterface {
+interface TrainingInterface {
 
     enum class State {
         IDLE, COUNTDOWN, RECORDING, SENDING

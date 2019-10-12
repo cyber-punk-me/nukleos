@@ -1,18 +1,18 @@
-package me.cyber.nukleos.ui.charts
+package me.cyber.nukleos.ui.training
 
 import android.os.Bundle
 import android.os.Handler
 import android.os.ResultReceiver
 import me.cyber.nukleos.ui.predict.PredictionService
 
-class CalibrationResultReceiver(
+class DeleteModelResultReceiver(
         private val calibrationResultCallback: () -> Unit,
         private val errorCallback: (error: String) -> Unit
 ) :
         ResultReceiver(Handler()) {
 
     companion object {
-        private const val DEFAULT_RESPONSE_ERROR = "Invalid calibration response"
+        private const val DEFAULT_RESPONSE_ERROR = "Invalid delete model response"
     }
 
     override fun onReceiveResult(resultCode: Int, resultData: Bundle) {
