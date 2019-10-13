@@ -40,6 +40,7 @@ import android.os.ParcelUuid
 import android.util.Log
 import android.view.WindowManager
 import android.widget.TextView
+import com.zugaldia.robocar.hardware.adafruit2348.AdafruitDcMotor
 import com.zugaldia.robocar.hardware.adafruit2348.AdafruitMotorHat
 import me.cyber.nukleos.IMotors
 
@@ -58,7 +59,8 @@ class GattServerActivity : IMotors, Activity() {
     /* Collection of notification subscribers */
     private val registeredDevices = mutableSetOf<BluetoothDevice>()
 
-    private val motorHat = AdafruitMotorHat()
+    private val motorHat = AdafruitMotorHat(0)
+    private val motorHat1 = AdafruitMotorHat(1)
 
 
     /**
@@ -357,16 +359,23 @@ class GattServerActivity : IMotors, Activity() {
             stopMotors()
         } else {
             val motor = motorHat.getMotor(intMotor)
-            motor.setSpeed(speed.toInt())
-            motor.run(direction.toInt())
-            motorsSpeeds[intMotor] = speed
-            motorsDirs[intMotor] = direction
+            spinMotorInner(motor, speed, direction, intMotor)
+            val testMotor = motorHat1.getMotor(1)
+            spinMotorInner(testMotor, speed, direction, intMotor)
         }
+    }
+
+    private fun spinMotorInner(motor: AdafruitDcMotor, speed: Byte, direction: Byte, intMotor: Int) {
+        motor.setSpeed(speed.toInt())
+        motor.run(direction.toInt())
+        motorsSpeeds[intMotor] = speed
+        motorsDirs[intMotor] = direction
     }
 
     override fun stopMotors() {
         for (i in 1..IMotors.MOTORS_COUNT) {
             motorHat.getMotor(i).run(IMotors.RELEASE.toInt())
+            motorHat1.getMotor(i).run(IMotors.RELEASE.toInt())
         }
     }
 

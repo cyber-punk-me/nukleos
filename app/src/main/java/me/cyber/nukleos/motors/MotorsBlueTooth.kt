@@ -72,13 +72,13 @@ class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothG
                         Thread {
                             //has to wait after subscription write
                             Log.d(TAG, "Spinning motors.")
-                            spinMotor(1, IMotors.FORWARD, 10)
+                            spinMotor(1, IMotors.FORWARD, 127)
                             sleep(200)
-                            spinMotor(1, IMotors.BACKWARD, 10)
+                            spinMotor(1, IMotors.BACKWARD, 127)
                             sleep(200)
-                            spinMotor(2, IMotors.FORWARD, 10)
+                            spinMotor(2, IMotors.FORWARD, 127)
                             sleep(200)
-                            spinMotor(2, IMotors.BACKWARD, 10)
+                            spinMotor(2, IMotors.BACKWARD, 127)
                             sleep(200)
                             stopMotors()
                         }.start()

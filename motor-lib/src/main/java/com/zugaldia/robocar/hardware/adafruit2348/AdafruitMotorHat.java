@@ -26,8 +26,8 @@ public class AdafruitMotorHat {
     /**
      * Public constructor.
      */
-    public AdafruitMotorHat() {
-        pwm = new AdafruitPwm(false);
+    public AdafruitMotorHat(int adaHatSwitchOffset) {
+        pwm = new AdafruitPwm(false, adaHatSwitchOffset);
         pwm.setPwmFreq(MOTOR_FREQUENCY);
         motors = new AdafruitDcMotor[]{
                 new AdafruitDcMotor(this, 0),
