@@ -25,7 +25,6 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
     private val mLearningSessId = UUID.fromString("885d0665-ca5d-46ed-b6dc-ea2c2610a67f")
     private val mScriptId = UUID.fromString("7de76908-d4d9-4ce9-98de-118a4fb3b8f8")
     private var mServerTimeMinusLocal: Long = 0
-
     private var mDataSubscription: Disposable? = null
     private var mChartsDataSubscription: Disposable? = null
     private var mPostDataSubscription: Disposable? = null
