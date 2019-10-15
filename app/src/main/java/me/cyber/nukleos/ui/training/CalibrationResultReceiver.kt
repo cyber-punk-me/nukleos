@@ -1,12 +1,12 @@
-package me.cyber.nukleos.ui.charts
+package me.cyber.nukleos.ui.training
 
 import android.os.Bundle
 import android.os.Handler
 import android.os.ResultReceiver
 import me.cyber.nukleos.ui.predict.PredictionService
 
-class CalibrationPreparationResultReceiver(
-        private val preparationResultCallback: (outputsSize: Int) -> Unit,
+class CalibrationResultReceiver(
+        private val calibrationResultCallback: () -> Unit,
         private val errorCallback: (error: String) -> Unit
 ) :
         ResultReceiver(Handler()) {
@@ -17,8 +17,7 @@ class CalibrationPreparationResultReceiver(
 
     override fun onReceiveResult(resultCode: Int, resultData: Bundle) {
         if (resultCode == PredictionService.ServiceResponses.SUCCESS.ordinal) {
-            val outputsSize = resultData.getInt(PredictionService.CLASSES_COUNT_KEY, -1)
-            preparationResultCallback(outputsSize)
+            calibrationResultCallback()
         } else {
             val error = resultData.getString(PredictionService.ERROR_KEY)
             errorCallback(error ?: DEFAULT_RESPONSE_ERROR)

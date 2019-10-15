@@ -1,4 +1,4 @@
-package me.cyber.nukleos.ui.charts
+package me.cyber.nukleos.ui.training
 
 import android.content.Intent
 import android.util.Log
@@ -9,24 +9,23 @@ import me.cyber.nukleos.App
 import me.cyber.nukleos.dagger.PeripheryManager
 import me.cyber.nukleos.sensors.Sensor
 import me.cyber.nukleos.sensors.SensorListener
-import me.cyber.nukleos.ui.charts.ChartsFragment.Companion.LEARNING_TIME
+import me.cyber.nukleos.ui.training.TrainingFragment.Companion.LEARNING_TIME
 import me.cyber.nukleos.ui.predict.PredictionService
 import me.cyber.nukleos.utils.showShortToast
 import java.util.*
 import kotlin.collections.ArrayList
 
-class ChartsPresenter(override val view: ChartInterface.View, private val mPeripheryManager: PeripheryManager)
-    : ChartInterface.Presenter(view), SensorListener {
+class TrainingPresenter(override val view: TrainingInterface.View, private val mPeripheryManager: PeripheryManager)
+    : TrainingInterface.Presenter(view), SensorListener {
 
-    private val TAG = "ChartsPresenter"
+    private val TAG = "TrainingPresenter"
     private val millsBetweenReads = 5
     private val numSensors = 8
     private val mApi by lazy { App.applicationComponent.getApiHelper().getApi() }
     private val mLearningSessId = UUID.fromString("885d0665-ca5d-46ed-b6dc-ea2c2610a67f")
     private val mScriptId = UUID.fromString("7de76908-d4d9-4ce9-98de-118a4fb3b8f8")
     private var mServerTimeMinusLocal: Long = 0
-    private var mDataSubscription: Disposable? = null
-    private var mChartsDataSubscription: Disposable? = null
+
     private var mPostDataSubscription: Disposable? = null
     private var mTrainModelSubscription: Disposable? = null
     private var mServerTimeSubscription: Disposable? = null
@@ -46,10 +45,10 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
     private val calibrationResultReceiver = CalibrationResultReceiver(
             {
                 "Calibration is finished".showShortToast()
-                view.goToState(ChartInterface.State.IDLE)
+                view.goToState(TrainingInterface.State.IDLE)
             }, {
         it.showShortToast()
-        view.goToState(ChartInterface.State.IDLE)
+        view.goToState(TrainingInterface.State.IDLE)
     })
     private val deleteTfModelResultReceiver = DeleteModelResultReceiver(
             {
@@ -86,10 +85,10 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    goToState(ChartInterface.State.IDLE)
+                    goToState(TrainingInterface.State.IDLE)
                     notifyDataSent()
                 }, {
-                    goToState(ChartInterface.State.IDLE)
+                    goToState(TrainingInterface.State.IDLE)
                     notifyDataFailed()
                 })
     }
@@ -107,10 +106,10 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    view.goToState(ChartInterface.State.IDLE)
+                    view.goToState(TrainingInterface.State.IDLE)
                     view.notifyTrainModelStarted()
                 }, {
-                    view.goToState(ChartInterface.State.IDLE)
+                    view.goToState(TrainingInterface.State.IDLE)
                     view.notifyTrainModelFailed()
                 })
     }
@@ -126,8 +125,6 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
                     view.notifyDataFailed()
                 })
     }
-
-    fun onCountdownFinished() = view.goToState(ChartInterface.State.RECORDING)
 
     override fun create() {}
 
@@ -146,58 +143,40 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
                 showNoStreamingMessage()
                 return
             }
-
             hideNoStreamingMessage()
-/*            mChartsDataSubscription?.apply {
-                if (isDisposed) this.dispose()
-            }
-            mChartsDataSubscription = firstStreamingSensor.getDataFlowable()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .doOnSubscribe { startCharts(true) }
-                    .subscribe { showData(it) }*/
-
             startCharts(true)
-
         }
         getServerTimeDiff()
     }
 
     override fun onCollectPressed() {
         collectData(LEARNING_TIME) {
-            view.goToState(ChartInterface.State.SENDING)
-            sendData(convertData(it,
-                    view.getDataType(), 64, 64),
-                    mLearningSessId)
+            view.goToState(TrainingInterface.State.SENDING)
+            val dataToSend = convertData(it,
+                    view.getDataType(), 64, 64)
+            sendData(dataToSend, mLearningSessId)
         }
     }
 
-    private fun collectData(collectTimeSeconds: Int, onCollected: (ArrayList<FloatArray>) -> Unit) {
-        val dataBuffer: ArrayList<FloatArray> = arrayListOf()
+    override fun onCollectStarted(dataWindow: Int, onCollected: (List<FloatArray>) -> Unit) {
+        Sensor.listenOnce(object : SensorListener{
+            override fun onSensorData(sensorName: String, data: List<FloatArray>) {
+                onCollected(data)
+            }
+        }, dataWindow)
+    }
+
+    private fun collectData(collectTimeSeconds: Int, onCollected: (List<FloatArray>) -> Unit) {
         with(view) {
             val selectedSensor = mPeripheryManager.getActiveSensor()
             if (selectedSensor == null) {
                 showNoStreamingMessage()
                 return
             }
+            val dataWindow = collectTimeSeconds * selectedSensor.getFrequency()
             selectedSensor.apply {
-                goToState(ChartInterface.State.COUNTDOWN)
+                goToState(TrainingInterface.State.COUNTDOWN, dataWindow, onCollected)
                 hideNoStreamingMessage()
-                mDataSubscription?.dispose()
-                /*
-                todo collect data
-                mDataSubscription = this.getDataFlowable()
-                        .skip(TIMER_COUNT, TimeUnit.SECONDS)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .take(TIMER_COUNT + collectTimeSeconds, TimeUnit.SECONDS)
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .doOnComplete {
-                            onCollected(dataBuffer)
-                        }
-                        .subscribe {
-                            dataBuffer.add(it)
-                        }*/
             }
         }
     }
@@ -250,8 +229,6 @@ class ChartsPresenter(override val view: ChartInterface.View, private val mPerip
     override fun destroy() {
         view.startCharts(false)
         Sensor.removeSensorListener(TAG)
-        mDataSubscription?.dispose()
-        mChartsDataSubscription?.dispose()
         mPostDataSubscription?.dispose()
         mServerTimeSubscription?.dispose()
     }

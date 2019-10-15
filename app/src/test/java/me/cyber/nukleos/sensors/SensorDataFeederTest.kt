@@ -34,6 +34,36 @@ class SensorDataFeederTest {
     }
 
     @Test
+    fun testListenOnce() {
+        val listener1Data = ArrayList<Float>()
+        val feeder = SensorDataFeeder()
+        var onDataCounter = 0
+
+
+        feeder.onData("sensor1", listOf(floatArrayOf(1.0f), floatArrayOf(2.0f), floatArrayOf(3.0f)))
+
+        feeder.listenOnce(object : SensorListener{
+            override fun onSensorData(sensorName: String, data: List<FloatArray>) {
+                onDataCounter++
+                data.forEach {
+                    listener1Data.addAll(it.toList())
+                }
+            }
+        }, 5)
+
+        feeder.onData("sensor1", listOf(floatArrayOf(4.0f), floatArrayOf(5.0f), floatArrayOf(6.0f)))
+        feeder.onData("sensor1", listOf(floatArrayOf(7.0f), floatArrayOf(8.0f), floatArrayOf(9.0f)))
+
+        val assumedData = listOf(4.0f, 5.0f, 6.0f, 7.0f, 8.0f)
+
+        assertEquals(assumedData, listener1Data)
+        feeder.onData("sensor1", listOf(floatArrayOf(10.0f), floatArrayOf(11.0f), floatArrayOf(12.0f)))
+        //sensor listener was removed, so no updates to listener
+        assertEquals(assumedData, listener1Data)
+        assertEquals(1, onDataCounter)
+    }
+
+    @Test
     fun testFeederListenersWindow() {
         val listener1Data = ArrayList<List<FloatArray>>()
         val listener2Data = ArrayList<List<FloatArray>>()

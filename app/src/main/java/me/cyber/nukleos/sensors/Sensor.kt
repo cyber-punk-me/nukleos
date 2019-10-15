@@ -41,6 +41,8 @@ interface Sensor {
 
         fun registerSensorListener(listenerName: String, sensorListener: SensorListener, subscriptionParams: SubscriptionParams = SubscriptionParams(1, 1)) = sensorDataFeeder.registerSensorListener(listenerName, sensorListener, subscriptionParams)
 
+        fun listenOnce(sensorListener: SensorListener, window: Int) = sensorDataFeeder.listenOnce(sensorListener, window)
+
         fun removeSensorListener(listenerName: String) = sensorDataFeeder.removeSensorListener(listenerName)
 
         fun onData(sensorName: String, data: List<FloatArray>) = sensorDataFeeder.onData(sensorName, data)
@@ -67,7 +69,7 @@ data class SubscriptionParams(
 class SensorDataFeeder {
 
     private var maxWindow: Int = 1
-    private val dataQueues : MutableMap<String, LinkedList<FloatArray>> = HashMap()
+    private val dataQueues: MutableMap<String, LinkedList<FloatArray>> = HashMap()
     private val listeners: MutableMap<String, Pair<SensorListener, SubscriptionParams>> = HashMap()
     private val listenerSteps: MutableMap<String, Int> = HashMap()
 
@@ -97,6 +99,16 @@ class SensorDataFeeder {
         }
     }
 
+    fun listenOnce(sensorListener: SensorListener, window: Int) {
+        val listenerName = UUID.randomUUID().toString()
+        registerSensorListener(listenerName, object : SensorListener {
+            override fun onSensorData(sensorName: String, data: List<FloatArray>) {
+                removeSensorListener(listenerName)
+                sensorListener.onSensorData(sensorName, data)
+            }
+        }, SubscriptionParams(window, window))
+    }
+
     //todo multiple sensors names
     fun onData(sensorName: String, data: List<FloatArray>) {
         synchronized(listeners) {
@@ -118,7 +130,7 @@ class SensorDataFeeder {
                         for (i in 0 until params.slide) {
                             queue.pop()
                         }
-                        listeners[listenerName]!!.first.onSensorData(sensorName, result)
+                        listeners[listenerName]?.first?.onSensorData(sensorName, result)
                     }
                 }
             }
