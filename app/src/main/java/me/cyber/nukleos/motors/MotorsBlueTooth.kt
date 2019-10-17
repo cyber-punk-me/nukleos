@@ -11,10 +11,9 @@ class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothG
 
     private var gatt: BluetoothGatt? = null
     var servicesDiscovered = false
-    private var mRecievedState: ByteArray? = null
+    private var mRecievedState: ByteArray = ByteArray(IMotors.MOTORS_COUNT)
 
     override fun getState() = mRecievedState
-    override fun stopMotors() = spinMotor(0, 0, 0)
 
     override fun connect(context: Any) {
         if (gatt == null) {
@@ -28,17 +27,18 @@ class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothG
         servicesDiscovered = false
     }
 
-    override fun spinMotor(iMotor: Byte, direction: Byte, speed: Byte) {
+    override fun spinMotor(iMotor: Byte, speed: Byte) {
         val characteristic = gatt
                 ?.getService(IMotors.SERVICE_UUID)
                 ?.getCharacteristic(IMotors.CHAR_MOTOR_CONTROL_UUID)
-        val command = ByteArray(3)
+        val command = ByteArray(2)
         command[0] = iMotor
-        command[1] = direction
         command[2] = speed
         characteristic?.value = command
         gatt?.writeCharacteristic(characteristic)
     }
+
+    override fun stopMotors() = spinMotor(0, 0)
 
     override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
         super.onConnectionStateChange(gatt, status, newState)
@@ -72,13 +72,13 @@ class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothG
                         Thread {
                             //has to wait after subscription write
                             Log.d(TAG, "Spinning motors.")
-                            spinMotor(1, IMotors.FORWARD, 127)
+                            spinMotor(1, 127)
                             sleep(200)
-                            spinMotor(1, IMotors.BACKWARD, 127)
+                            spinMotor(1, -127)
                             sleep(200)
-                            spinMotor(2, IMotors.FORWARD, 127)
+                            spinMotor(2, 127)
                             sleep(200)
-                            spinMotor(2, IMotors.BACKWARD, 127)
+                            spinMotor(2, -127)
                             sleep(200)
                             stopMotors()
                         }.start()
@@ -96,7 +96,7 @@ class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothG
     override fun onCharacteristicChanged(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
         super.onCharacteristicChanged(gatt, characteristic)
         mRecievedState = characteristic.value
-        Log.w(TAG, "onCharacteristicChanged received: ${mRecievedState?.joinToString()}")
+        Log.w(TAG, "onCharacteristicChanged received: ${mRecievedState.joinToString()}")
     }
 
 }

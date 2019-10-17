@@ -40,16 +40,13 @@ import android.os.ParcelUuid
 import android.util.Log
 import android.view.WindowManager
 import android.widget.TextView
-import com.zugaldia.robocar.hardware.adafruit2348.AdafruitDcMotor
-import com.zugaldia.robocar.hardware.adafruit2348.AdafruitMotorHat
 import me.cyber.nukleos.IMotors
 
 import java.util.Arrays
 
 private const val TAG = "GattServerActivity"
 
-class GattServerActivity : IMotors, Activity() {
-
+class GattServerActivity : IMotors by MotorController(), Activity() {
 
     /* Local UI */
     private lateinit var textView: TextView
@@ -58,10 +55,6 @@ class GattServerActivity : IMotors, Activity() {
     private var bluetoothGattServer: BluetoothGattServer? = null
     /* Collection of notification subscribers */
     private val registeredDevices = mutableSetOf<BluetoothDevice>()
-
-    private val motorHat = AdafruitMotorHat(0)
-    private val motorHat1 = AdafruitMotorHat(1)
-
 
     /**
      * Listens for Bluetooth adapter events to enable/disable
@@ -147,7 +140,7 @@ class GattServerActivity : IMotors, Activity() {
             if (IMotors.CHAR_MOTOR_CONTROL_UUID == characteristic.uuid) {
                 Log.d(TAG, "Motor charateristic write")
                 stopMotors()
-                spinMotor(value[0], value[1], value[2])
+                spinMotor(value[0], value[1])
             }
             if (responseNeeded) {
                 bluetoothGattServer?.sendResponse(device,
@@ -347,48 +340,4 @@ class GattServerActivity : IMotors, Activity() {
         }
     }
 
-    /**
-     * @param iMotor
-     * @param direction
-     * @param speed
-     */
-    override fun spinMotor(iMotor: Byte, direction: Byte, speed: Byte) {
-        Log.w("Motors", "trying to spin motors.")
-        val intMotor = iMotor.toInt()
-        if (intMotor == 0 && direction.toInt() == 0 && speed.toInt() == 0) {
-            stopMotors()
-        } else {
-            val motor = motorHat.getMotor(intMotor)
-            spinMotorInner(motor, speed, direction, intMotor)
-            val testMotor = motorHat1.getMotor(1)
-            spinMotorInner(testMotor, speed, direction, intMotor)
-        }
-    }
-
-    private fun spinMotorInner(motor: AdafruitDcMotor, speed: Byte, direction: Byte, intMotor: Int) {
-        motor.setSpeed(speed.toInt())
-        motor.run(direction.toInt())
-        motorsSpeeds[intMotor] = speed
-        motorsDirs[intMotor] = direction
-    }
-
-    override fun stopMotors() {
-        for (i in 1..IMotors.MOTORS_COUNT) {
-            motorHat.getMotor(i).run(IMotors.RELEASE.toInt())
-            motorHat1.getMotor(i).run(IMotors.RELEASE.toInt())
-        }
-    }
-
-
-    override fun connect(context: Any) {
-        //noop
-    }
-
-    //ada motors are indexed from 1
-    private val motorsSpeeds = ByteArray(IMotors.MOTORS_COUNT + 1)
-    private val motorsDirs = ByteArray(IMotors.MOTORS_COUNT + 1)
-
-    override fun getState(): ByteArray {
-        return motorsSpeeds.sliceArray(1..IMotors.MOTORS_COUNT) + motorsDirs.sliceArray(1..IMotors.MOTORS_COUNT)
-    }
 }

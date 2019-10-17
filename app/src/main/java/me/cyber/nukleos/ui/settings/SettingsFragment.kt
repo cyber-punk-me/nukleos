@@ -48,7 +48,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
 
     fun addActionLengthValidation(vararg prefs: Preference) {
         prefs.forEach {
-            it.setOnPreferenceChangeListener { preference, any ->
+            it.setOnPreferenceChangeListener { _, any ->
                 try {
                     val value = Integer.parseInt(any.toString())
                     value in 1 .. maxDuration
@@ -61,7 +61,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
 
     fun addActionIntensityValidation(vararg prefs: Preference) {
         prefs.forEach {
-            it.setOnPreferenceChangeListener { preference, any ->
+            it.setOnPreferenceChangeListener { _, any ->
                 try {
                     val value = Integer.parseInt(any.toString())
                     value in 1 .. maxIntensity
