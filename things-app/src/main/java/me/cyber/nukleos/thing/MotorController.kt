@@ -44,7 +44,7 @@ class MotorController : IMotors {
 
     private fun spinMotorInner(motor: AdafruitDcMotor, speed: Byte, intMotor: Int) {
         motorsSpeeds[intMotor] = speed
-        motor.setSpeed(speed.toInt().absoluteValue)
+        motor.setSpeed(speed.toInt().absoluteValue * 2)
         if (0.toByte() != speed) {
             motor.run(if (speed > 0) AdafruitMotorHat.FORWARD else AdafruitMotorHat.BACKWARD)
         } else {
