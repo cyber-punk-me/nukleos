@@ -119,7 +119,7 @@ class GattServerActivity : IMotors by MotorController(), Activity() {
                             requestId,
                             BluetoothGatt.GATT_SUCCESS,
                             0,
-                            getState())
+                            getSpeeds())
                 }
                 else -> {
                     // Invalid characteristic
@@ -140,7 +140,7 @@ class GattServerActivity : IMotors by MotorController(), Activity() {
             if (IMotors.CHAR_MOTOR_CONTROL_UUID == characteristic.uuid) {
                 Log.d(TAG, "Motor charateristic write")
                 stopMotors()
-                spinMotor(value[0], value[1])
+                spinMotors(value)
             }
             if (responseNeeded) {
                 bluetoothGattServer?.sendResponse(device,
@@ -335,7 +335,7 @@ class GattServerActivity : IMotors by MotorController(), Activity() {
             val motorsStateCharacteristic = bluetoothGattServer
                     ?.getService(IMotors.SERVICE_UUID)
                     ?.getCharacteristic(IMotors.CHAR_MOTOR_STATE_UUID)
-            motorsStateCharacteristic?.value = getState()
+            motorsStateCharacteristic?.value = getSpeeds()
             bluetoothGattServer?.notifyCharacteristicChanged(device, motorsStateCharacteristic, false)
         }
     }

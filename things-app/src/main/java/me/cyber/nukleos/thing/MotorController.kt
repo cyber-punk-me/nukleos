@@ -18,7 +18,7 @@ class MotorController : IMotors {
         //noop
     }
 
-    override fun getState(): ByteArray {
+    override fun getSpeeds(): ByteArray {
         return motorsSpeeds.sliceArray(1..IMotors.MOTORS_COUNT)
     }
 
@@ -39,6 +39,12 @@ class MotorController : IMotors {
                 else -> null
             }
             spinMotorInner(motor!!, speed, intMotor)
+        }
+    }
+
+    override fun spinMotors(speeds: ByteArray) {
+        for (iMotor in 1..IMotors.MOTORS_COUNT) {
+            spinMotor(iMotor.toByte(), speeds[iMotor - 1])
         }
     }
 

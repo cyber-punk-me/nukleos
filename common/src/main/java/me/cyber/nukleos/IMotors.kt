@@ -13,15 +13,21 @@ interface IMotors {
      */
     fun spinMotor(iMotor: Byte, speed: Byte)
 
+    /**
+     * set array of size [MOTORS_COUNTMOTORS_COUNT]
+     * speeds will be set according to getSpeeds() structure.
+     */
+    fun spinMotors(speeds: ByteArray)
+
     fun stopMotors()
 
-    fun motorsCount() = getState().size
+    fun motorsCount() = getSpeeds().size
 
     /**
      * array containing each motor speed.
      * indexed 0 to [motorsCount() - 1]
      */
-    fun getState() : ByteArray
+    fun getSpeeds() : ByteArray
 
     companion object {
         val MOTORS_COUNT = 8
