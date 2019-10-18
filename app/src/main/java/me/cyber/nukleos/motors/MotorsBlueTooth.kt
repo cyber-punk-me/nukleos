@@ -10,11 +10,11 @@ import java.lang.Thread.sleep
 class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothGattCallback() {
 
     private var gatt: BluetoothGatt? = null
-    var servicesDiscovered = false
-    private var mRecievedState: ByteArray? = null
+    private var servicesDiscovered = false
+    private var connected = false
+    private var speeds: ByteArray = ByteArray(IMotors.MOTORS_COUNT)
 
-    override fun getState() = mRecievedState
-    override fun stopMotors() = spinMotor(0, 0, 0)
+    override fun getSpeeds() = speeds
 
     override fun connect(context: Any) {
         if (gatt == null) {
@@ -23,22 +23,32 @@ class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothG
     }
 
     fun disconnect() {
+        speeds = ByteArray(IMotors.MOTORS_COUNT)
+        connected = false
         gatt?.close()
         gatt = null
         servicesDiscovered = false
     }
 
-    override fun spinMotor(iMotor: Byte, direction: Byte, speed: Byte) {
+    private fun sendSpinCommand() {
         val characteristic = gatt
                 ?.getService(IMotors.SERVICE_UUID)
                 ?.getCharacteristic(IMotors.CHAR_MOTOR_CONTROL_UUID)
-        val command = ByteArray(3)
-        command[0] = iMotor
-        command[1] = direction
-        command[2] = speed
-        characteristic?.value = command
+        characteristic?.value = speeds
         gatt?.writeCharacteristic(characteristic)
     }
+
+    override fun spinMotor(iMotor: Byte, speed: Byte) {
+        speeds[iMotor - 1] = speed
+        sendSpinCommand()
+    }
+
+    override fun spinMotors(speeds: ByteArray) {
+        this.speeds = speeds
+        sendSpinCommand()
+    }
+
+    override fun stopMotors() = spinMotor(0, 0)
 
     override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
         super.onConnectionStateChange(gatt, status, newState)
@@ -68,19 +78,23 @@ class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothG
                     } else {
                         subscribeDescriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
                         val subs = gatt.writeDescriptor(subscribeDescriptor)
+                        connected = true
                         Log.d(TAG, "Subscribed to motors state : $subs")
                         Thread {
-                            //has to wait after subscription write
-                            Log.d(TAG, "Spinning motors.")
-                            spinMotor(1, IMotors.FORWARD, 10)
-                            sleep(200)
-                            spinMotor(1, IMotors.BACKWARD, 10)
-                            sleep(200)
-                            spinMotor(2, IMotors.FORWARD, 10)
-                            sleep(200)
-                            spinMotor(2, IMotors.BACKWARD, 10)
-                            sleep(200)
-                            stopMotors()
+                            //has to wait after subscription write is complete
+                            while(connected) {
+                                Log.d(TAG, "Spinning motors.")
+                                for (i in 1..IMotors.MOTORS_COUNT) {
+                                    spinMotor(i.toByte(), 30)
+                                    sleep(300)
+                                    spinMotor(i.toByte(), -30)
+                                    sleep(300)
+                                    spinMotor(i.toByte(), 0)
+                                    sleep(300)
+                                }
+                            }
+                            //stopMotors()
+
                         }.start()
                     }
                 } else {
@@ -95,8 +109,8 @@ class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothG
 
     override fun onCharacteristicChanged(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
         super.onCharacteristicChanged(gatt, characteristic)
-        mRecievedState = characteristic.value
-        Log.w(TAG, "onCharacteristicChanged received: ${mRecievedState?.joinToString()}")
+        speeds = characteristic.value
+        Log.w(TAG, "onCharacteristicChanged received: ${speeds.joinToString()}")
     }
 
 }

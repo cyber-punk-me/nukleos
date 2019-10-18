@@ -62,7 +62,7 @@ class PredictFragment : BaseFragment<PredictInterface.Presenter>(), PredictInter
         val min = prediction.distr.min()
         val delta = max!! - min!!
 
-        val normalized = prediction.distr.map { it -> ((it - min) / (delta) * 100).toInt() }
+        val normalized = prediction.distr.map { ((it - min) / (delta) * 100).toInt() }
         "${prediction.output} | $normalized".showShortToast()
     }
 
