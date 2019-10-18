@@ -53,12 +53,14 @@ public class AdafruitPwm {
     /**
      * Public constructor.
      */
-    public AdafruitPwm(boolean debug) {
+    public AdafruitPwm(boolean debug, int adaHatSwitchOffset) {
         try {
             // Attempt to access the I2C device
-            Timber.d("Connecting to I2C device %s @ 0x%02X.", I2C_DEVICE_NAME, MOTOR_HAT_I2C_ADDRESS);
+            String deviceName = I2C_DEVICE_NAME;
+            int i2caddress = MOTOR_HAT_I2C_ADDRESS + adaHatSwitchOffset;
+            Timber.d("Connecting to I2C device %s @ 0x%02X.", deviceName, i2caddress);
             PeripheralManager manager = PeripheralManager.getInstance();
-            i2c = manager.openI2cDevice(I2C_DEVICE_NAME, MOTOR_HAT_I2C_ADDRESS);
+            i2c = manager.openI2cDevice(deviceName, i2caddress);
         } catch (IOException e) {
             Timber.e(e, "Unable to access I2C device.");
         }
