@@ -28,7 +28,7 @@ class PeripheryManager {
                 Log.i(TAG, "Motors ${it!!.getName()} ${if (it.isConnected()) "connected" else "disconnected"}")
             }
             if (it.isConnected()) {
-                Log.i(TAG, "Motors state received: ${it.getSpeeds().joinToString()}")
+                Log.i(TAG, "Motors state updated: ${it.getSpeeds().joinToString()}")
             }
 
             if (it.isConnected() && !prevMotorsConnected) {
@@ -38,12 +38,12 @@ class PeripheryManager {
                     Log.d(TAG, "Executing motors action...")
                     //has to wait after subscription write is complete
                     while(it.isConnected()) {
-                        for (i in 1..IMotors.MOTORS_COUNT) {
-                            theMotors.spinMotor(i.toByte(), 30)
+                        for (i in 0 until IMotors.MOTORS_COUNT) {
+                            theMotors.spinMotor(i, 30)
                             Thread.sleep(400)
-                            theMotors.spinMotor(i.toByte(), -30)
+                            theMotors.spinMotor(i, -30)
                             Thread.sleep(400)
-                            theMotors.spinMotor(i.toByte(), 0)
+                            theMotors.spinMotor(i, 0)
                             Thread.sleep(400)
                         }
                     }
@@ -110,7 +110,7 @@ class PeripheryManager {
         val DEFAULT_MOTORS = object : IMotors{
             override fun getConnectionStatus(): IMotors.Status = IMotors.Status.DISCONNECTED
 
-            override fun spinMotor(iMotor: Byte, speed: Byte) {
+            override fun spinMotor(iMotor: Int, speed: Byte) {
             }
             override fun spinMotors(speeds: ByteArray) {
             }

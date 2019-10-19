@@ -78,10 +78,10 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
                 val mot = mPeripheryManager.motors!!
                 when (tryControl) {
                     0 -> mot.stopMotors()
-                    1 -> mot.spinMotor(1, 127)
-                    2 -> mot.spinMotor(1, -127)
-                    3 -> mot.spinMotor(2, 127)
-                    4 -> mot.spinMotor(2, -127)
+                    1 -> mot.spinMotor(0, 127)
+                    2 -> mot.spinMotor(0, -127)
+                    3 -> mot.spinMotor(1, 127)
+                    4 -> mot.spinMotor(1, -127)
                 }
             }
 

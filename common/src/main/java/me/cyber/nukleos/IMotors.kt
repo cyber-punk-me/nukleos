@@ -14,10 +14,9 @@ interface IMotors {
 
     /**
      * negative speed is reverse direction
-     *
-     * motors are indexed 1 to [motorsCount()] //todo index motors from 0
+     * indexed 0 to [motorsCount() - 1]
      */
-    fun spinMotor(iMotor: Byte, speed: Byte)
+    fun spinMotor(iMotor: Int, speed: Byte)
 
     /**
      * set array of size [MOTORS_COUNTMOTORS_COUNT]
