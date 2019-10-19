@@ -36,7 +36,12 @@ class MotorsBlueTooth(val peripheryManager: PeripheryManager, val bluetoothConne
                                 .subscribe({
                                     gatt = it.connectGatt(bluetoothConnector.context, false, this)
                                     findMotorsSubscription?.dispose()
-                                }, {}, {})
+                                }, {
+                                    Log.e(TAG, it.message, it)
+                                    disconnect()
+                                }, {
+                                    disconnect()
+                                })
                     }
         }
     }
