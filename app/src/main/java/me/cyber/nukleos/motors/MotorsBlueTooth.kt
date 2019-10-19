@@ -15,32 +15,37 @@ class MotorsBlueTooth(val peripheryManager: PeripheryManager, val bluetoothConne
 
     private var gatt: BluetoothGatt? = null
     private var servicesDiscovered = false
-    private var connected = false
     private var speeds: ByteArray = ByteArray(IMotors.MOTORS_COUNT)
     private var findMotorsSubscription: Disposable? = null
+    private var connStatus : IMotors.Status = IMotors.Status.DISCONNECTED
 
     override fun getSpeeds() = speeds
 
     override fun getName(): String = "BT MOTORS"
 
     override fun connect() {
-        bluetoothConnector.startBluetoothScan(10, TimeUnit.SECONDS, IMotors.SERVICE_UUID)
-                .also {
-                    findMotorsSubscription = it.subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe({
-                                gatt = it.connectGatt(bluetoothConnector.context, false, this)
-                                peripheryManager.motors = this
-                                findMotorsSubscription?.dispose()
-                            }, {}, {})
-                }
+        if (connStatus == IMotors.Status.DISCONNECTED) {
+            peripheryManager.motors = this
+            connStatus = IMotors.Status.CONNECTING
+            peripheryManager.notifyMotorsChanged()
+
+            bluetoothConnector.startBluetoothScan(10, TimeUnit.SECONDS, IMotors.SERVICE_UUID)
+                    .also {
+                        findMotorsSubscription = it.subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe({
+                                    gatt = it.connectGatt(bluetoothConnector.context, false, this)
+                                    findMotorsSubscription?.dispose()
+                                }, {}, {})
+                    }
+        }
     }
 
-    override fun isConnected() = connected
+    override fun getConnectionStatus(): IMotors.Status = connStatus
 
     override fun disconnect() {
+        connStatus = IMotors.Status.DISCONNECTED
         speeds = ByteArray(IMotors.MOTORS_COUNT)
-        connected = false
         gatt?.close()
         gatt = null
         servicesDiscovered = false
@@ -102,7 +107,7 @@ class MotorsBlueTooth(val peripheryManager: PeripheryManager, val bluetoothConne
                     } else {
                         subscribeDescriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
                         val subs = gatt.writeDescriptor(subscribeDescriptor)
-                        connected = true
+                        connStatus = IMotors.Status.CONNECTED
                         Log.d(TAG, "Subscribed to motors state : $subs")
                         peripheryManager.notifyMotorsChanged()
                     }

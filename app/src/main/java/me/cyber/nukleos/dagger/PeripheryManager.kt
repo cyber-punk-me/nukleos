@@ -40,11 +40,11 @@ class PeripheryManager {
                     while(it.isConnected()) {
                         for (i in 1..IMotors.MOTORS_COUNT) {
                             theMotors.spinMotor(i.toByte(), 30)
-                            Thread.sleep(300)
+                            Thread.sleep(400)
                             theMotors.spinMotor(i.toByte(), -30)
-                            Thread.sleep(300)
+                            Thread.sleep(400)
                             theMotors.spinMotor(i.toByte(), 0)
-                            Thread.sleep(300)
+                            Thread.sleep(400)
                         }
                     }
                 }.start()
@@ -108,6 +108,8 @@ class PeripheryManager {
         const val TAG = "PeripheryManager"
 
         val DEFAULT_MOTORS = object : IMotors{
+            override fun getConnectionStatus(): IMotors.Status = IMotors.Status.DISCONNECTED
+
             override fun spinMotor(iMotor: Byte, speed: Byte) {
             }
             override fun spinMotors(speeds: ByteArray) {

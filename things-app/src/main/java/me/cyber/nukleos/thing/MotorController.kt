@@ -18,7 +18,7 @@ class MotorController : IMotors {
         return motorsSpeeds.sliceArray(1..IMotors.MOTORS_COUNT)
     }
 
-    override fun isConnected() = true
+    override fun getConnectionStatus() = IMotors.Status.CONNECTED
 
     override fun getName() : String = "ADA MOTORS"
 

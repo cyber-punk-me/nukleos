@@ -3,6 +3,7 @@ package me.cyber.nukleos.ui.control
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.bluetooth.BluetoothConnector
 import me.cyber.nukleos.dagger.PeripheryManager
 import me.cyber.nukleos.motors.MotorsBlueTooth
@@ -27,9 +28,10 @@ class PeripheryStuffPresenter(override val view: PeripheryControlInterface.View,
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe{
-                        when (it.isConnected()) {
-                            true -> showMotorsConnected()
-                            false -> showMotorsDisonnected()
+                        when (it.getConnectionStatus()) {
+                            IMotors.Status.CONNECTED -> showMotorsConnected()
+                            IMotors.Status.DISCONNECTED -> showMotorsDisonnected()
+                            IMotors.Status.CONNECTING -> showMotorsConnecting()
                         }
                     }
 
@@ -49,18 +51,18 @@ class PeripheryStuffPresenter(override val view: PeripheryControlInterface.View,
                                             Status.CONNECTING -> {
                                                 showConnectionLoader()
                                                 showSensorConnecting()
-                                                showSensorNotScan()
+                                                showSensorNotStreaming()
                                             }
                                             Status.STREAMING -> {
                                                 hideConnectionLoader()
                                                 showSensorConnected()
-                                                showSensorScan()
+                                                showSensorStreaming()
                                             }
                                             else -> {
                                                 hideConnectionLoader()
                                                 showSensorDisconnected()
                                                 disableSensorControlPanel()
-                                                showSensorNotScan()
+                                                showSensorNotStreaming()
                                             }
                                         }
                                     }

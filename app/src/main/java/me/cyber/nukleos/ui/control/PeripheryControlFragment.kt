@@ -103,12 +103,12 @@ class PeripheryControlFragment : BaseFragment<PeripheryControlInterface.Presente
         sensor_frequency_seekbar.isEnabled = true
     }
 
-    override fun showSensorScan() {
+    override fun showSensorStreaming() {
         device_status?.text = getString(R.string.currently_streaming)
     }
 
-    override fun showSensorNotScan() {
-        device_status?.text = getString(R.string.waiting_for_scan)
+    override fun showSensorNotStreaming() {
+        device_status?.text = getString(R.string.disconnected)
     }
 
     override fun showSensorScanFrequency(frequency: Int) {
@@ -118,14 +118,17 @@ class PeripheryControlFragment : BaseFragment<PeripheryControlInterface.Presente
     override fun showMotorsConnected() {
         motor_status?.text = getString(R.string.connected)
         button_connect_motors.text = getString(R.string.disconnect)
+        button_connect_motors.isEnabled = true
     }
 
     override fun showMotorsConnecting() {
         motor_status?.text = getString(R.string.connecting)
+        button_connect_motors.isEnabled = false
     }
 
     override fun showMotorsDisonnected() {
         motor_status?.text = getString(R.string.disconnected)
         button_connect_motors.text = getString(R.string.connect)
+        button_connect_motors.isEnabled = true
     }
 }

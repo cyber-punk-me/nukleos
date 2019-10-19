@@ -8,7 +8,9 @@ interface IMotors {
 
     fun disconnect(): Unit = Unit
 
-    fun isConnected() : Boolean = false
+    fun getConnectionStatus() : Status
+
+    fun isConnected() : Boolean = Status.CONNECTED == getConnectionStatus()
 
     /**
      * negative speed is reverse direction
@@ -34,6 +36,12 @@ interface IMotors {
     fun getSpeeds() : ByteArray
 
     fun getName() : String = "STUB"
+
+    enum class Status {
+        DISCONNECTED,
+        CONNECTING,
+        CONNECTED
+    }
 
     companion object {
         val MOTORS_COUNT = 8

@@ -24,7 +24,7 @@
     <string name="unknown_stuff">Unknown Stuff</string>
 
     <!--Sensor control tab-->
-    <string name="current_device">Current device</string>
+    <string name="current_sensor">Current sensor</string>
     <string name="name">Name</string>
     <string name="device_status">Status</string>
     <string name="motors_status">Motors Status</string>
@@ -35,7 +35,6 @@
     <string name="disconnect">Disconnect</string>
     <string name="connected">Connected</string>
     <string name="disconnected">Disconnected</string>
-    <string name="waiting_for_scan">Waiting for scan</string>
     <string name="device_control">Device Control</string>
     <string name="stop">Stop</string>
     <string name="start">Start</string>
