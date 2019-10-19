@@ -4,10 +4,10 @@ import android.bluetooth.*
 import android.content.Context
 import android.util.Log
 import me.cyber.nukleos.IMotors
-import me.cyber.nukleos.sensors.myosensor.TAG
-import java.lang.Thread.sleep
+import me.cyber.nukleos.dagger.PeripheryManager
 
-class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothGattCallback() {
+class MotorsBlueTooth(private val device: BluetoothDevice, val peripheryManager: PeripheryManager)
+    : IMotors, BluetoothGattCallback() {
 
     private var gatt: BluetoothGatt? = null
     private var servicesDiscovered = false
@@ -16,18 +16,23 @@ class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothG
 
     override fun getSpeeds() = speeds
 
+    override fun getName() : String = "BT MOTORS"
+
     override fun connect(context: Any) {
         if (gatt == null) {
             gatt = device.connectGatt(context as Context, false, this)
         }
     }
 
-    fun disconnect() {
+    override fun isConnected() = connected
+
+    override fun disconnect() {
         speeds = ByteArray(IMotors.MOTORS_COUNT)
         connected = false
         gatt?.close()
         gatt = null
         servicesDiscovered = false
+        peripheryManager.notifyMotorsChanged()
     }
 
     private fun sendSpinCommand() {
@@ -54,10 +59,10 @@ class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothG
         super.onConnectionStateChange(gatt, status, newState)
         Log.d(TAG, "onConnectionStateChange: $status -> $newState")
         if (newState != status && newState == BluetoothProfile.STATE_CONNECTED) {
-            Log.d(TAG, "MotorsBlueTooth Connected")
+            Log.d(TAG, "MotorsBlueTooth device connected. Discovering services.")
             gatt.discoverServices()
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-            // Calling disconnect() here will cause to release the GATT resources.
+            // Calling onDisconnected() here will cause to release the GATT resources.
             disconnect()
             Log.d(TAG, "Bluetooth Disconnected")
         }
@@ -80,37 +85,26 @@ class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothG
                         val subs = gatt.writeDescriptor(subscribeDescriptor)
                         connected = true
                         Log.d(TAG, "Subscribed to motors state : $subs")
-                        Thread {
-                            //has to wait after subscription write is complete
-                            while(connected) {
-                                Log.d(TAG, "Spinning motors.")
-                                for (i in 1..IMotors.MOTORS_COUNT) {
-                                    spinMotor(i.toByte(), 30)
-                                    sleep(300)
-                                    spinMotor(i.toByte(), -30)
-                                    sleep(300)
-                                    spinMotor(i.toByte(), 0)
-                                    sleep(300)
-                                }
-                            }
-                            //stopMotors()
-
-                        }.start()
+                        peripheryManager.notifyMotorsChanged()
                     }
                 } else {
-                    Log.w(TAG, "Failed to subscribe to motor state.")
+                    Log.e(TAG, "Failed to subscribe to motor state.")
                 }
             }
             Log.d(TAG, "MotorsBlueTooth connected : $servicesDiscovered")
         } else {
-            Log.w(TAG, "onServicesDiscovered received: $status")
+            Log.d(TAG, "onServicesDiscovered received: $status")
         }
     }
 
     override fun onCharacteristicChanged(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
         super.onCharacteristicChanged(gatt, characteristic)
         speeds = characteristic.value
-        Log.w(TAG, "onCharacteristicChanged received: ${speeds.joinToString()}")
+        peripheryManager.notifyMotorsChanged()
+    }
+
+    companion object {
+        const val TAG = "MotorsBluetooth"
     }
 
 }

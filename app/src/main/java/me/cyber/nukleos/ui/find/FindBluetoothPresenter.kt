@@ -34,10 +34,10 @@ class FindBluetoothPresenter(
                     mFindMotorsSubscription = subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe({
-                                if (mPeripheryManager.motors == null) {
+                                if (mPeripheryManager.motors !is MotorsBlueTooth) {
                                     synchronized(mPeripheryManager) {
-                                        if (mPeripheryManager.motors == null) {
-                                            val motors = MotorsBlueTooth(it)
+                                        if (mPeripheryManager.motors !is MotorsBlueTooth) {
+                                            val motors = MotorsBlueTooth(it, mPeripheryManager)
                                             mPeripheryManager.motors = motors
                                             motors.connect(mBluetoothConnector.context)
                                         }

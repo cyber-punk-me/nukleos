@@ -99,7 +99,7 @@ class Myo(private val device: BluetoothDevice) : Sensor, BluetoothGattCallback()
             Log.d(TAG, "Bluetooth Connected")
             gatt.discoverServices()
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-            // Calling disconnect() here will cause to release the GATT resources.
+            // Calling onDisconnected() here will cause to release the GATT resources.
             disconnect()
             Log.d(TAG, "Bluetooth Disconnected")
         }
