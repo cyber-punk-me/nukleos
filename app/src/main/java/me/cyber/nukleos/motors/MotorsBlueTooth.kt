@@ -72,8 +72,8 @@ class MotorsBlueTooth(val peripheryManager: PeripheryManager, val bluetoothConne
         }
     }
 
-    override fun spinMotor(iMotor: Byte, speed: Byte) {
-        speeds[iMotor - 1] = speed
+    override fun spinMotor(iMotor: Int, speed: Byte) {
+        speeds[iMotor] = speed
         sendSpinCommand()
     }
 
@@ -82,7 +82,10 @@ class MotorsBlueTooth(val peripheryManager: PeripheryManager, val bluetoothConne
         sendSpinCommand()
     }
 
-    override fun stopMotors() = spinMotor(0, 0)
+    override fun stopMotors() {
+        this.speeds = ByteArray(IMotors.MOTORS_COUNT)
+        sendSpinCommand()
+    }
 
     override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
         super.onConnectionStateChange(gatt, status, newState)
@@ -97,7 +100,6 @@ class MotorsBlueTooth(val peripheryManager: PeripheryManager, val bluetoothConne
         }
     }
 
-    @Synchronized
     override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
         if (status == BluetoothGatt.GATT_SUCCESS && !servicesDiscovered) {
             servicesDiscovered = true
@@ -113,6 +115,7 @@ class MotorsBlueTooth(val peripheryManager: PeripheryManager, val bluetoothConne
                         subscribeDescriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
                         val subs = gatt.writeDescriptor(subscribeDescriptor)
                         connStatus = IMotors.Status.CONNECTED
+                        speeds = ByteArray(IMotors.MOTORS_COUNT)
                         Log.d(TAG, "Subscribed to motors state : $subs")
                         peripheryManager.notifyMotorsChanged()
                     }
@@ -128,7 +131,7 @@ class MotorsBlueTooth(val peripheryManager: PeripheryManager, val bluetoothConne
 
     override fun onCharacteristicChanged(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
         super.onCharacteristicChanged(gatt, characteristic)
-        speeds = characteristic.value
+        //speeds = characteristic.value
         peripheryManager.notifyMotorsChanged()
     }
 
