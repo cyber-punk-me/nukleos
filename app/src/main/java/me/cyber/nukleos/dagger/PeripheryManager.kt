@@ -1,11 +1,9 @@
 package me.cyber.nukleos.dagger
-import android.content.Context
 import android.util.Log
 import io.reactivex.subjects.BehaviorSubject
 import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.sensors.LastKnownSensorManager
 import me.cyber.nukleos.sensors.Sensor
-import me.cyber.nukleos.sensors.myosensor.TAG
 
 class PeripheryManager {
 
@@ -102,11 +100,13 @@ class PeripheryManager {
         motors.disconnect()
     }
 
-    fun connectMotors(context : Context) {
-        motors.connect(context)
+    fun connectMotors() {
+        motors.connect()
     }
 
     companion object {
+        const val TAG = "PeripheryManager"
+
         val DEFAULT_MOTORS = object : IMotors{
             override fun spinMotor(iMotor: Byte, speed: Byte) {
             }

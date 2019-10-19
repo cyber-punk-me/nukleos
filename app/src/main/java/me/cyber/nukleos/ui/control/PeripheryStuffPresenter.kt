@@ -5,6 +5,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.bluetooth.BluetoothConnector
 import me.cyber.nukleos.dagger.PeripheryManager
+import me.cyber.nukleos.motors.MotorsBlueTooth
 import me.cyber.nukleos.sensors.Status
 
 class PeripheryStuffPresenter(override val view: PeripheryControlInterface.View, private val mBluetoothConnector: BluetoothConnector,
@@ -12,11 +13,13 @@ class PeripheryStuffPresenter(override val view: PeripheryControlInterface.View,
 
     private var mSensorStatusSubscription: Disposable? = null
     private var mSensorControlSubscription: Disposable? = null
-
     private var mMotorsStatusSubscription: Disposable? = null
 
 
-    override fun create() {}
+    override fun create() {
+        mPeripheryManager.motors = MotorsBlueTooth(mPeripheryManager, mBluetoothConnector)
+        mPeripheryManager.connectMotors()
+    }
 
     override fun start() {
         with(view) {
@@ -84,7 +87,7 @@ class PeripheryStuffPresenter(override val view: PeripheryControlInterface.View,
 
     override fun onConnectMotorsClicked() {
             if (!mPeripheryManager.motors.isConnected()) {
-                mPeripheryManager.connectMotors(mBluetoothConnector.context)
+                mPeripheryManager.connectMotors()
             } else {
                 mPeripheryManager.disconnectMotors()
             }

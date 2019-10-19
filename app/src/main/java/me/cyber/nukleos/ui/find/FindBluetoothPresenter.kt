@@ -5,10 +5,8 @@ import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.bluetooth.BluetoothConnector
 import me.cyber.nukleos.dagger.PeripheryManager
-import me.cyber.nukleos.motors.MotorsBlueTooth
 import me.cyber.nukleos.sensors.myosensor.Myo
 import java.util.concurrent.TimeUnit
 
@@ -20,31 +18,13 @@ class FindBluetoothPresenter(
 ) : FindSensorInterface.Presenter(view) {
 
     private var mFindFlowable: Flowable<BluetoothDevice>? = null
-    private var mFindMotorsFlowable: Flowable<BluetoothDevice>? = null
 
     private var mFindSubscription: Disposable? = null
-    private var mFindMotorsSubscription: Disposable? = null
 
     private var mSensorsUpdateSubscription: Disposable? = null
 
     override fun create() {
         mFindFlowable = mBluetoothConnector.startBluetoothScan(10, TimeUnit.SECONDS, Myo.BLUETOOTH_UUID)
-        mFindMotorsFlowable = mBluetoothConnector.startBluetoothScan(10, TimeUnit.SECONDS, IMotors.SERVICE_UUID)
-                .apply {
-                    mFindMotorsSubscription = subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe({
-                                if (mPeripheryManager.motors !is MotorsBlueTooth) {
-                                    synchronized(mPeripheryManager) {
-                                        if (mPeripheryManager.motors !is MotorsBlueTooth) {
-                                            val motors = MotorsBlueTooth(it, mPeripheryManager)
-                                            mPeripheryManager.motors = motors
-                                            motors.connect(mBluetoothConnector.context)
-                                        }
-                                    }
-                                }
-                            }, {}, {})
-                }
     }
 
     override fun start() = with(view) {
@@ -59,7 +39,6 @@ class FindBluetoothPresenter(
 
     override fun destroy() {
         mFindSubscription?.dispose()
-        mFindMotorsSubscription?.dispose()
         mSensorsUpdateSubscription?.dispose()
         view.hideFindLoader()
     }

@@ -1,27 +1,39 @@
 package me.cyber.nukleos.motors
 
 import android.bluetooth.*
-import android.content.Context
 import android.util.Log
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.IMotors
+import me.cyber.nukleos.bluetooth.BluetoothConnector
 import me.cyber.nukleos.dagger.PeripheryManager
+import java.util.concurrent.TimeUnit
 
-class MotorsBlueTooth(private val device: BluetoothDevice, val peripheryManager: PeripheryManager)
+class MotorsBlueTooth(val peripheryManager: PeripheryManager, val bluetoothConnector: BluetoothConnector)
     : IMotors, BluetoothGattCallback() {
 
     private var gatt: BluetoothGatt? = null
     private var servicesDiscovered = false
     private var connected = false
     private var speeds: ByteArray = ByteArray(IMotors.MOTORS_COUNT)
+    private var findMotorsSubscription: Disposable? = null
 
     override fun getSpeeds() = speeds
 
-    override fun getName() : String = "BT MOTORS"
+    override fun getName(): String = "BT MOTORS"
 
-    override fun connect(context: Any) {
-        if (gatt == null) {
-            gatt = device.connectGatt(context as Context, false, this)
-        }
+    override fun connect() {
+        bluetoothConnector.startBluetoothScan(10, TimeUnit.SECONDS, IMotors.SERVICE_UUID)
+                .also {
+                    findMotorsSubscription = it.subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe({
+                                gatt = it.connectGatt(bluetoothConnector.context, false, this)
+                                peripheryManager.motors = this
+                                findMotorsSubscription?.dispose()
+                            }, {}, {})
+                }
     }
 
     override fun isConnected() = connected
@@ -32,15 +44,22 @@ class MotorsBlueTooth(private val device: BluetoothDevice, val peripheryManager:
         gatt?.close()
         gatt = null
         servicesDiscovered = false
+        findMotorsSubscription?.dispose()
         peripheryManager.notifyMotorsChanged()
     }
 
     private fun sendSpinCommand() {
-        val characteristic = gatt
-                ?.getService(IMotors.SERVICE_UUID)
-                ?.getCharacteristic(IMotors.CHAR_MOTOR_CONTROL_UUID)
-        characteristic?.value = speeds
-        gatt?.writeCharacteristic(characteristic)
+        if (isConnected()) {
+            try {
+                val characteristic = gatt
+                        ?.getService(IMotors.SERVICE_UUID)
+                        ?.getCharacteristic(IMotors.CHAR_MOTOR_CONTROL_UUID)
+                characteristic?.value = speeds
+                gatt?.writeCharacteristic(characteristic)
+            } catch (t: Throwable) {
+                Log.e(TAG, t.message, t)
+            }
+        }
     }
 
     override fun spinMotor(iMotor: Byte, speed: Byte) {

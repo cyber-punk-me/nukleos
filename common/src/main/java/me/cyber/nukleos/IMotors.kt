@@ -4,7 +4,7 @@ import java.util.*
 
 interface IMotors {
 
-    fun connect(context: Any): Unit = Unit
+    fun connect(): Unit = Unit
 
     fun disconnect(): Unit = Unit
 
