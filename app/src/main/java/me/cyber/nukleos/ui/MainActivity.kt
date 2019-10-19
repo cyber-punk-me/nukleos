@@ -21,7 +21,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import me.cyber.nukleos.dagger.PeripheryManager
 import me.cyber.nukleos.sensors.synaps.UsbService
 import me.cyber.nukleos.ui.training.TrainingFragment
-import me.cyber.nukleos.ui.control.SensorControlFragment
+import me.cyber.nukleos.ui.control.PeripheryControlFragment
 import me.cyber.nukleos.ui.find.FindSensorFragment
 import me.cyber.nukleos.ui.predict.PredictFragment
 import me.cyber.nukleos.ui.settings.SettingsFragment
@@ -90,7 +90,7 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
         val findSensorFragment = FindSensorFragment.newInstance()
         val fragmentList = listOf(
                 findSensorFragment,
-                SensorControlFragment.newInstance(),
+                PeripheryControlFragment.newInstance(),
                 TrainingFragment.newInstance(),
                 PredictFragment.newInstance(),
                 SettingsFragment.newInstance()

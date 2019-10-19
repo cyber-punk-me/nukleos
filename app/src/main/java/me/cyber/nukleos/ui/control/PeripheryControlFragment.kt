@@ -15,14 +15,14 @@ import me.cyber.nukleus.R
 import javax.inject.Inject
 
 
-class SensorControlFragment : BaseFragment<SensorControlInterface.Presenter>(), SensorControlInterface.View {
+class PeripheryControlFragment : BaseFragment<PeripheryControlInterface.Presenter>(), PeripheryControlInterface.View {
 
     companion object {
-        fun newInstance() = SensorControlFragment()
+        fun newInstance() = PeripheryControlFragment()
     }
 
     @Inject
-    lateinit var controlDevicePresenter: SensorStuffPresenter
+    lateinit var controlDevicePresenter: PeripheryStuffPresenter
 
     override fun onAttach(context: Context?) {
         AndroidSupportInjection.inject(this as Fragment)
@@ -39,7 +39,8 @@ class SensorControlFragment : BaseFragment<SensorControlInterface.Presenter>(), 
             vibro_button_1.setOnClickListener { onVibrationClicked(1) }
             vibro_button_2.setOnClickListener { onVibrationClicked(2) }
             vibro_button_3.setOnClickListener { onVibrationClicked(3) }
-            button_connect.setOnClickListener { onConnectionButtonClicked() }
+            button_connect.setOnClickListener { onConnectSensorClicked() }
+            button_connect_motors.setOnClickListener{ onConnectMotorsClicked() }
             sensor_frequency_seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) { onProgressSelected(progress) }
                 override fun onStartTrackingTouch(p0: SeekBar?) {}
@@ -61,56 +62,73 @@ class SensorControlFragment : BaseFragment<SensorControlInterface.Presenter>(), 
         connection_loader.animate().alpha(0.0f)
     }
 
-    override fun showConnecting() {
+    override fun showSensorConnecting() {
         device_status.text = getString(R.string.connecting)
     }
 
-    override fun showConnected() {
+    override fun showSensorConnected() {
         device_status.text = getString(R.string.connected)
         button_connect.text = getString(R.string.disconnect)
     }
 
-    override fun showDisconnected() {
+    override fun showSensorDisconnected() {
         device_status.text = getString(R.string.disconnected)
         button_connect.text = getString(R.string.connect)
     }
 
-    override fun showConnectionError() {
+    override fun showSensorConnectionError() {
         "Connection failed".showShortToast()
         button_connect.text = getString(R.string.connect)
     }
 
-    override fun enableConnectButton() {
+    override fun enableSensorConnectButton() {
         button_connect.isEnabled = true
     }
 
-    override fun disableConnectButton() {
+    override fun disableSensorConnectButton() {
         button_connect.isEnabled = false
     }
 
-    override fun disableControlPanel() {
+    override fun disableSensorControlPanel() {
         vibro_button_1.isEnabled = false
         vibro_button_2.isEnabled = false
         vibro_button_3.isEnabled = false
         sensor_frequency_seekbar.isEnabled = false
     }
 
-    override fun enableControlPanel() {
+    override fun enableSensorControlPanel() {
         vibro_button_1.isEnabled = true
         vibro_button_2.isEnabled = true
         vibro_button_3.isEnabled = true
         sensor_frequency_seekbar.isEnabled = true
     }
 
-    override fun showScan() {
+    override fun showSensorStreaming() {
         device_status?.text = getString(R.string.currently_streaming)
     }
 
-    override fun showNotScan() {
-        device_status?.text = getString(R.string.waiting_for_scan)
+    override fun showSensorNotStreaming() {
+        device_status?.text = getString(R.string.disconnected)
     }
 
-    override fun showScanFrequency(frequency: Int) {
+    override fun showSensorScanFrequency(frequency: Int) {
         device_frequency_value.text = getString(R.string.hz_step, frequency)
+    }
+
+    override fun showMotorsConnected() {
+        motor_status?.text = getString(R.string.connected)
+        button_connect_motors.text = getString(R.string.disconnect)
+        button_connect_motors.isEnabled = true
+    }
+
+    override fun showMotorsConnecting() {
+        motor_status?.text = getString(R.string.connecting)
+        button_connect_motors.isEnabled = false
+    }
+
+    override fun showMotorsDisonnected() {
+        motor_status?.text = getString(R.string.disconnected)
+        button_connect_motors.text = getString(R.string.connect)
+        button_connect_motors.isEnabled = true
     }
 }

@@ -14,13 +14,13 @@ class MotorController : IMotors {
     private val motorHat = AdafruitMotorHat(0)
     private val motorHat1 = AdafruitMotorHat(1)
 
-    override fun connect(context: Any) {
-        //noop
-    }
-
     override fun getSpeeds(): ByteArray {
         return motorsSpeeds.sliceArray(1..IMotors.MOTORS_COUNT)
     }
+
+    override fun getConnectionStatus() = IMotors.Status.CONNECTED
+
+    override fun getName() : String = "ADA MOTORS"
 
     /**
      * @param iMotor

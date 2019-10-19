@@ -4,7 +4,7 @@ import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import me.cyber.nukleos.ui.MainActivity
 import me.cyber.nukleos.ui.training.TrainingFragment
-import me.cyber.nukleos.ui.control.SensorControlFragment
+import me.cyber.nukleos.ui.control.PeripheryControlFragment
 import me.cyber.nukleos.ui.find.FindSensorFragment
 import me.cyber.nukleos.ui.predict.PredictFragment
 
@@ -19,7 +19,7 @@ abstract class BuildersModule {
     abstract fun bindScanDeviceFragment(): FindSensorFragment
 
     @ContributesAndroidInjector(modules = [SensorControlViewModule::class, SensorControlModule::class])
-    abstract fun bindControlDeviceFragment(): SensorControlFragment
+    abstract fun bindControlDeviceFragment(): PeripheryControlFragment
 
     @ContributesAndroidInjector(modules = [ChartsViewModule::class, ChartsModule::class])
     abstract fun bindGraphFragment(): TrainingFragment

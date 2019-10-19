@@ -4,12 +4,18 @@ import java.util.*
 
 interface IMotors {
 
-    fun connect(context: Any)
+    fun connect(): Unit = Unit
+
+    fun disconnect(): Unit = Unit
+
+    fun getConnectionStatus() : Status
+
+    fun isConnected() : Boolean = Status.CONNECTED == getConnectionStatus()
 
     /**
      * negative speed is reverse direction
      *
-     * motors are indexed 1 to [motorsCount()]
+     * motors are indexed 1 to [motorsCount()] //todo index motors from 0
      */
     fun spinMotor(iMotor: Byte, speed: Byte)
 
@@ -29,6 +35,14 @@ interface IMotors {
      */
     fun getSpeeds() : ByteArray
 
+    fun getName() : String = "STUB"
+
+    enum class Status {
+        DISCONNECTED,
+        CONNECTING,
+        CONNECTED
+    }
+
     companion object {
         val MOTORS_COUNT = 8
 
@@ -36,7 +50,6 @@ interface IMotors {
         val CHAR_MOTOR_CONTROL_UUID = UUID.fromString("10992895-9b61-4380-8e51-5028d2c17a0c")
         val CHAR_MOTOR_STATE_UUID = UUID.fromString("10992895-9b61-4380-8e51-5028d2c17a0d")
         val CLIENT_CONFIG_DESCRIPTOR = UUID.fromString("10992895-9b61-4380-8e51-5028d2c17a0e")
-
     }
 
 }

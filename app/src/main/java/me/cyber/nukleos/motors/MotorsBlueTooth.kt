@@ -1,41 +1,70 @@
 package me.cyber.nukleos.motors
 
 import android.bluetooth.*
-import android.content.Context
 import android.util.Log
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.IMotors
-import me.cyber.nukleos.sensors.myosensor.TAG
-import java.lang.Thread.sleep
+import me.cyber.nukleos.bluetooth.BluetoothConnector
+import me.cyber.nukleos.dagger.PeripheryManager
+import java.util.concurrent.TimeUnit
 
-class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothGattCallback() {
+class MotorsBlueTooth(val peripheryManager: PeripheryManager, val bluetoothConnector: BluetoothConnector)
+    : IMotors, BluetoothGattCallback() {
 
     private var gatt: BluetoothGatt? = null
     private var servicesDiscovered = false
-    private var connected = false
     private var speeds: ByteArray = ByteArray(IMotors.MOTORS_COUNT)
+    private var findMotorsSubscription: Disposable? = null
+    private var connStatus : IMotors.Status = IMotors.Status.DISCONNECTED
 
     override fun getSpeeds() = speeds
 
-    override fun connect(context: Any) {
-        if (gatt == null) {
-            gatt = device.connectGatt(context as Context, false, this)
+    override fun getName(): String = "BT MOTORS"
+
+    override fun connect() {
+        if (connStatus == IMotors.Status.DISCONNECTED) {
+            peripheryManager.motors = this
+            connStatus = IMotors.Status.CONNECTING
+            peripheryManager.notifyMotorsChanged()
+
+            bluetoothConnector.startBluetoothScan(10, TimeUnit.SECONDS, IMotors.SERVICE_UUID)
+                    .also {
+                        findMotorsSubscription = it.subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe({
+                                    gatt = it.connectGatt(bluetoothConnector.context, false, this)
+                                    findMotorsSubscription?.dispose()
+                                }, {}, {})
+                    }
         }
     }
 
-    fun disconnect() {
+    override fun getConnectionStatus(): IMotors.Status = connStatus
+
+    override fun disconnect() {
+        connStatus = IMotors.Status.DISCONNECTED
         speeds = ByteArray(IMotors.MOTORS_COUNT)
-        connected = false
         gatt?.close()
         gatt = null
         servicesDiscovered = false
+        findMotorsSubscription?.dispose()
+        peripheryManager.notifyMotorsChanged()
     }
 
     private fun sendSpinCommand() {
-        val characteristic = gatt
-                ?.getService(IMotors.SERVICE_UUID)
-                ?.getCharacteristic(IMotors.CHAR_MOTOR_CONTROL_UUID)
-        characteristic?.value = speeds
-        gatt?.writeCharacteristic(characteristic)
+        if (isConnected()) {
+            try {
+                val characteristic = gatt
+                        ?.getService(IMotors.SERVICE_UUID)
+                        ?.getCharacteristic(IMotors.CHAR_MOTOR_CONTROL_UUID)
+                characteristic?.value = speeds
+                gatt?.writeCharacteristic(characteristic)
+            } catch (t: Throwable) {
+                Log.e(TAG, t.message, t)
+            }
+        }
     }
 
     override fun spinMotor(iMotor: Byte, speed: Byte) {
@@ -54,10 +83,10 @@ class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothG
         super.onConnectionStateChange(gatt, status, newState)
         Log.d(TAG, "onConnectionStateChange: $status -> $newState")
         if (newState != status && newState == BluetoothProfile.STATE_CONNECTED) {
-            Log.d(TAG, "MotorsBlueTooth Connected")
+            Log.d(TAG, "MotorsBlueTooth device connected. Discovering services.")
             gatt.discoverServices()
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-            // Calling disconnect() here will cause to release the GATT resources.
+            // Calling onDisconnected() here will cause to release the GATT resources.
             disconnect()
             Log.d(TAG, "Bluetooth Disconnected")
         }
@@ -78,39 +107,28 @@ class MotorsBlueTooth(private val device: BluetoothDevice) : IMotors, BluetoothG
                     } else {
                         subscribeDescriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
                         val subs = gatt.writeDescriptor(subscribeDescriptor)
-                        connected = true
+                        connStatus = IMotors.Status.CONNECTED
                         Log.d(TAG, "Subscribed to motors state : $subs")
-                        Thread {
-                            //has to wait after subscription write is complete
-                            while(connected) {
-                                Log.d(TAG, "Spinning motors.")
-                                for (i in 1..IMotors.MOTORS_COUNT) {
-                                    spinMotor(i.toByte(), 30)
-                                    sleep(300)
-                                    spinMotor(i.toByte(), -30)
-                                    sleep(300)
-                                    spinMotor(i.toByte(), 0)
-                                    sleep(300)
-                                }
-                            }
-                            //stopMotors()
-
-                        }.start()
+                        peripheryManager.notifyMotorsChanged()
                     }
                 } else {
-                    Log.w(TAG, "Failed to subscribe to motor state.")
+                    Log.e(TAG, "Failed to subscribe to motor state.")
                 }
             }
             Log.d(TAG, "MotorsBlueTooth connected : $servicesDiscovered")
         } else {
-            Log.w(TAG, "onServicesDiscovered received: $status")
+            Log.d(TAG, "onServicesDiscovered received: $status")
         }
     }
 
     override fun onCharacteristicChanged(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
         super.onCharacteristicChanged(gatt, characteristic)
         speeds = characteristic.value
-        Log.w(TAG, "onCharacteristicChanged received: ${speeds.joinToString()}")
+        peripheryManager.notifyMotorsChanged()
+    }
+
+    companion object {
+        const val TAG = "MotorsBluetooth"
     }
 
 }

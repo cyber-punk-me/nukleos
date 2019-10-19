@@ -24,9 +24,10 @@
     <string name="unknown_stuff">Unknown Stuff</string>
 
     <!--Sensor control tab-->
-    <string name="current_device">Current device</string>
+    <string name="current_sensor">Current sensor</string>
     <string name="name">Name</string>
     <string name="device_status">Status</string>
+    <string name="motors_status">Motors Status</string>
     <string name="select">Select</string>
     <string name="address">Address</string>
     <string name="connect">Connect</string>
@@ -34,7 +35,6 @@
     <string name="disconnect">Disconnect</string>
     <string name="connected">Connected</string>
     <string name="disconnected">Disconnected</string>
-    <string name="waiting_for_scan">Waiting for scan</string>
     <string name="device_control">Device Control</string>
     <string name="stop">Stop</string>
     <string name="start">Start</string>
@@ -43,7 +43,7 @@
     <string name="short_vibration">Short</string>
     <string name="normal_vibration">Normal</string>
     <string name="long_vibration">PLEASE, STOP!</string>
-    <string name="currently_streaming">Current streaming…</string>
+    <string name="currently_streaming">Streaming…</string>
     <string name="frequency_max">200Hz</string>
     <string name="hz_step">%1$dhz</string>
     <string name="location_permission_denied">We need location permission!</string>

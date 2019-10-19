@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/default_margin"
-        android:text="@string/current_device"
+        android:text="@string/current_sensor"
         android:textColor="@color/colorPrimary"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -197,6 +197,53 @@
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toEndOf="@+id/vibro_button_2"
         app:layout_constraintTop_toBottomOf="@+id/vibration_title" />
+
+
+    <View
+        android:id="@+id/motors_divider"
+        android:layout_width="wrap_content"
+        android:layout_height="5dp"
+        android:layout_marginTop="@dimen/default_margin"
+        android:background="@color/secondaryLightColor"
+        app:layout_constraintTop_toBottomOf="@id/vibro_button_3"
+        app:layout_constraintLeft_toLeftOf="parent"/>
+
+
+    <TextView
+        android:id="@+id/motor_status_title"
+        style="@style/TextAppearance.AppCompat.Subhead"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_margin"
+        android:text="@string/motors_status"
+        android:textColor="@color/primaryColor"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/motors_divider" />
+
+    <TextView
+        android:id="@+id/motor_status"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_margin"
+        android:text="@string/disconnected"
+        app:layout_constraintEnd_toStartOf="@+id/connection_loader"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/motor_status_title" />
+
+    <android.support.design.button.MaterialButton
+        android:id="@+id/button_connect_motors"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/ten_grid_size"
+        android:layout_margin="@dimen/default_margin"
+        android:enabled="true"
+        android:minWidth="120dp"
+        android:text="@string/connect"
+        app:layout_constraintBottom_toTopOf="@+id/motor_status"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/motor_status" />
+
 
 
 </android.support.constraint.ConstraintLayout>
