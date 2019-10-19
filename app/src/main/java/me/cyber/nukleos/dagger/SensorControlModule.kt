@@ -3,16 +3,16 @@ package me.cyber.nukleos.dagger
 import me.cyber.nukleos.bluetooth.BluetoothConnector
 import dagger.Module
 import dagger.Provides
-import me.cyber.nukleos.ui.control.SensorControlInterface
-import me.cyber.nukleos.ui.control.SensorStuffPresenter
+import me.cyber.nukleos.ui.control.PeripheryControlInterface
+import me.cyber.nukleos.ui.control.PeripheryStuffPresenter
 
 @Module
 class SensorControlModule {
 
     @Provides
     fun provideControlDevicePresenter(
-            sensorControlView: SensorControlInterface.View,
+            peripheryControlView: PeripheryControlInterface.View,
             bluetoothConnector: BluetoothConnector,
             peripheryManager: PeripheryManager)
-            = SensorStuffPresenter(sensorControlView, bluetoothConnector, peripheryManager)
+            = PeripheryStuffPresenter(peripheryControlView, bluetoothConnector, peripheryManager)
 }

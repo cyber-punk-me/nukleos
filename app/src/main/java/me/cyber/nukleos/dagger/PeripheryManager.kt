@@ -1,4 +1,5 @@
 package me.cyber.nukleos.dagger
+import android.content.Context
 import android.util.Log
 import io.reactivex.subjects.BehaviorSubject
 import me.cyber.nukleos.IMotors
@@ -23,7 +24,7 @@ class PeripheryManager {
 
     var prevMotorsConnected : Boolean = false
 
-    private val motorsObservable: BehaviorSubject<IMotors> = BehaviorSubject.createDefault(motors).also {
+    val motorsObservable: BehaviorSubject<IMotors> = BehaviorSubject.createDefault(motors).also {
         it.subscribe {
             if (prevMotorsConnected != it.isConnected()) {
                 Log.i(TAG, "Motors ${it!!.getName()} ${if (it.isConnected()) "connected" else "disconnected"}")
@@ -99,6 +100,10 @@ class PeripheryManager {
 
     fun disconnectMotors() {
         motors.disconnect()
+    }
+
+    fun connectMotors(context : Context) {
+        motors.connect(context)
     }
 
     companion object {
