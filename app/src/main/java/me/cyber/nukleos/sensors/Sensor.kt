@@ -3,6 +3,7 @@ package me.cyber.nukleos.sensors
 import io.reactivex.subjects.BehaviorSubject
 import me.cyber.nukleos.sensors.Status.*
 import java.util.*
+import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.collections.HashMap
 
 interface Sensor {
@@ -69,7 +70,7 @@ data class SubscriptionParams(
 class SensorDataFeeder {
 
     private var maxWindow: Int = 1
-    private val dataQueues: MutableMap<String, LinkedList<FloatArray>> = HashMap()
+    private val dataQueues: MutableMap<String, ConcurrentLinkedQueue<FloatArray>> = HashMap()
     private val listeners: MutableMap<String, Pair<SensorListener, SubscriptionParams>> = HashMap()
     private val listenerSteps: MutableMap<String, Int> = HashMap()
 
@@ -85,7 +86,7 @@ class SensorDataFeeder {
         synchronized(listeners) {
             listeners[listenerName] = Pair(sensorListener, subscriptionParams)
             listenerSteps[listenerName] = 0
-            dataQueues[listenerName] = LinkedList()
+            dataQueues[listenerName] = ConcurrentLinkedQueue()
             updateMaxWindow()
         }
     }
@@ -128,7 +129,7 @@ class SensorDataFeeder {
                             result.add(queIter.next())
                         }
                         for (i in 0 until params.slide) {
-                            queue.pop()
+                            queue.remove()
                         }
                         listeners[listenerName]?.first?.onSensorData(sensorName, result)
                     }
