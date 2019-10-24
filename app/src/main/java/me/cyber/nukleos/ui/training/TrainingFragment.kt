@@ -25,7 +25,7 @@ class TrainingFragment : BaseFragment<TrainingInterface.Presenter>(), TrainingIn
     companion object {
 
         private const val TIMER_FORMAT = "%02d:%02d:%02d"
-        const val TIMER_COUNT = 5L
+        const val TIMER_COUNT = 4L
         const val LEARNING_TIME = 10
 
         fun newInstance() = TrainingFragment()
