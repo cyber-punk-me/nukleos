@@ -1,6 +1,7 @@
 package me.cyber.nukleos.thing
 
 import android.util.Log
+import com.google.android.things.contrib.driver.pwmservo.Servo
 import com.zugaldia.robocar.hardware.adafruit2348.AdafruitMotorHat
 import me.cyber.nukleos.IMotors
 import kotlin.math.absoluteValue
@@ -10,8 +11,10 @@ class MotorController : IMotors {
     //ada motors are indexed from 1; 0th element is empty
     private val motorsSpeeds = ByteArray(IMotors.MOTORS_COUNT)
 
-    private val motorHat = AdafruitMotorHat(0)
+    private var motorHat = AdafruitMotorHat(0)
     private val motorHat1 = AdafruitMotorHat(1)
+    private val servo0 = initServo("PWM0")
+    private val servo1 = initServo("PWM1")
 
     override fun getSpeeds(): ByteArray = motorsSpeeds
 
@@ -54,6 +57,11 @@ class MotorController : IMotors {
             motorHat.getMotor(adaMotor).run(AdafruitMotorHat.RELEASE)
             motorHat1.getMotor(adaMotor).run(AdafruitMotorHat.RELEASE)
         }
+    }
+
+    private fun initServo(pwmPin: String): Servo = Servo(pwmPin).also {
+        it.setAngleRange(0.0, 180.0)
+        it.setPulseDurationRange(0.5, 2.5)
     }
 
     companion object {
