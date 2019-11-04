@@ -6,6 +6,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.IMotors
+import me.cyber.nukleos.IMotors.Companion.writeServoCommand
 import me.cyber.nukleos.bluetooth.BluetoothConnector
 import me.cyber.nukleos.dagger.PeripheryManager
 import java.util.concurrent.TimeUnit
@@ -72,6 +73,23 @@ class MotorsBlueTooth(val peripheryManager: PeripheryManager, val bluetoothConne
         }
     }
 
+    override fun setServoAngle(iServo: Int, angle: Float) {
+        if (isConnected()) {
+            try {
+                val characteristic = gatt
+                        ?.getService(IMotors.SERVICE_UUID)
+                        ?.getCharacteristic(IMotors.CHAR_SERVO_CONTROL_UUID)
+                val servoCommand = writeServoCommand(iServo, angle)
+                characteristic?.setValue(servoCommand)
+                gatt?.writeCharacteristic(characteristic)
+                Log.d(TAG, "Wrote servo command : $servoCommand")
+            } catch (t: Throwable) {
+                Log.e(TAG, t.message, t)
+            }
+        }
+    }
+
+
     override fun spinMotor(iMotor: Int, speed: Byte) {
         speeds[iMotor] = speed
         sendSpinCommand()
@@ -108,7 +126,7 @@ class MotorsBlueTooth(val peripheryManager: PeripheryManager, val bluetoothConne
                 if (characteristic != null) {
                     Log.d(TAG, "Subscribing to motors state...")
                     gatt.setCharacteristicNotification(characteristic, true)
-                    val subscribeDescriptor = characteristic.getDescriptor(IMotors.CLIENT_CONFIG_DESCRIPTOR)
+                    val subscribeDescriptor = characteristic.getDescriptor(IMotors.MOTOR_STATE_DESCRIPTOR)
                     if (subscribeDescriptor == null) {
                         Log.w(TAG, "Failed to resolve motor state subscription descriptor.")
                     } else {
@@ -131,8 +149,10 @@ class MotorsBlueTooth(val peripheryManager: PeripheryManager, val bluetoothConne
 
     override fun onCharacteristicChanged(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
         super.onCharacteristicChanged(gatt, characteristic)
-        //speeds = characteristic.value
-        peripheryManager.notifyMotorsChanged()
+        if (IMotors.CHAR_MOTOR_STATE_UUID == characteristic.uuid) {
+            //speeds = characteristic.value
+            peripheryManager.notifyMotorsChanged()
+        }
     }
 
     companion object {

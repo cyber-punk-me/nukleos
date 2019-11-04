@@ -34,6 +34,8 @@ interface IMotors {
      */
     fun getSpeeds() : ByteArray
 
+    fun setServoAngle(iServo: Int, angle: Float)
+
     fun getName() : String = "STUB"
 
     enum class Status {
@@ -44,11 +46,25 @@ interface IMotors {
 
     companion object {
         val MOTORS_COUNT = 8
+        val SERVOS_COUNT = 2
 
         val SERVICE_UUID = UUID.fromString("88bb896c-3ec9-45e5-9107-d898ea6cd455")
         val CHAR_MOTOR_CONTROL_UUID = UUID.fromString("10992895-9b61-4380-8e51-5028d2c17a0c")
         val CHAR_MOTOR_STATE_UUID = UUID.fromString("10992895-9b61-4380-8e51-5028d2c17a0d")
-        val CLIENT_CONFIG_DESCRIPTOR = UUID.fromString("10992895-9b61-4380-8e51-5028d2c17a0e")
+        val MOTOR_STATE_DESCRIPTOR = UUID.fromString("10992895-9b61-4380-8e51-5028d2c17a0e")
+
+        val CHAR_SERVO_CONTROL_UUID = UUID.fromString("10992895-9b61-4380-8e51-5028d2c17a1c")
+        val CHAR_SERVO_STATE_UUID = UUID.fromString("10992895-9b61-4380-8e51-5028d2c17a1d")
+        val SERVO_STATE_DESCRIPTOR = UUID.fromString("10992895-9b61-4380-8e51-5028d2c17a1e")
+
+        fun writeServoCommand(iServo: Int, angle: Float) = "$iServo:$angle"
+
+        fun readServoCommand(command: String): Pair<Int, Float> {
+            val split = command.split(":")
+            val iServo = Integer.parseInt(split[0])
+            val angle = java.lang.Float.parseFloat(split[1])
+            return Pair(iServo, angle)
+        }
     }
 
 }

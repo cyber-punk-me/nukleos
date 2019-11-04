@@ -59,9 +59,19 @@ class MotorController : IMotors {
         }
     }
 
+    override fun setServoAngle(iServo: Int, angle: Float) {
+        val servo = when(iServo) {
+            0 -> servo0
+            else -> servo1
+        }
+        servo.angle = angle.toDouble()
+        Log.d(getName(), "Set servo $iServo to angle ${servo.angle}")
+    }
+
     private fun initServo(pwmPin: String): Servo = Servo(pwmPin).also {
         it.setAngleRange(0.0, 180.0)
         it.setPulseDurationRange(0.5, 2.5)
+        it.setEnabled(true)
     }
 
     companion object {
