@@ -415,7 +415,7 @@ class PredictionService : IntentService(PredictionService::class.java.name) {
         }
         try {
             val network = getCalibrationNetwork() ?: return predictionIn
-            val ndArray = NDArray(Array(1) { predictionIn.midLayer.toFloatArray() })
+            val ndArray = NDArray(Array(1) { predictionIn.midLayer!!.toFloatArray() })
             val prediction = network.predict(ndArray)[0]
             return Prediction(prediction, List(predictionIn.distr.size) { 0f }) //TODO use weights from network
         } catch (t: Throwable) {
