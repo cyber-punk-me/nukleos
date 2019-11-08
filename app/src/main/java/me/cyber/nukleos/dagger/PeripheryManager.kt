@@ -38,12 +38,20 @@ class PeripheryManager {
                     Log.d(TAG, "Executing motors action...")
                     //has to wait after subscription write is complete
                     while(it.isConnected()) {
-                        for (i in 0 until IMotors.MOTORS_COUNT) {
+                        for (i in 4 until IMotors.MOTORS_COUNT) {
+                            theMotors.setServoAngle(0, 180f)
+                            Thread.sleep(400)
+                            theMotors.setServoAngle(1, 0f)
+                            Thread.sleep(400)
                             theMotors.spinMotor(i, 30)
                             Thread.sleep(400)
                             theMotors.spinMotor(i, -30)
                             Thread.sleep(400)
                             theMotors.spinMotor(i, 0)
+                            Thread.sleep(400)
+                            theMotors.setServoAngle(0, 0f)
+                            Thread.sleep(400)
+                            theMotors.setServoAngle(1, 180f)
                             Thread.sleep(400)
                         }
                     }
@@ -115,6 +123,8 @@ class PeripheryManager {
             override fun spinMotors(speeds: ByteArray) {
             }
             override fun stopMotors() {
+            }
+            override fun setServoAngle(iServo: Int, angle: Float) {
             }
             override fun getSpeeds(): ByteArray = ByteArray(IMotors.MOTORS_COUNT)
         }

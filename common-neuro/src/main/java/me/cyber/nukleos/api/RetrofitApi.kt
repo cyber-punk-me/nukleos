@@ -1,8 +1,8 @@
 package me.cyber.nukleos.api
 
+import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
@@ -15,7 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class RetrofitApi(private val mUrl: String) {
+class RetrofitApi(private val mUrl: String, private val observeScheduler: Scheduler) {
 
     private val mRetrofit by lazy {
         Retrofit.Builder()
@@ -36,7 +36,7 @@ class RetrofitApi(private val mUrl: String) {
     fun postData(dataId: UUID, rawData: String, extension: String) = Single.create { emitter: SingleEmitter<Meta> ->
         mRequest.postData(dataId, RequestBody.create(MediaType.parse("text/plain"), rawData), extension)
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(observeScheduler)
                 .subscribe({
                     emitter.onSuccess(it)
                 }, {
@@ -47,7 +47,7 @@ class RetrofitApi(private val mUrl: String) {
     fun trainModel(dataId: UUID, scriptId: UUID) = Single.create { emitter: SingleEmitter<Meta> ->
         mRequest.postModel(Model(dataId, scriptId))
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(observeScheduler)
                 .subscribe({
                     emitter.onSuccess(it)
                 }, {
@@ -58,7 +58,7 @@ class RetrofitApi(private val mUrl: String) {
     fun predict(data: PredictRequest) = Single.create { emitter: SingleEmitter<PredictResponse> ->
         mRequest.predict(data)
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(observeScheduler)
                 .subscribe({
                     emitter.onSuccess(it)
                 }, {
@@ -69,7 +69,7 @@ class RetrofitApi(private val mUrl: String) {
     fun getServerTime() = Single.create{ emitter : SingleEmitter<Long> ->
         mRequest.getServerTime()
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(observeScheduler)
                 .subscribe({
                     emitter.onSuccess(it)
                 }, {
@@ -80,7 +80,7 @@ class RetrofitApi(private val mUrl: String) {
     fun downloadModel() = Single.create { emitter: SingleEmitter<ResponseBody> ->
         mRequest.getModel()
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(observeScheduler)
                 .subscribe({
                     emitter.onSuccess(it)
                 }, {

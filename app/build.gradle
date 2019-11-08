@@ -91,6 +91,7 @@ dependencies {
     implementation fileTree(include: ['*.aar'], dir: 'libs')
 
     implementation project(':common')
+    implementation project(':common-neuro')
 
     implementation 'commons-io:commons-io:2.6'
 

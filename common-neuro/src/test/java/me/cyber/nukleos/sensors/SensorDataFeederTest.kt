@@ -26,6 +26,8 @@ class SensorDataFeederTest {
 
         val assumedData = listOf(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f)
 
+        Thread.sleep(100)
+
         assertEquals(assumedData, listener1Data)
         feeder.removeSensorListener("1")
         feeder.onData("sensor1", listOf(floatArrayOf(10.0f), floatArrayOf(11.0f), floatArrayOf(12.0f)))
@@ -55,6 +57,8 @@ class SensorDataFeederTest {
         feeder.onData("sensor1", listOf(floatArrayOf(7.0f), floatArrayOf(8.0f), floatArrayOf(9.0f)))
 
         val assumedData = listOf(4.0f, 5.0f, 6.0f, 7.0f, 8.0f)
+
+        Thread.sleep(100)
 
         assertEquals(assumedData, listener1Data)
         feeder.onData("sensor1", listOf(floatArrayOf(10.0f), floatArrayOf(11.0f), floatArrayOf(12.0f)))
@@ -87,6 +91,7 @@ class SensorDataFeederTest {
         feeder.onData("sensor1", listOf(floatArrayOf(4.0f), floatArrayOf(5.0f), floatArrayOf(6.0f)))
         feeder.onData("sensor1", listOf(floatArrayOf(7.0f), floatArrayOf(8.0f), floatArrayOf(9.0f), floatArrayOf(10.0f)))
 
+        Thread.sleep(100)
 
         assertEquals(4, listener1Data.size)
             listener1Data.forEach{

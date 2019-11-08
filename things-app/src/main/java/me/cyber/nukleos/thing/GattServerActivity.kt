@@ -41,6 +41,7 @@ import android.util.Log
 import android.view.WindowManager
 import android.widget.TextView
 import me.cyber.nukleos.IMotors
+import me.cyber.nukleos.IMotors.Companion.readServoCommand
 
 import java.util.Arrays
 
@@ -54,7 +55,7 @@ class GattServerActivity : IMotors by MotorController(), Activity() {
     private lateinit var bluetoothManager: BluetoothManager
     private var bluetoothGattServer: BluetoothGattServer? = null
     /* Collection of notification subscribers */
-    private val registeredDevices = mutableSetOf<BluetoothDevice>()
+    private val motorSpeedsSubscribers = mutableSetOf<BluetoothDevice>()
 
     /**
      * Listens for Bluetooth adapter events to enable/disable
@@ -102,7 +103,7 @@ class GattServerActivity : IMotors by MotorController(), Activity() {
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.i(TAG, "BluetoothDevice DISCONNECTED: $device")
                 //Remove device from any active subscriptions
-                registeredDevices.remove(device)
+                motorSpeedsSubscribers.remove(device)
                 //todo fix "advertising disappears after client disconnects"
                 stopMotors()
                 stopAdvertising()
@@ -140,6 +141,11 @@ class GattServerActivity : IMotors by MotorController(), Activity() {
             if (IMotors.CHAR_MOTOR_CONTROL_UUID == characteristic.uuid) {
                 Log.d(TAG, "Motor charateristic write")
                 spinMotors(value)
+            } else if (IMotors.CHAR_SERVO_CONTROL_UUID == characteristic.uuid) {
+                val command = String(value)
+                Log.d(TAG, "Servo charateristic write : $command")
+                val servoCommand = readServoCommand(command)
+                setServoAngle(servoCommand.first, servoCommand.second)
             }
             if (responseNeeded) {
                 bluetoothGattServer?.sendResponse(device,
@@ -147,15 +153,16 @@ class GattServerActivity : IMotors by MotorController(), Activity() {
                         BluetoothGatt.GATT_SUCCESS,
                         0, null)
             }
-            //todo check if this thread is ok
-            notifyRegisteredDevices()
+            if (IMotors.CHAR_MOTOR_CONTROL_UUID == characteristic.uuid) {
+                notifyMotorSpeedSubscribers()
+            }
         }
 
         override fun onDescriptorReadRequest(device: BluetoothDevice, requestId: Int, offset: Int,
                                              descriptor: BluetoothGattDescriptor) {
-            if (IMotors.CLIENT_CONFIG_DESCRIPTOR == descriptor.uuid) {
+            if (IMotors.MOTOR_STATE_DESCRIPTOR == descriptor.uuid) {
                 Log.d(TAG, "Config descriptor read")
-                val returnValue = if (registeredDevices.contains(device)) {
+                val returnValue = if (motorSpeedsSubscribers.contains(device)) {
                     BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
                 } else {
                     BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
@@ -178,13 +185,13 @@ class GattServerActivity : IMotors by MotorController(), Activity() {
                                               descriptor: BluetoothGattDescriptor,
                                               preparedWrite: Boolean, responseNeeded: Boolean,
                                               offset: Int, value: ByteArray) {
-            if (IMotors.CLIENT_CONFIG_DESCRIPTOR == descriptor.uuid) {
+            if (IMotors.MOTOR_STATE_DESCRIPTOR == descriptor.uuid) {
                 if (Arrays.equals(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE, value)) {
                     Log.d(TAG, "Subscribe device to notifications: $device")
-                    registeredDevices.add(device)
+                    motorSpeedsSubscribers.add(device)
                 } else if (Arrays.equals(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE, value)) {
                     Log.d(TAG, "Unsubscribe device from notifications: $device")
-                    registeredDevices.remove(device)
+                    motorSpeedsSubscribers.remove(device)
                 }
 
                 if (responseNeeded) {
@@ -324,13 +331,13 @@ class GattServerActivity : IMotors by MotorController(), Activity() {
      * Send a motor service notification to any devices that are subscribed
      * to the characteristic.
      */
-    private fun notifyRegisteredDevices() {
-        if (registeredDevices.isEmpty()) {
+    private fun notifyMotorSpeedSubscribers() {
+        if (motorSpeedsSubscribers.isEmpty()) {
             Log.i(TAG, "No subscribers registered")
             return
         }
-        Log.i(TAG, "Sending update to ${registeredDevices.size} subscribers")
-        for (device in registeredDevices) {
+        Log.i(TAG, "Sending update to ${motorSpeedsSubscribers.size} subscribers")
+        for (device in motorSpeedsSubscribers) {
             val motorsStateCharacteristic = bluetoothGattServer
                     ?.getService(IMotors.SERVICE_UUID)
                     ?.getCharacteristic(IMotors.CHAR_MOTOR_STATE_UUID)

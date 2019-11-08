@@ -3,7 +3,6 @@ package me.cyber.nukleos.ui.predict
 import android.content.Intent
 import io.reactivex.disposables.Disposable
 import me.cyber.nukleos.App
-import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.api.PredictResponse
 import me.cyber.nukleos.api.Prediction
 import me.cyber.nukleos.control.TryControl
@@ -105,7 +104,7 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
                     }
                 }
 
-            }, SubscriptionParams(8, 2))
+            }, SubscriptionParams(8, 4))
         } else {
             Sensor.removeSensorListener(PREDICTION_TAG)
         }
