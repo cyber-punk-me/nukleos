@@ -21,11 +21,26 @@ object MotorsProfile {
                 //Read-only characteristic, supports notifications
                 BluetoothGattCharacteristic.PROPERTY_READ or BluetoothGattCharacteristic.PROPERTY_NOTIFY,
                 BluetoothGattCharacteristic.PERMISSION_READ)
-        val configDescriptor = BluetoothGattDescriptor(IMotors.CLIENT_CONFIG_DESCRIPTOR,
+        val configDescriptor = BluetoothGattDescriptor(IMotors.MOTOR_STATE_DESCRIPTOR,
                 //Read/write descriptor
                 BluetoothGattDescriptor.PERMISSION_READ or BluetoothGattDescriptor.PERMISSION_WRITE)
         motorsStateCharacteristic.addDescriptor(configDescriptor)
 
+        val servosControlCharacteristic = BluetoothGattCharacteristic(IMotors.CHAR_SERVO_CONTROL_UUID,
+                BluetoothGattCharacteristic.PROPERTY_READ or BluetoothGattCharacteristic.PROPERTY_WRITE,
+                BluetoothGattCharacteristic.PERMISSION_READ or BluetoothGattCharacteristic.PERMISSION_WRITE
+        )
+
+        val servosStateCharacteristic = BluetoothGattCharacteristic(IMotors.CHAR_SERVO_STATE_UUID,
+                BluetoothGattCharacteristic.PROPERTY_READ or BluetoothGattCharacteristic.PROPERTY_NOTIFY,
+                BluetoothGattCharacteristic.PERMISSION_READ)
+        val servosConfigDescriptor = BluetoothGattDescriptor(IMotors.SERVO_STATE_DESCRIPTOR,
+                //Read/write descriptor
+                BluetoothGattDescriptor.PERMISSION_READ or BluetoothGattDescriptor.PERMISSION_WRITE)
+        servosStateCharacteristic.addDescriptor(servosConfigDescriptor)
+
+        service.addCharacteristic(servosStateCharacteristic)
+        service.addCharacteristic(servosControlCharacteristic)
         service.addCharacteristic(motorsControlCharacteristic)
         service.addCharacteristic(motorsStateCharacteristic)
 

@@ -2,8 +2,10 @@ package me.cyber.nukleos.sensors
 
 import io.reactivex.subjects.BehaviorSubject
 import me.cyber.nukleos.sensors.Status.*
+import java.lang.Exception
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.Executors
 import kotlin.collections.HashMap
 
 interface Sensor {
@@ -52,8 +54,9 @@ interface Sensor {
 }
 
 interface SensorListener {
-    //no slow operations here please
+
     fun onSensorData(sensorName: String, data: List<FloatArray>)
+
 }
 
 enum class Status {
@@ -72,9 +75,9 @@ class SensorDataFeeder {
     private var maxWindow: Int = 1
     private val dataQueues: MutableMap<String, ConcurrentLinkedQueue<FloatArray>> = HashMap()
     private val listeners: MutableMap<String, Pair<SensorListener, SubscriptionParams>> = HashMap()
-    private val listenerSteps: MutableMap<String, Int> = HashMap()
+    private val dataExecutor = Executors.newSingleThreadExecutor()
 
-    fun size() = synchronized(listeners) { maxWindow }
+    fun size() = maxWindow
 
     private fun updateMaxWindow() {
         val maxWindowCurrent = listeners.maxBy { it.value.second.window }?.value?.second?.window
@@ -85,7 +88,6 @@ class SensorDataFeeder {
     fun registerSensorListener(listenerName: String, sensorListener: SensorListener, subscriptionParams: SubscriptionParams = SubscriptionParams(1, 1)) {
         synchronized(listeners) {
             listeners[listenerName] = Pair(sensorListener, subscriptionParams)
-            listenerSteps[listenerName] = 0
             dataQueues[listenerName] = ConcurrentLinkedQueue()
             updateMaxWindow()
         }
@@ -94,7 +96,6 @@ class SensorDataFeeder {
     fun removeSensorListener(listenerName: String) {
         synchronized(listeners) {
             listeners.remove(listenerName)
-            listenerSteps.remove(listenerName)
             dataQueues.remove(listenerName)
             updateMaxWindow()
         }
@@ -112,13 +113,16 @@ class SensorDataFeeder {
 
     //todo multiple sensors names
     fun onData(sensorName: String, data: List<FloatArray>) {
-        synchronized(listeners) {
-            dataQueues.forEach { (_, q) ->
-                data.forEach {
-                    q.add(it)
-                }
+        val queuesToProcess: Map<String, ConcurrentLinkedQueue<FloatArray>> = synchronized(listeners) {
+            HashMap(dataQueues)
+        }
+        queuesToProcess.forEach { (_, q) ->
+            data.forEach {
+                q.add(it)
             }
-            dataQueues.forEach { (listenerName, queue) ->
+        }
+        dataExecutor.submit {
+            queuesToProcess.forEach { (listenerName, queue) ->
                 val params = listeners[listenerName]!!.second
                 val queueSize = queue.size
                 for (iStart in 0 until queueSize step params.slide) {
@@ -131,10 +135,15 @@ class SensorDataFeeder {
                         for (i in 0 until params.slide) {
                             queue.remove()
                         }
-                        listeners[listenerName]?.first?.onSensorData(sensorName, result)
+                        try {
+                            listeners[listenerName]?.first?.onSensorData(sensorName, result)
+                        } catch (e: Exception) {
+                            println(e.message)
+                        }
                     }
                 }
             }
         }
     }
+
 }
