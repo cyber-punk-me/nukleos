@@ -104,7 +104,7 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
                     }
                 }
 
-            }, SubscriptionParams(8, 2))
+            }, SubscriptionParams(8, 4))
         } else {
             Sensor.removeSensorListener(PREDICTION_TAG)
         }
