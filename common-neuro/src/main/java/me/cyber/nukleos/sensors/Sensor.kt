@@ -2,6 +2,7 @@ package me.cyber.nukleos.sensors
 
 import io.reactivex.subjects.BehaviorSubject
 import me.cyber.nukleos.sensors.Status.*
+import java.lang.Exception
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executors
@@ -134,7 +135,11 @@ class SensorDataFeeder {
                         for (i in 0 until params.slide) {
                             queue.remove()
                         }
-                        listeners[listenerName]?.first?.onSensorData(sensorName, result)
+                        try {
+                            listeners[listenerName]?.first?.onSensorData(sensorName, result)
+                        } catch (e: Exception) {
+                            println(e.message)
+                        }
                     }
                 }
             }
