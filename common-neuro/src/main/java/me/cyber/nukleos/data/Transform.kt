@@ -53,7 +53,7 @@ fun zeroCrossing(segment: List<Float>): Float {
 
 fun slopeSignChanges(segment: List<Float>): Float {
     var ssc = 0.0F
-    for (i in segment.indices) {
+    for (i in 1 until segment.size - 1) {
         if ((segment[i - 1] < segment[i] && segment[i] > segment[i + 1]) || (segment[i - 1] > segment[i] && segment[i] < segment[i + 1])) {
             ssc += 1
         }
