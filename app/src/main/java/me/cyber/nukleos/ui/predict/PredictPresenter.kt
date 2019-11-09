@@ -7,6 +7,7 @@ import me.cyber.nukleos.api.PredictResponse
 import me.cyber.nukleos.api.Prediction
 import me.cyber.nukleos.control.TryControl
 import me.cyber.nukleos.dagger.PeripheryManager
+import me.cyber.nukleos.data.mapNeuralDefault
 import me.cyber.nukleos.sensors.Sensor
 import me.cyber.nukleos.sensors.SensorListener
 import me.cyber.nukleos.sensors.SubscriptionParams
@@ -54,10 +55,11 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
     private fun predict(data: List<FloatArray>) {
         if (!predictionInProgress) {
             predictionInProgress = true
+            val transformed = mapNeuralDefault(data)
             val appContext = App.applicationComponent.getAppContext()
             val nextIntent = Intent(appContext, PredictionService::class.java).apply {
                 type = PredictionService.ServiceCommands.PREDICT.name
-                putExtra(PredictionService.PREDICT_DATA_KEY, data.flatMap { d -> d.asList() }.toFloatArray())
+                putExtra(PredictionService.PREDICT_DATA_KEY, transformed.flatMap { d -> d.flatMap { it.toList() } }.toFloatArray())
                 putExtra(PredictionService.RECEIVER_KEY, predictionResultReceiver)
                 putExtra(PredictionService.PREFER_OFFLINE_PREDICTION_KEY, !predictOnlineEnabled)
             }

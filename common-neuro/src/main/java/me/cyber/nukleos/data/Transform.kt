@@ -18,12 +18,18 @@ fun mapNeuralDefault(data: List<FloatArray>) =
 fun mapNeuralChunked(data: List<FloatArray>,
                       chunk: Int,
                       vararg features: (List<Float>) -> Float): List<List<FloatArray>> {
-    return data.chunked(chunk){ mapNeural(it, *features) }
+    val chunked = data.chunked(chunk){ mapNeural(it, *features) }
+    return if (chunked.last().size < chunk) {
+        //drop incomplete chunk
+        chunked.dropLast(1)
+    } else {
+        chunked
+    }
 }
 
 /**
  * @param data - list where each element is data reading. Each data reading has multiple channels (FloatArray)
- * @return list where each element is features for a channel
+ * @return list where each element is all features for a channel
  */
 fun mapNeural(data: List<FloatArray>,
               vararg features: (List<Float>) -> Float): List<FloatArray> {
