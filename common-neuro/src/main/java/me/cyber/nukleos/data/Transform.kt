@@ -1,13 +1,25 @@
 package me.cyber.nukleos.data
 
+val defaultGroup = 8
 
 fun mapNeuralDefault(data: List<FloatArray>) =
-        mapNeural(data,
+        mapNeuralChunked(data,
+                defaultGroup,
                 { channel -> meanAbsoluteValue(channel) },
                 { channel -> waveformLength(channel) },
                 { channel -> zeroCrossing(channel) },
                 { channel -> slopeSignChanges(channel) }
         )
+
+/**
+ * @param data - list where each element is data reading. Each data reading has multiple channels (FloatArray)
+ * @return list where each element is a chunk of channel features
+ */
+fun mapNeuralChunked(data: List<FloatArray>,
+                      chunk: Int,
+                      vararg features: (List<Float>) -> Float): List<List<FloatArray>> {
+    return data.chunked(chunk){ mapNeural(it, *features) }
+}
 
 /**
  * @param data - list where each element is data reading. Each data reading has multiple channels (FloatArray)

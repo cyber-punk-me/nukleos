@@ -1,6 +1,7 @@
 package me.cyber.nukleos.api
 
 import io.reactivex.internal.schedulers.ExecutorScheduler
+import me.cyber.nukleos.data.mapNeuralDefault
 import me.cyber.nukleos.sensors.SensorDataFeeder
 import me.cyber.nukleos.sensors.SensorListener
 import org.junit.Test
@@ -40,15 +41,13 @@ class NeuralApiTest {
     private fun convertData(data: List<FloatArray>, dataClass: Int): String {
         val builder = StringBuilder()
 
-        val floats = data.flatMap { d -> d.asList() }
-        val grouped: List<List<Float>> = floats.withIndex().groupBy { it.index / (sensorsInEachRead * readsPerLine) }
-                .map { it.value.map { it.value } } //get rid of indices
-                .dropLast(1)
+        val grouped = mapNeuralDefault(data)
 
-
-        grouped.forEach {
-            it.forEach{
-                builder.append("$it,")
+        grouped.forEach { timeGroup ->
+            timeGroup.forEach{ sensorFeatures ->
+                sensorFeatures.forEach {
+                    builder.append("$it,")
+                }
             }
             builder.append("$dataClass\n")
         }
