@@ -14,7 +14,7 @@ class MotorProtocolTest {
     fun testProtocolRoundtrip() {
 
         val message = MotorMessage("an action", listOf(Action.Stop(), Action.Wait(1000),
-                Action.Motor(byteArrayOf(0x01.toByte(), 0xFE.toByte())),
+                Action.Motor(byteArrayOf(0x7E.toByte(), 0x2B.toByte())),
                 Action.Servo(1, 10F), Action.Servo(0, 180F)))
 
         val msgString = message.toString()
@@ -36,7 +36,7 @@ class MotorProtocolTest {
             }
 
             override fun spinMotors(speeds: ByteArray) {
-                println("spinMotors : $speeds")
+                println("spinMotors : ${String(speeds)}")
                 printTimeReference()
             }
 
