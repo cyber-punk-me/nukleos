@@ -13,9 +13,9 @@ class MotorProtocolTest {
     @Test
     fun testProtocolRoundtrip() {
 
-        val message = MotorMessage("an action", listOf(Action.Stop(), Action.Wait(1000),
+        val message = MotorMessage("an action", Action.Stop(), Action.Wait(1000),
                 Action.Motor(byteArrayOf(0x7E.toByte(), 0x2B.toByte())),
-                Action.Servo(1, 10F), Action.Servo(0, 180F)))
+                Action.Servo(1, 10F), Action.Servo(0, 180F))
 
         val msgString = message.toString()
 
@@ -26,6 +26,7 @@ class MotorProtocolTest {
         assertEquals(msgString, parsed.toString())
 
         parsed.execute(object : IMotors{
+
             override fun getConnectionStatus(): IMotors.Status {
                 return IMotors.Status.CONNECTED
             }

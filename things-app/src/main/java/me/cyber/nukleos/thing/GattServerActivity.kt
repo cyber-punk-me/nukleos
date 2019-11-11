@@ -42,6 +42,7 @@ import android.view.WindowManager
 import android.widget.TextView
 import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.IMotors.Companion.readServoCommand
+import me.cyber.nukleos.parseMotorMessage
 
 import java.util.Arrays
 
@@ -146,6 +147,12 @@ class GattServerActivity : IMotors by MotorController(), Activity() {
                 Log.d(TAG, "Servo charateristic write : $command")
                 val servoCommand = readServoCommand(command)
                 setServoAngle(servoCommand.first, servoCommand.second)
+            } else if (IMotors.CHAR_MOTOR_MESSAGE_CONTROL_UUID == characteristic.uuid) {
+                val motorMessage = String(value)
+                Log.d(TAG, "MotorMessage write : $motorMessage")
+                val parsedMotorMessage = parseMotorMessage(motorMessage)
+                Log.d(TAG, "Executing motor message : ${parsedMotorMessage.name}")
+                executeMotorMessage(parsedMotorMessage)
             }
             if (responseNeeded) {
                 bluetoothGattServer?.sendResponse(device,

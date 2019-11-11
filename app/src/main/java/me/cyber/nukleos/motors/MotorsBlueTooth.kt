@@ -7,6 +7,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.IMotors.Companion.writeServoCommand
+import me.cyber.nukleos.MotorMessage
 import me.cyber.nukleos.bluetooth.BluetoothConnector
 import me.cyber.nukleos.dagger.PeripheryManager
 import java.util.concurrent.TimeUnit
@@ -103,6 +104,20 @@ class MotorsBlueTooth(val peripheryManager: PeripheryManager, val bluetoothConne
     override fun stopMotors() {
         this.speeds = ByteArray(IMotors.MOTORS_COUNT)
         sendSpinCommand()
+    }
+
+    override fun executeMotorMessage(motorMessage: MotorMessage) {
+        if (isConnected()) {
+            try {
+                val characteristic = gatt
+                        ?.getService(IMotors.SERVICE_UUID)
+                        ?.getCharacteristic(IMotors.CHAR_MOTOR_MESSAGE_CONTROL_UUID)
+                characteristic?.value = motorMessage.toString().toByteArray()
+                gatt?.writeCharacteristic(characteristic)
+            } catch (t: Throwable) {
+                Log.e(TAG, t.message, t)
+            }
+        }
     }
 
     override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {

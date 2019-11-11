@@ -2,7 +2,9 @@ package me.cyber.nukleos.dagger
 
 import android.util.Log
 import io.reactivex.subjects.BehaviorSubject
+import me.cyber.nukleos.Action
 import me.cyber.nukleos.IMotors
+import me.cyber.nukleos.MotorMessage
 import me.cyber.nukleos.sensors.LastKnownSensorManager
 import me.cyber.nukleos.sensors.Sensor
 import java.lang.Thread.sleep
@@ -35,7 +37,6 @@ class PeripheryManager {
 
             if (it.isConnected() && !prevMotorsConnected) {
                 //some random task for motors
-                val theMotors = it
                 Thread {
                     Log.d(TAG, "Executing motors action...")
                     //has to wait after subscription write is complete
@@ -53,16 +54,24 @@ class PeripheryManager {
 
     private fun openSesame() {
         Log.d(TAG, "openSesame")
-        motors.setServoAngle(1, 120f)
+/*        motors.setServoAngle(1, 120f)
         sleep(400)
-        motors.setServoAngle(0, 60f)
+        motors.setServoAngle(0, 60f)*/
+        motors.executeMotorMessage(MotorMessage("openSesame",
+                Action.Servo(1, 120F),
+                Action.Wait(200),
+                Action.Servo(0, 60F)))
     }
 
     private fun closeSesame() {
         Log.d(TAG, "closeSesame")
-        motors.setServoAngle(1, 0f)
+/*         motors.setServoAngle(1, 0f)
         sleep(400)
-        motors.setServoAngle(0, 180f)
+        motors.setServoAngle(0, 180f)*/
+        motors.executeMotorMessage(MotorMessage("closeSesame",
+                Action.Servo(0, 180F),
+                Action.Wait(200),
+                Action.Servo(1, 0F)))
     }
 
     fun removeIf(needToBeDeleted: (Sensor) -> Boolean) {

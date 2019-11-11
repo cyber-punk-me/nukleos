@@ -64,6 +64,8 @@ val jsonMapper: ObjectMapper = jacksonObjectMapper().also {
 data class MotorMessage(@get:JsonProperty("n") val name: String,
                         @get:JsonProperty("a") val actions: List<Action>) {
 
+    constructor(name: String, vararg actions: Action) : this(name, actions.asList())
+
     fun execute(motors: IMotors) {
         Thread {
             actions.forEach { it.execute(motors) }
