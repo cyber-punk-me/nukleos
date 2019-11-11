@@ -14,7 +14,7 @@ class MotorController : IMotors {
     private var motorHat = AdafruitMotorHat(0)
     private val motorHat1 = AdafruitMotorHat(1)
     //0 base, pin  18
-    private val servo0 = initServo("PWM0", 180.0, 60.0, 180.0)
+    private val servo0 = initServo("PWM0", 120.0, 0.0, 120.0)
     //1 upper, pin  13
     private val servo1 = initServo("PWM1", 0.0, 0.0, 120.0)
 
@@ -71,7 +71,7 @@ class MotorController : IMotors {
     }
 
     private fun initServo(pwmPin: String, startAngle: Double, minAngle: Double, maxAngle: Double): Servo = Servo(pwmPin).also {
-        it.setPulseDurationRange(0.5, 2.5)
+        it.setPulseDurationRange(0.5, 2.0)
         it.setAngleRange(minAngle, maxAngle)
         it.angle = startAngle
         it.setEnabled(true)
