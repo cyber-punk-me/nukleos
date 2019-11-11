@@ -2,6 +2,8 @@ package me.cyber.nukleos.ui.predict
 
 import android.content.Intent
 import io.reactivex.disposables.Disposable
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import me.cyber.nukleos.App
 import me.cyber.nukleos.api.PredictResponse
 import me.cyber.nukleos.api.Prediction
@@ -53,17 +55,19 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
     }
 
     private fun predict(data: List<FloatArray>) {
-        if (!predictionInProgress) {
-            predictionInProgress = true
-            val transformed = mapNeuralDefault(data)
-            val appContext = App.applicationComponent.getAppContext()
-            val nextIntent = Intent(appContext, PredictionService::class.java).apply {
-                type = PredictionService.ServiceCommands.PREDICT.name
-                putExtra(PredictionService.PREDICT_DATA_KEY, transformed.flatMap { d -> d.flatMap { it.toList() } }.toFloatArray())
-                putExtra(PredictionService.RECEIVER_KEY, predictionResultReceiver)
-                putExtra(PredictionService.PREFER_OFFLINE_PREDICTION_KEY, !predictOnlineEnabled)
+        GlobalScope.launch {
+            if (!predictionInProgress) {
+                predictionInProgress = true
+                val transformed = mapNeuralDefault(data)
+                val appContext = App.applicationComponent.getAppContext()
+                val nextIntent = Intent(appContext, PredictionService::class.java).apply {
+                    type = PredictionService.ServiceCommands.PREDICT.name
+                    putExtra(PredictionService.PREDICT_DATA_KEY, transformed.flatMap { d -> d.flatMap { it.toList() } }.toFloatArray())
+                    putExtra(PredictionService.RECEIVER_KEY, predictionResultReceiver)
+                    putExtra(PredictionService.PREFER_OFFLINE_PREDICTION_KEY, !predictOnlineEnabled)
+                }
+                appContext.startService(nextIntent)
             }
-            appContext.startService(nextIntent)
         }
     }
 
@@ -78,11 +82,11 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
             if (mPeripheryManager.motors != null) {
                 val mot = mPeripheryManager.motors!!
                 when (tryControl) {
-                    0 -> mot.stopMotors()
-                    1 -> mot.spinMotor(0, 127)
-                    2 -> mot.spinMotor(0, -127)
-                    3 -> mot.spinMotor(1, 127)
-                    4 -> mot.spinMotor(1, -127)
+                    //0 -> mot.stopMotors()
+                    //1 -> mot.spinMotor(0, 127)
+                    //2 -> mot.spinMotor(0, -127)
+                    //3 -> mot.spinMotor(1, 127)
+                    //4 -> mot.spinMotor(1, -127)
                 }
             }
 
@@ -106,7 +110,7 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
                     }
                 }
 
-            }, SubscriptionParams(8, 4))
+            }, SubscriptionParams(8, 8))
         } else {
             Sensor.removeSensorListener(PREDICTION_TAG)
         }

@@ -1,5 +1,7 @@
 package me.cyber.nukleos.data
 
+import kotlinx.coroutines.*
+
 val defaultGroup = 8
 
 fun mapNeuralDefault(data: List<FloatArray>) =
@@ -16,9 +18,9 @@ fun mapNeuralDefault(data: List<FloatArray>) =
  * @return list where each element is a chunk of channel features
  */
 fun mapNeuralChunked(data: List<FloatArray>,
-                      chunk: Int,
-                      vararg features: (List<Float>) -> Float): List<List<FloatArray>> {
-    val chunked = data.chunked(chunk){ mapNeural(it, *features) }
+                     chunk: Int,
+                     vararg features: (List<Float>) -> Float): List<List<FloatArray>> {
+    val chunked = data.chunked(chunk) { mapNeural(it, *features) }
     return if (chunked.last().size < chunk) {
         //drop incomplete chunk
         chunked.dropLast(1)
@@ -36,12 +38,18 @@ fun mapNeural(data: List<FloatArray>,
     val result = ArrayList<FloatArray>()
     for (i in data[0].indices) {
         val channelData: List<Float> = data.map { it[i] }
-        val channelFeatures: FloatArray = features.map { it(channelData) }.toFloatArray()
-        result.add(channelFeatures)
+        runBlocking {
+            val channelFeatures: FloatArray = applyFeatures(features, channelData).toFloatArray()
+            result.add(channelFeatures)
+        }
     }
     return result
 }
 
+private suspend fun applyFeatures(features: Array<out (List<Float>) -> Float>, channelData: List<Float>) =
+        coroutineScope {
+            features.map { async { it(channelData) } }.awaitAll()
+        }
 
 fun meanAbsoluteValue(segment: List<Float>): Float {
     var sum = 0.0F
