@@ -60,7 +60,7 @@ class PeripheryManager {
         motors.executeMotorMessage(MotorMessage("openSesame",
                 Action.Servo(1, 120F),
                 Action.Wait(200),
-                Action.Servo(0, 0F)))
+                Action.Servo(0, 60F)))
     }
 
     private fun closeSesame() {
@@ -69,7 +69,7 @@ class PeripheryManager {
         sleep(400)
         motors.setServoAngle(0, 180f)*/
         motors.executeMotorMessage(MotorMessage("closeSesame",
-                Action.Servo(0, 120F),
+                Action.Servo(0, 180F),
                 Action.Wait(200),
                 Action.Servo(1, 0F)))
     }
