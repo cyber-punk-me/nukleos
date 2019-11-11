@@ -18,8 +18,6 @@ const val SERVO = "sv"
 const val WAIT = "wt"
 const val STOP = "sp"
 
-private val actionExecutor = Executors.newSingleThreadExecutor()
-
 @JsonTypeInfo(use = NAME, include = PROPERTY)
 @JsonSubTypes(JsonSubTypes.Type(value = Action.Motor::class, name = MOTOR),
         JsonSubTypes.Type(value = Action.Servo::class, name = SERVO),
@@ -29,24 +27,24 @@ abstract class Action {
     abstract fun execute(motors: IMotors)
 
     class Motor(@get:JsonProperty("s")
-                var speeds: ByteArray?) : Action() {
+                var speeds: ByteArray) : Action() {
         override fun execute(motors: IMotors) {
-            motors.spinMotors(speeds!!)
+            motors.spinMotors(speeds)
         }
 
     }
 
-    class Servo(@get:JsonProperty("s")  var iServo: Int?,
-                @get:JsonProperty("a")  var angle: Float?): Action() {
+    class Servo(@get:JsonProperty("s")  var iServo: Int,
+                @get:JsonProperty("a")  var angle: Float): Action() {
         override fun execute(motors: IMotors) {
-            motors.setServoAngle(iServo!!, angle!!)
+            motors.setServoAngle(iServo, angle)
         }
 
     }
 
-    class Wait(@get:JsonProperty("t") var time: Long?) : Action() {
+    class Wait(@get:JsonProperty("t") var time: Long) : Action() {
         override fun execute(motors: IMotors) {
-            Thread.sleep(time!!)
+            Thread.sleep(time)
         }
     }
 
@@ -63,10 +61,13 @@ val jsonMapper: ObjectMapper = jacksonObjectMapper().also {
 }
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-data class MotorMessage(@get:JsonProperty("a") val actions: List<Action>) {
+data class MotorMessage(@get:JsonProperty("n") val name: String,
+                        @get:JsonProperty("a") val actions: List<Action>) {
 
     fun execute(motors: IMotors) {
-        actions.forEach { actionExecutor.execute { it.execute(motors) } }
+        Thread {
+            actions.forEach { it.execute(motors) }
+        }.start()
     }
 
     override fun toString(): String = jsonMapper.writeValueAsString(this)
