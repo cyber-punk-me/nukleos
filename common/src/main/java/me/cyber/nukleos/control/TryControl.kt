@@ -22,10 +22,10 @@ class TryControl {
     }
 
     companion object {
-        val ZERO_PREFERENCE = 2
+        val ZERO_PREFERENCE = 1
         val COMMAND_SET = 4
-        val BUFFER_SIZE = 6
-        val THRESHOLD = 5
+        val BUFFER_SIZE = 3
+        val THRESHOLD = 2
     }
 
     private fun <E> List<E>.containsAtLeast(aGuess: E, atLeast: Int): Boolean = fold(0) { acc, e ->

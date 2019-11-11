@@ -36,6 +36,8 @@ interface IMotors {
 
     fun setServoAngle(iServo: Int, angle: Float)
 
+    fun executeMotorMessage(motorMessage: MotorMessage) = motorMessage.execute(this)
+
     fun getName() : String = "STUB"
 
     enum class Status {
@@ -56,6 +58,8 @@ interface IMotors {
         val CHAR_SERVO_CONTROL_UUID = UUID.fromString("10992895-9b61-4380-8e51-5028d2c17a1c")
         val CHAR_SERVO_STATE_UUID = UUID.fromString("10992895-9b61-4380-8e51-5028d2c17a1d")
         val SERVO_STATE_DESCRIPTOR = UUID.fromString("10992895-9b61-4380-8e51-5028d2c17a1e")
+
+        val CHAR_MOTOR_MESSAGE_CONTROL_UUID = UUID.fromString("10992895-9b61-4380-8e51-5028d2c17a0f")
 
         fun writeServoCommand(iServo: Int, angle: Float) = "$iServo:$angle"
 

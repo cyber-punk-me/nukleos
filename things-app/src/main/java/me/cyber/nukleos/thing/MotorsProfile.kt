@@ -39,10 +39,18 @@ object MotorsProfile {
                 BluetoothGattDescriptor.PERMISSION_READ or BluetoothGattDescriptor.PERMISSION_WRITE)
         servosStateCharacteristic.addDescriptor(servosConfigDescriptor)
 
+
+        val motorsMessageControlCharacteristic = BluetoothGattCharacteristic(IMotors.CHAR_MOTOR_MESSAGE_CONTROL_UUID,
+                //Read-write characteristic
+                BluetoothGattCharacteristic.PROPERTY_READ or BluetoothGattCharacteristic.PROPERTY_WRITE,
+                BluetoothGattCharacteristic.PERMISSION_READ or BluetoothGattCharacteristic.PERMISSION_WRITE
+        )
+
         service.addCharacteristic(servosStateCharacteristic)
         service.addCharacteristic(servosControlCharacteristic)
         service.addCharacteristic(motorsControlCharacteristic)
         service.addCharacteristic(motorsStateCharacteristic)
+        service.addCharacteristic(motorsMessageControlCharacteristic)
 
         return service
     }

@@ -7,11 +7,13 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.App
 import me.cyber.nukleos.dagger.PeripheryManager
+import me.cyber.nukleos.data.mapNeuralDefault
 import me.cyber.nukleos.sensors.Sensor
 import me.cyber.nukleos.sensors.SensorListener
 import me.cyber.nukleos.ui.training.TrainingFragment.Companion.LEARNING_TIME
 import me.cyber.nukleos.ui.predict.PredictionService
 import me.cyber.nukleos.utils.showShortToast
+import java.lang.StringBuilder
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -58,7 +60,8 @@ class TrainingPresenter(override val view: TrainingInterface.View, private val m
                 "Model delete failed".showShortToast()
             })
 
-    private fun convertData(data: List<FloatArray>, dataType: Int, window: Int = 64, slide: Int = 64) =
+    @Deprecated("use convertData")
+    private fun convertDataOld(data: List<FloatArray>, dataType: Int, window: Int = 64, slide: Int = 64) =
             StringBuffer().apply {
                 val recordEndTime = System.currentTimeMillis() + mServerTimeMinusLocal
                 val recordStartTime = recordEndTime - millsBetweenReads * data.size
@@ -79,6 +82,24 @@ class TrainingPresenter(override val view: TrainingInterface.View, private val m
                     end += slide
                 }
             }.toString()
+
+    private fun convertData(data: List<FloatArray>, dataClass: Int): String {
+        val builder = StringBuilder()
+
+        val grouped = mapNeuralDefault(data)
+
+        grouped.forEach { timeGroup ->
+            timeGroup.forEach{ sensorFeatures ->
+                sensorFeatures.forEach {
+                    builder.append("$it,")
+                }
+            }
+            builder.append("$dataClass\n")
+        }
+
+        val result = builder.toString()
+        return result
+    }
 
     private fun sendData(data: String, learningSessId: UUID) = with(view) {
         mPostDataSubscription = mApi.postData(learningSessId, data, "csv")
@@ -153,7 +174,7 @@ class TrainingPresenter(override val view: TrainingInterface.View, private val m
         collectData(LEARNING_TIME) {
             view.goToState(TrainingInterface.State.SENDING)
             val dataToSend = convertData(it,
-                    view.getDataType(), 64, 64)
+                    view.getDataType())
             sendData(dataToSend, mLearningSessId)
         }
     }

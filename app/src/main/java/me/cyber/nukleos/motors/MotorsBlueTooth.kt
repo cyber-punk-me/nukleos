@@ -7,6 +7,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.IMotors.Companion.writeServoCommand
+import me.cyber.nukleos.MotorMessage
 import me.cyber.nukleos.bluetooth.BluetoothConnector
 import me.cyber.nukleos.dagger.PeripheryManager
 import java.util.concurrent.TimeUnit
@@ -45,6 +46,11 @@ class MotorsBlueTooth(val peripheryManager: PeripheryManager, val bluetoothConne
                                 })
                     }
         }
+    }
+
+    override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
+        super.onMtuChanged(gatt, mtu, status)
+        Log.d(TAG, "Mtu response; mtu: $mtu, status: $status")
     }
 
     override fun getConnectionStatus(): IMotors.Status = connStatus
@@ -105,12 +111,31 @@ class MotorsBlueTooth(val peripheryManager: PeripheryManager, val bluetoothConne
         sendSpinCommand()
     }
 
+    override fun executeMotorMessage(motorMessage: MotorMessage) {
+        if (isConnected()) {
+            try {
+                val characteristic = gatt
+                        ?.getService(IMotors.SERVICE_UUID)
+                        ?.getCharacteristic(IMotors.CHAR_MOTOR_MESSAGE_CONTROL_UUID)
+                characteristic?.value = motorMessage.toString().toByteArray()
+                gatt?.writeCharacteristic(characteristic)
+            } catch (t: Throwable) {
+                Log.e(TAG, t.message, t)
+            }
+        }
+    }
+
     override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
         super.onConnectionStateChange(gatt, status, newState)
         Log.d(TAG, "onConnectionStateChange: $status -> $newState")
         if (newState != status && newState == BluetoothProfile.STATE_CONNECTED) {
             Log.d(TAG, "MotorsBlueTooth device connected. Discovering services.")
-            gatt.discoverServices()
+            //request larger Maximum Transmission Unit
+            gatt.requestMtu(512)
+            Thread {
+                Thread.sleep(3000)
+                gatt.discoverServices()
+            }.start()
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
             // Calling onDisconnected() here will cause to release the GATT resources.
             disconnect()
