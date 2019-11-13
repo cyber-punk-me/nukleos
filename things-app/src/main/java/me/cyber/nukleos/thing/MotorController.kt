@@ -13,10 +13,10 @@ class MotorController : IMotors {
 
     private var motorHat = AdafruitMotorHat(0)
     private val motorHat1 = AdafruitMotorHat(1)
-    //0 base, pin  18
-    private val servo0 = initServo("PWM0", 180.0, 0.0, 180.0)
-    //1 upper, pin  13
-    private val servo1 = initServo("PWM1", 0.0, 0.0, 180.0)
+    //0 base, pin  18;
+    private val servo0 = initServo("PWM0", IMotors.BASE_SERVO_CLOSE, 0.0, 180.0)
+    //1 upper, pin  13;
+    private val servo1 = initServo("PWM1", IMotors.TOP_SERVO_CLOSE, 0.0, 180.0)
 
     override fun getSpeeds(): ByteArray = motorsSpeeds
 
