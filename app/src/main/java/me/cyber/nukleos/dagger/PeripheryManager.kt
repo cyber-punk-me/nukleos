@@ -5,6 +5,7 @@ import io.reactivex.subjects.BehaviorSubject
 import me.cyber.nukleos.Action
 import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.MotorMessage
+import me.cyber.nukleos.motors.MotorsControlStrategy
 import me.cyber.nukleos.sensors.LastKnownSensorManager
 import me.cyber.nukleos.sensors.Sensor
 import java.lang.Thread.sleep
@@ -19,6 +20,7 @@ class PeripheryManager {
             notifyMotorsChanged()
         }
 
+    private val motorsControlStrategy = MotorsControlStrategy()
     private val sensors = mutableMapOf<Long, Sensor>()
     private var lastSelectedSensorId: Long? = null
 
@@ -117,6 +119,12 @@ class PeripheryManager {
 
     fun connectMotors() {
         motors.connect()
+    }
+
+    fun onMotionUpdated(dataClass: Int) {
+        if (motors.isConnected()) {
+            motorsControlStrategy.control(motors, dataClass)
+        }
     }
 
     companion object {

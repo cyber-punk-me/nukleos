@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.INVISIBLE
 import android.view.ViewGroup
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.layout_predict.*
@@ -44,6 +45,10 @@ class PredictFragment : BaseFragment<PredictInterface.Presenter>(), PredictInter
         }
         predict_toggle.setOnClickListener { predictPresenter.onPredictSwitched(predict_toggle.isChecked, predict_online_toggle.isChecked) }
         predict_online_toggle.setOnClickListener { predictPresenter.onPredictSwitched(predict_toggle.isChecked, predict_online_toggle.isChecked) }
+        button_action1.visibility = INVISIBLE
+        button_action2.visibility = INVISIBLE
+        button_action3.visibility = INVISIBLE
+        button_action4.visibility = INVISIBLE
     }
 
     override fun showData(data: List<FloatArray>) {

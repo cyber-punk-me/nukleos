@@ -12,20 +12,20 @@ class TryControl {
             buffer.removeFirst()
         }
         if (buffer.size < BUFFER_SIZE) {
-            return -1
+            return ControlManager.DATA_NOOP
         }
         return when {
             aGuess == 0 && buffer.containsAtLeast(aGuess, THRESHOLD - ZERO_PREFERENCE) -> aGuess
             buffer.containsAtLeast(aGuess, THRESHOLD) -> aGuess
-            else -> -1
+            else -> ControlManager.DATA_NOOP
         }
     }
 
     companion object {
         val ZERO_PREFERENCE = 1
         val COMMAND_SET = 4
-        val BUFFER_SIZE = 3
-        val THRESHOLD = 2
+        val BUFFER_SIZE = 4
+        val THRESHOLD = 3
     }
 
     private fun <E> List<E>.containsAtLeast(aGuess: E, atLeast: Int): Boolean = fold(0) { acc, e ->

@@ -7,7 +7,7 @@ import kotlinx.coroutines.launch
 import me.cyber.nukleos.App
 import me.cyber.nukleos.api.PredictResponse
 import me.cyber.nukleos.api.Prediction
-import me.cyber.nukleos.control.TryControl
+import me.cyber.nukleos.control.ControlManager
 import me.cyber.nukleos.dagger.PeripheryManager
 import me.cyber.nukleos.data.mapNeuralDefault
 import me.cyber.nukleos.sensors.Sensor
@@ -28,7 +28,7 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
     private var mPostPredict: Disposable? = null
     private var predictEnabled = false
     private var predictOnlineEnabled = false
-    private val control = TryControl()
+    private val control = ControlManager()
 
     @Volatile
     private var predictionInProgress = false
@@ -37,10 +37,17 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
 
     override fun start() {
         Sensor.registerSensorListener(TAG, this)
+
+        control.reset()
+
+        control.addControlListener(TAG, object : ControlManager.ControlListener {
+            override fun onMotionUpdated(dataClass: Int) {
+                mPeripheryManager.onMotionUpdated(dataClass)
+            }
+        })
+
         with(view) {
             startCharts(true)
-        }
-        with(view) {
             val selectedSensor = mPeripheryManager.getActiveSensor() ?: return
             selectedSensor.apply {
                 hideNoStreamingMessage()
@@ -73,24 +80,9 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
 
     private fun onPredictionResult(predictedClass: Int, distribution: FloatArray) {
         predictionInProgress = false
-
-        val tryControl = control.guess(predictedClass)
-
-        if (tryControl >= 0) {
-            view.notifyPredict(
-                    PredictResponse(listOf(Prediction(tryControl, distribution.asList()))))
-            if (mPeripheryManager.motors != null) {
-                val mot = mPeripheryManager.motors!!
-                when (tryControl) {
-                    //0 -> mot.stopMotors()
-                    //1 -> mot.spinMotor(0, 127)
-                    //2 -> mot.spinMotor(0, -127)
-                    //3 -> mot.spinMotor(1, 127)
-                    //4 -> mot.spinMotor(1, -127)
-                }
-            }
-
-        }
+        control.notifyDataArrived(predictedClass)
+        view.notifyPredict(
+                PredictResponse(listOf(Prediction(predictedClass, distribution.asList()))))
     }
 
     private fun onPredictionError(t: Throwable) {
@@ -103,7 +95,7 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
         predictOnlineEnabled = predictOnline
         predictionInProgress = false
         if (on) {
-            Sensor.registerSensorListener(PREDICTION_TAG, object : SensorListener{
+            Sensor.registerSensorListener(PREDICTION_TAG, object : SensorListener {
                 override fun onSensorData(sensorName: String, data: List<FloatArray>) {
                     if (predictEnabled && !predictionInProgress) {
                         predict(data)
@@ -119,6 +111,7 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
     override fun destroy() {
         predictEnabled = false
         Sensor.removeSensorListener(TAG)
+        control.removeControlListener(TAG)
         view.startCharts(false)
         mPostPredict?.dispose()
     }
