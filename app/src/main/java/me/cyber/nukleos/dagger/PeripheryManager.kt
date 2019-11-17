@@ -2,9 +2,7 @@ package me.cyber.nukleos.dagger
 
 import android.util.Log
 import io.reactivex.subjects.BehaviorSubject
-import me.cyber.nukleos.Action
 import me.cyber.nukleos.IMotors
-import me.cyber.nukleos.MotorMessage
 import me.cyber.nukleos.motors.MotorsControlStrategy
 import me.cyber.nukleos.sensors.LastKnownSensorManager
 import me.cyber.nukleos.sensors.Sensor
@@ -20,7 +18,7 @@ class PeripheryManager {
             notifyMotorsChanged()
         }
 
-    private val motorsControlStrategy = MotorsControlStrategy()
+    private var motorsControlStrategy : MotorsControlStrategy? = null
     private val sensors = mutableMapOf<Long, Sensor>()
     private var lastSelectedSensorId: Long? = null
 
@@ -38,42 +36,16 @@ class PeripheryManager {
             }
 
             if (it.isConnected() && !prevMotorsConnected) {
-                //some random task for motors
                 Thread {
-                    Log.d(TAG, "Executing motors action...")
+                    Log.d(TAG, "Initiating motors interaction...")
                     //has to wait after subscription write is complete
-                    while (it.isConnected()) {
-                        openSesame()
-                        sleep(3000)
-                        closeSesame()
-                        sleep(3000)
-                    }
+                    sleep(1000)
+                    motorsControlStrategy = MotorsControlStrategy()
+                    motorsControlStrategy?.motorsConnected(it)
                 }.start()
             }
             prevMotorsConnected = it.isConnected()
         }
-    }
-
-    private fun openSesame() {
-        Log.d(TAG, "openSesame")
-        motors.executeMotorMessage(MotorMessage("openSesame",
-                Action.Servo(1, IMotors.TOP_SERVO_OPEN.toFloat()),
-                Action.Wait(200),
-                Action.Servo(0, IMotors.BASE_SERVO_OPEN.toFloat()),
-                Action.Motor(byteArrayOf(127.toByte(), 127.toByte(), 127.toByte(), 127.toByte(),
-                        127.toByte(), 127.toByte(), 127.toByte(), 127.toByte())))
-        )
-    }
-
-    private fun closeSesame() {
-        Log.d(TAG, "closeSesame")
-        motors.executeMotorMessage(MotorMessage("closeSesame",
-                Action.Servo(0, IMotors.BASE_SERVO_CLOSE.toFloat()),
-                Action.Wait(200),
-                Action.Servo(1, IMotors.TOP_SERVO_CLOSE.toFloat()),
-                Action.Motor(byteArrayOf(0.toByte(), 0.toByte(), 0.toByte(), 0.toByte(),
-                        0.toByte(), 0.toByte(), 0.toByte(), 0.toByte())))
-        )
     }
 
     fun removeIf(needToBeDeleted: (Sensor) -> Boolean) {
@@ -120,6 +92,7 @@ class PeripheryManager {
     }
 
     fun disconnectMotors() {
+        prevMotorsConnected = false
         motors.disconnect()
     }
 
@@ -129,7 +102,7 @@ class PeripheryManager {
 
     fun onMotionUpdated(dataClass: Int) {
         if (motors.isConnected()) {
-            motorsControlStrategy.control(motors, dataClass)
+            motorsControlStrategy?.control(motors, dataClass)
         }
     }
 
