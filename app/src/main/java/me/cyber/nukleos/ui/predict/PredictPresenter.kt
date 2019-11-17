@@ -80,9 +80,11 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
 
     private fun onPredictionResult(predictedClass: Int, distribution: FloatArray) {
         predictionInProgress = false
-        control.notifyDataArrived(predictedClass)
-        view.notifyPredict(
-                PredictResponse(listOf(Prediction(predictedClass, distribution.asList()))))
+        if (predictEnabled) {
+            control.notifyDataArrived(predictedClass)
+            view.notifyPredict(
+                    PredictResponse(listOf(Prediction(predictedClass, distribution.asList()))))
+        }
     }
 
     private fun onPredictionError(t: Throwable) {
@@ -106,10 +108,12 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
         } else {
             Sensor.removeSensorListener(PREDICTION_TAG)
         }
+        view.notifyPredictEnabled(predictEnabled)
     }
 
     override fun destroy() {
         predictEnabled = false
+        view.notifyPredictEnabled(predictEnabled)
         Sensor.removeSensorListener(TAG)
         control.removeControlListener(TAG)
         view.startCharts(false)

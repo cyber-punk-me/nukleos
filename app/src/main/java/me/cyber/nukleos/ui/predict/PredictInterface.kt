@@ -11,6 +11,7 @@ interface PredictInterface {
         fun startCharts(isRunning: Boolean)
         fun hideNoStreamingMessage()
         fun showNoStreamingMessage()
+        fun notifyPredictEnabled(enabled: Boolean)
         fun notifyPredict(prediction: PredictResponse)
         fun notifyPredictError(error: Throwable)
         fun updateMotors(iMotor: Int, direction: Int, speed: Int)

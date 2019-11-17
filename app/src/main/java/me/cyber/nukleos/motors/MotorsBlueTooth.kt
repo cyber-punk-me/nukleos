@@ -51,6 +51,7 @@ class MotorsBlueTooth(val peripheryManager: PeripheryManager, val bluetoothConne
     override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
         super.onMtuChanged(gatt, mtu, status)
         Log.d(TAG, "Mtu response; mtu: $mtu, status: $status")
+        gatt?.discoverServices()
     }
 
     override fun getConnectionStatus(): IMotors.Status = connStatus
@@ -132,10 +133,6 @@ class MotorsBlueTooth(val peripheryManager: PeripheryManager, val bluetoothConne
             Log.d(TAG, "MotorsBlueTooth device connected. Discovering services.")
             //request larger Maximum Transmission Unit
             gatt.requestMtu(512)
-            Thread {
-                Thread.sleep(3000)
-                gatt.discoverServices()
-            }.start()
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
             // Calling onDisconnected() here will cause to release the GATT resources.
             disconnect()

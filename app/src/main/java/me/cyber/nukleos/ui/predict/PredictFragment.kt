@@ -67,11 +67,27 @@ class PredictFragment : BaseFragment<PredictInterface.Presenter>(), PredictInter
         val min = prediction.distr.min()
         val delta = max!! - min!!
 
-        val normalized = prediction.distr.map { ((it - min) / (delta) * 100).toInt() }
-        "${prediction.output} | $normalized".showShortToast()
+        val normalized = prediction.distr.map { ((it - min) / (delta) * 100).toInt().toString() }
+        .map { it.padStart(3, ' ')}
+
+        activity?.runOnUiThread {
+            sensor_notification.text = "${prediction.output} | $normalized"
+        }
+    }
+
+    override fun notifyPredictEnabled(enabled: Boolean) {
+        if (!enabled) {
+            activity?.runOnUiThread {
+                sensor_notification.text = ""
+                if (predict_toggle.isChecked) {
+                    predict_toggle.isChecked = false
+                }
+            }
+        }
     }
 
     override fun notifyPredictError(error: Throwable) = (error.message ?: "").showShortToast()
+
     override fun startCharts(isRunning: Boolean) {
         sensor_charts_predict_view?.apply {
             this.isRunning = isRunning
@@ -79,10 +95,10 @@ class PredictFragment : BaseFragment<PredictInterface.Presenter>(), PredictInter
     }
 
     override fun showNoStreamingMessage() {
-        connect_device_warning.visibility = View.VISIBLE
+        sensor_notification.text = getText(R.string.connect_data_source)
     }
 
     override fun hideNoStreamingMessage() {
-        connect_device_warning.visibility = View.INVISIBLE
+        sensor_notification.text = ""
     }
 }

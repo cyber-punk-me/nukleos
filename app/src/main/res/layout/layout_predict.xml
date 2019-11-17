@@ -5,7 +5,7 @@
     android:animateLayoutChanges="true">
 
     <TextView
-        android:id="@+id/connect_device_warning"
+        android:id="@+id/sensor_notification"
         style="@style/TextAppearance.AppCompat.Body1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -13,7 +13,8 @@
         android:layout_marginTop="100dp"
         android:gravity="center"
         android:text="@string/connect_data_source"
-        android:visibility="invisible" />
+        android:typeface="monospace"
+        />
 
     <me.cyber.nukleos.views.PowerfulChartsView
         android:id="@+id/sensor_charts_predict_view"

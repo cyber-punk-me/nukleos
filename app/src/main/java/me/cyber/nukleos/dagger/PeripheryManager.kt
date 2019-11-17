@@ -59,7 +59,10 @@ class PeripheryManager {
         motors.executeMotorMessage(MotorMessage("openSesame",
                 Action.Servo(1, IMotors.TOP_SERVO_OPEN.toFloat()),
                 Action.Wait(200),
-                Action.Servo(0, IMotors.BASE_SERVO_OPEN.toFloat())))
+                Action.Servo(0, IMotors.BASE_SERVO_OPEN.toFloat()),
+                Action.Motor(byteArrayOf(127.toByte(), 127.toByte(), 127.toByte(), 127.toByte(),
+                        127.toByte(), 127.toByte(), 127.toByte(), 127.toByte())))
+        )
     }
 
     private fun closeSesame() {
@@ -67,7 +70,10 @@ class PeripheryManager {
         motors.executeMotorMessage(MotorMessage("closeSesame",
                 Action.Servo(0, IMotors.BASE_SERVO_CLOSE.toFloat()),
                 Action.Wait(200),
-                Action.Servo(1, IMotors.TOP_SERVO_CLOSE.toFloat())))
+                Action.Servo(1, IMotors.TOP_SERVO_CLOSE.toFloat()),
+                Action.Motor(byteArrayOf(0.toByte(), 0.toByte(), 0.toByte(), 0.toByte(),
+                        0.toByte(), 0.toByte(), 0.toByte(), 0.toByte())))
+        )
     }
 
     fun removeIf(needToBeDeleted: (Sensor) -> Boolean) {
