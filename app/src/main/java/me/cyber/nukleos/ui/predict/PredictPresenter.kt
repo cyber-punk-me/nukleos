@@ -83,7 +83,7 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
         if (predictEnabled) {
             control.notifyDataArrived(predictedClass)
             view.notifyPredict(
-                    PredictResponse(listOf(Prediction(predictedClass, distribution.asList()))))
+                PredictResponse(listOf(Prediction(predictedClass, distribution.asList()))))
         }
     }
 
