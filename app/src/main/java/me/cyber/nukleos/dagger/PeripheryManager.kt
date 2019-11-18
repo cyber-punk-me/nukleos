@@ -4,7 +4,7 @@ import android.util.Log
 import io.reactivex.subjects.BehaviorSubject
 import me.cyber.nukleos.Action
 import me.cyber.nukleos.IMotors
-import me.cyber.nukleos.MotorMessage
+import me.cyber.nukleos.motors.MotorsControlStrategy
 import me.cyber.nukleos.sensors.LastKnownSensorManager
 import me.cyber.nukleos.sensors.Sensor
 import java.lang.Thread.sleep
@@ -19,6 +19,7 @@ class PeripheryManager {
             notifyMotorsChanged()
         }
 
+    private var motorsControlStrategy : MotorsControlStrategy? = null
     private val sensors = mutableMapOf<Long, Sensor>()
     private var lastSelectedSensorId: Long? = null
 
@@ -36,42 +37,16 @@ class PeripheryManager {
             }
 
             if (it.isConnected() && !prevMotorsConnected) {
-                //some random task for motors
                 Thread {
-                    Log.d(TAG, "Executing motors action...")
+                    Log.d(TAG, "Initiating motors interaction...")
                     //has to wait after subscription write is complete
-                    while (it.isConnected()) {
-                        openSesame()
-                        sleep(3000)
-                        closeSesame()
-                        sleep(3000)
-                    }
+                    sleep(1000)
+                    motorsControlStrategy = MotorsControlStrategy()
+                    motorsControlStrategy?.motorsConnected(it)
                 }.start()
             }
             prevMotorsConnected = it.isConnected()
         }
-    }
-
-    private fun openSesame() {
-        Log.d(TAG, "openSesame")
-/*        motors.setServoAngle(1, 120f)
-        sleep(400)
-        motors.setServoAngle(0, 60f)*/
-        motors.executeMotorMessage(MotorMessage("openSesame",
-                Action.Servo(1, 120F),
-                Action.Wait(200),
-                Action.Servo(0, 60F)))
-    }
-
-    private fun closeSesame() {
-        Log.d(TAG, "closeSesame")
-/*         motors.setServoAngle(1, 0f)
-        sleep(400)
-        motors.setServoAngle(0, 180f)*/
-        motors.executeMotorMessage(MotorMessage("closeSesame",
-                Action.Servo(0, 180F),
-                Action.Wait(200),
-                Action.Servo(1, 0F)))
     }
 
     fun removeIf(needToBeDeleted: (Sensor) -> Boolean) {
@@ -118,11 +93,18 @@ class PeripheryManager {
     }
 
     fun disconnectMotors() {
+        prevMotorsConnected = false
         motors.disconnect()
     }
 
     fun connectMotors() {
         motors.connect()
+    }
+
+    fun onMotionUpdated(dataClass: Int) {
+        if (motors.isConnected()) {
+            motorsControlStrategy?.control(motors, dataClass)
+        }
     }
 
     companion object {

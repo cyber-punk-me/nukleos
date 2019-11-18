@@ -69,6 +69,14 @@ interface IMotors {
             val angle = java.lang.Float.parseFloat(split[1])
             return Pair(iServo, angle)
         }
+
+        val BASE_SERVO_CLOSE = 177.0
+        val BASE_SERVO_OPEN = 55.0
+
+        val TOP_SERVO_CLOSE = 0.0
+        val TOP_SERVO_OPEN = 110.0
+
+
     }
 
 }
