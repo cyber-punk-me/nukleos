@@ -1,6 +1,9 @@
 package me.cyber.nukleos.data
 
-const val defaultDataReadsPerFeature = 8
+const val DEFAULT_DATA_READS_PER_FEATURE = 8
+
+//each FloatArray is a set of features for a channel
+typealias FeaturesArraysByChannel = List<FloatArray>
 
 val defaultFeatures: Array<(List<Float>) -> Float> = arrayOf(
         { channel -> meanAbsoluteValue(channel) },
@@ -8,9 +11,9 @@ val defaultFeatures: Array<(List<Float>) -> Float> = arrayOf(
         { channel -> zeroCrossing(channel) },
         { channel -> slopeSignChanges(channel) })
 
-fun mapNeuralDefault(data: List<FloatArray>): List<List<FloatArray>> {
+fun mapNeuralDefault(data: List<FloatArray>): List<FeaturesArraysByChannel> {
     return mapNeuralChunked(data,
-            defaultDataReadsPerFeature,
+            DEFAULT_DATA_READS_PER_FEATURE,
             defaultFeatures
     )
 }
@@ -22,7 +25,7 @@ fun mapNeuralDefault(data: List<FloatArray>): List<List<FloatArray>> {
  */
 private fun mapNeuralChunked(data: List<FloatArray>,
                              dataReadsPerFeature: Int,
-                             features: Array<(List<Float>) -> Float>): List<List<FloatArray>> {
+                             features: Array<(List<Float>) -> Float>): List<FeaturesArraysByChannel> {
     val chunked = data.chunked(dataReadsPerFeature) { mapNeural(it, features) }
     return if (chunked.last().size < dataReadsPerFeature) {
         //drop incomplete chunk
@@ -37,7 +40,7 @@ private fun mapNeuralChunked(data: List<FloatArray>,
  * @return list where each element is all features for a channel
  */
 private fun mapNeural(data: List<FloatArray>,
-                      features: Array<(List<Float>) -> Float>): List<FloatArray> {
+                      features: Array<(List<Float>) -> Float>): FeaturesArraysByChannel {
     val result = ArrayList<FloatArray>()
     for (i in data[0].indices) {
         val channelData: List<Float> = data.map { it[i] }

@@ -9,6 +9,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import me.cyber.nukleos.App
 import me.cyber.nukleos.dagger.PeripheryManager
+import me.cyber.nukleos.data.DEFAULT_DATA_READS_PER_FEATURE
 import me.cyber.nukleos.data.mapNeuralDefault
 import me.cyber.nukleos.sensors.Sensor
 import me.cyber.nukleos.sensors.SensorListener
@@ -23,8 +24,6 @@ class TrainingPresenter(override val view: TrainingInterface.View, private val m
     : TrainingInterface.Presenter(view), SensorListener {
 
     private val TAG = "TrainingPresenter"
-    private val millsBetweenReads = 5
-    private val numSensors = 8
     private val mApi by lazy { App.applicationComponent.getApiHelper().getApi() }
     private val mLearningSessId = UUID.fromString("885d0665-ca5d-46ed-b6dc-ea2c2610a67f")
     private val mScriptId = UUID.fromString("7de76908-d4d9-4ce9-98de-118a4fb3b8f8")
@@ -33,7 +32,6 @@ class TrainingPresenter(override val view: TrainingInterface.View, private val m
     private var mPostDataSubscription: Disposable? = null
     private var mTrainModelSubscription: Disposable? = null
     private var mServerTimeSubscription: Disposable? = null
-    private var mMarkTime = false
 
     private val calibrationPreparationResultReceiver = CalibrationPreparationResultReceiver(
             {
@@ -61,29 +59,6 @@ class TrainingPresenter(override val view: TrainingInterface.View, private val m
             {
                 "Model delete failed".showShortToast()
             })
-
-    @Deprecated("use convertData")
-    private fun convertDataOld(data: List<FloatArray>, dataType: Int, window: Int = 64, slide: Int = 64) =
-            StringBuffer().apply {
-                val recordEndTime = System.currentTimeMillis() + mServerTimeMinusLocal
-                val recordStartTime = recordEndTime - millsBetweenReads * data.size
-                val floats = data.flatMap { d -> d.asList() }
-                var start = 0
-                var end = window
-                while (end <= floats.size) {
-                    for (i in start until end) {
-                        append("${floats[i]},")
-                    }
-                    if (!mMarkTime) {
-                        append("$dataType\n")
-                    } else {
-                        val windowTime = recordStartTime + start * millsBetweenReads / numSensors
-                        append("$windowTime\n")
-                    }
-                    start += slide
-                    end += slide
-                }
-            }.toString()
 
     private fun convertData(data: List<FloatArray>, dataClass: Int): String {
         val builder = StringBuilder()
@@ -160,7 +135,6 @@ class TrainingPresenter(override val view: TrainingInterface.View, private val m
     override fun start() {
         Sensor.registerSensorListener(TAG, this)
         with(view) {
-            //TODO we should support several sensors
             val firstStreamingSensor = mPeripheryManager.getActiveSensor()
             if (firstStreamingSensor == null) {
                 showNoStreamingMessage()
@@ -227,7 +201,7 @@ class TrainingPresenter(override val view: TrainingInterface.View, private val m
 
             @Suppress("NestedLambdaShadowedImplicitParameter")
             val classData = it.withIndex()
-                    .groupBy { it.index / 8 } //make groups of 8 x 8 floats
+                    .groupBy { it.index / DEFAULT_DATA_READS_PER_FEATURE } //make groups of 8 x 8 floats
                     .map { it.value.map { it.value } } //get rid of indices
                     .dropLast(1) //drop last group that could be incomplete
                     .map { it.flatMap { it.toList() }.toFloatArray() } //make arrays of 64 floats for prediction purposes

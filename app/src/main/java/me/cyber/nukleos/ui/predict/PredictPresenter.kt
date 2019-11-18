@@ -9,6 +9,7 @@ import me.cyber.nukleos.api.PredictResponse
 import me.cyber.nukleos.api.Prediction
 import me.cyber.nukleos.control.ControlManager
 import me.cyber.nukleos.dagger.PeripheryManager
+import me.cyber.nukleos.data.DEFAULT_DATA_READS_PER_FEATURE
 import me.cyber.nukleos.data.mapNeuralDefault
 import me.cyber.nukleos.sensors.Sensor
 import me.cyber.nukleos.sensors.SensorListener
@@ -104,7 +105,7 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
                     }
                 }
 
-            }, SubscriptionParams(8, 8))
+            }, SubscriptionParams(DEFAULT_DATA_READS_PER_FEATURE, DEFAULT_DATA_READS_PER_FEATURE))
         } else {
             Sensor.removeSensorListener(PREDICTION_TAG)
         }
