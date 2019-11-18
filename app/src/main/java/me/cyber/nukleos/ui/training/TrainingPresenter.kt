@@ -5,6 +5,8 @@ import android.util.Log
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import me.cyber.nukleos.App
 import me.cyber.nukleos.dagger.PeripheryManager
 import me.cyber.nukleos.data.mapNeuralDefault
@@ -89,7 +91,7 @@ class TrainingPresenter(override val view: TrainingInterface.View, private val m
         val grouped = mapNeuralDefault(data)
 
         grouped.forEach { timeGroup ->
-            timeGroup.forEach{ sensorFeatures ->
+            timeGroup.forEach { sensorFeatures ->
                 sensorFeatures.forEach {
                     builder.append("$it,")
                 }
@@ -180,9 +182,11 @@ class TrainingPresenter(override val view: TrainingInterface.View, private val m
     }
 
     override fun onCollectStarted(dataWindow: Int, onCollected: (List<FloatArray>) -> Unit) {
-        Sensor.listenOnce(object : SensorListener{
+        Sensor.listenOnce(object : SensorListener {
             override fun onSensorData(sensorName: String, data: List<FloatArray>) {
-                onCollected(data)
+                GlobalScope.launch {
+                    onCollected(data)
+                }
             }
         }, dataWindow)
     }
