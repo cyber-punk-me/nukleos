@@ -36,7 +36,7 @@ interface IMotors {
 
     fun setServoAngle(iServo: Int, angle: Float)
 
-    fun executeMotorMessage(motorMessage: MotorMessage) = motorMessage.execute(this)
+    fun executeMotorMessage(motorMessage: MotorMessage) = println("Run command: $motorMessage")
 
     fun getName() : String = "STUB"
 

@@ -34,8 +34,8 @@ abstract class Action {
 
     }
 
-    class Servo(@get:JsonProperty("s")  var iServo: Int,
-                @get:JsonProperty("a")  var angle: Float): Action() {
+    class Servo(@get:JsonProperty("s") var iServo: Int,
+                @get:JsonProperty("a") var angle: Float) : Action() {
         override fun execute(motors: IMotors) {
             motors.setServoAngle(iServo, angle)
         }
@@ -67,9 +67,7 @@ data class MotorMessage(@get:JsonProperty("n") val name: String,
     constructor(name: String, vararg actions: Action) : this(name, actions.asList())
 
     fun execute(motors: IMotors) {
-        Thread {
-            actions.forEach { it.execute(motors) }
-        }.start()
+        actions.forEach { it.execute(motors) }
     }
 
     override fun toString(): String = jsonMapper.writeValueAsString(this)

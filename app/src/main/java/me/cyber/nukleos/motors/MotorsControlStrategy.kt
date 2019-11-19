@@ -40,7 +40,7 @@ class MotorsControlStrategy {
 
     private fun hackerMode(motors: IMotors) {
         Log.d(PeripheryManager.TAG, "standby")
-        motors.executeMotorMessage(MotorMessage("standby",
+        motors.executeMotorMessage(MotorMessage("hacker",
                 CLOSE_SERVOS + HACKER_LIGHTS)
         )
     }
