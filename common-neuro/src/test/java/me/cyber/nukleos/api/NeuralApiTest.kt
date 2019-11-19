@@ -41,7 +41,9 @@ class NeuralApiTest {
     private fun convertData(data: List<FloatArray>, dataClass: Int): String {
         val builder = StringBuilder()
 
+        val start = System.currentTimeMillis()
         val grouped = mapNeuralDefault(data)
+        println("Convert worked for ${System.currentTimeMillis() - start}")
 
         grouped.forEach { timeGroup ->
             timeGroup.forEach{ sensorFeatures ->

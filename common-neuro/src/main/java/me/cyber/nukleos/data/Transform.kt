@@ -1,27 +1,33 @@
 package me.cyber.nukleos.data
 
-import kotlinx.coroutines.*
+const val DEFAULT_DATA_READS_PER_FEATURE = 8
 
-val defaultGroup = 8
+//each FloatArray is a set of features for a channel
+typealias FeaturesArraysByChannel = List<FloatArray>
 
-fun mapNeuralDefault(data: List<FloatArray>) =
-        mapNeuralChunked(data,
-                defaultGroup,
-                { channel -> meanAbsoluteValue(channel) },
-                { channel -> waveformLength(channel) },
-                { channel -> zeroCrossing(channel) },
-                { channel -> slopeSignChanges(channel) }
-        )
+val defaultFeatures: Array<(List<Float>) -> Float> = arrayOf(
+        { channel -> meanAbsoluteValue(channel) },
+        { channel -> waveformLength(channel) },
+        { channel -> zeroCrossing(channel) },
+        { channel -> slopeSignChanges(channel) })
+
+fun mapNeuralDefault(data: List<FloatArray>): List<FeaturesArraysByChannel> {
+    return mapNeuralChunked(data,
+            DEFAULT_DATA_READS_PER_FEATURE,
+            defaultFeatures
+    )
+}
 
 /**
  * @param data - list where each element is data reading. Each data reading has multiple channels (FloatArray)
- * @return list where each element is a chunk of channel features
+ * @param dataReadsPerFeature - length of data to accumulate a feature
+ * @return list where each element is a chunk of all channel features. Each chunk was formed from data of length dataReadsPerFeature
  */
-fun mapNeuralChunked(data: List<FloatArray>,
-                     chunk: Int,
-                     vararg features: (List<Float>) -> Float): List<List<FloatArray>> {
-    val chunked = data.chunked(chunk) { mapNeural(it, *features) }
-    return if (chunked.last().size < chunk) {
+private fun mapNeuralChunked(data: List<FloatArray>,
+                             dataReadsPerFeature: Int,
+                             features: Array<(List<Float>) -> Float>): List<FeaturesArraysByChannel> {
+    val chunked = data.chunked(dataReadsPerFeature) { mapNeural(it, features) }
+    return if (chunked.last().size < dataReadsPerFeature) {
         //drop incomplete chunk
         chunked.dropLast(1)
     } else {
@@ -33,23 +39,16 @@ fun mapNeuralChunked(data: List<FloatArray>,
  * @param data - list where each element is data reading. Each data reading has multiple channels (FloatArray)
  * @return list where each element is all features for a channel
  */
-fun mapNeural(data: List<FloatArray>,
-              vararg features: (List<Float>) -> Float): List<FloatArray> {
+private fun mapNeural(data: List<FloatArray>,
+                      features: Array<(List<Float>) -> Float>): FeaturesArraysByChannel {
     val result = ArrayList<FloatArray>()
     for (i in data[0].indices) {
         val channelData: List<Float> = data.map { it[i] }
-        runBlocking {
-            val channelFeatures: FloatArray = applyFeatures(features, channelData).toFloatArray()
-            result.add(channelFeatures)
-        }
+        val channelFeatures: FloatArray = features.map { it(channelData) }.toFloatArray()
+        result.add(channelFeatures)
     }
     return result
 }
-
-private suspend fun applyFeatures(features: Array<out (List<Float>) -> Float>, channelData: List<Float>) =
-        coroutineScope {
-            features.map { async { it(channelData) } }.awaitAll()
-        }
 
 fun meanAbsoluteValue(segment: List<Float>): Float {
     var sum = 0.0F
