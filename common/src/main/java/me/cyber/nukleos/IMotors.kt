@@ -70,7 +70,7 @@ interface IMotors {
             return Pair(iServo, angle)
         }
 
-        val BASE_SERVO_CLOSE = 177.0
+        val BASE_SERVO_CLOSE = 175.0 //177.0
         val BASE_SERVO_OPEN = 55.0
 
         val TOP_SERVO_CLOSE = 0.0
