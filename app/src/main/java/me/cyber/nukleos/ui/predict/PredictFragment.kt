@@ -2,6 +2,7 @@ package me.cyber.nukleos.ui.predict
 
 import android.content.Context
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.INVISIBLE
@@ -36,6 +37,17 @@ class PredictFragment : BaseFragment<PredictInterface.Presenter>(), PredictInter
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
             inflater.inflate(R.layout.layout_predict, container, false).apply { setHasOptionsMenu(true) }
 
+    private fun showActionButtonSelected(iAction: Int) {
+        context?.let {
+            val unselectedDrawable = ContextCompat.getDrawable(it, R.drawable.button_dark)
+            val selectedDrawable = ContextCompat.getDrawable(it, R.drawable.button_light)
+            button_action0.background = if (0 == iAction) selectedDrawable else unselectedDrawable
+            button_action1.background = if (1 == iAction) selectedDrawable else unselectedDrawable
+            button_action2.background = if (2 == iAction) selectedDrawable else unselectedDrawable
+            button_action3.background = if (3 == iAction) selectedDrawable else unselectedDrawable
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         with(sensor_charts_predict_view) {
@@ -45,10 +57,22 @@ class PredictFragment : BaseFragment<PredictInterface.Presenter>(), PredictInter
         }
         predict_toggle.setOnClickListener { predictPresenter.onPredictSwitched(predict_toggle.isChecked, predict_online_toggle.isChecked) }
         predict_online_toggle.setOnClickListener { predictPresenter.onPredictSwitched(predict_toggle.isChecked, predict_online_toggle.isChecked) }
-        button_action1.visibility = INVISIBLE
-        button_action2.visibility = INVISIBLE
-        button_action3.visibility = INVISIBLE
-        button_action4.visibility = INVISIBLE
+        //button_action0.visibility = INVISIBLE
+        //button_action1.visibility = INVISIBLE
+        //button_action2.visibility = INVISIBLE
+        //button_action3.visibility = INVISIBLE
+        button_action0.setOnClickListener {
+            predictPresenter.onActionPressed(0)
+        }
+        button_action1.setOnClickListener {
+            predictPresenter.onActionPressed(1)
+        }
+        button_action2.setOnClickListener {
+            predictPresenter.onActionPressed(2)
+        }
+        button_action3.setOnClickListener {
+            predictPresenter.onActionPressed(3)
+        }
     }
 
     override fun showData(data: List<FloatArray>) {
@@ -72,6 +96,7 @@ class PredictFragment : BaseFragment<PredictInterface.Presenter>(), PredictInter
 
         activity?.runOnUiThread {
             sensor_notification.text = "${prediction.output} | $normalized"
+            showActionButtonSelected(prediction.output)
         }
     }
 

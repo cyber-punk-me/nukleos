@@ -35,7 +35,17 @@
             android:layout_height="wrap_content"
             >
 
-            <ToggleButton
+            <Button
+                android:id="@+id/button_action0"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_margin="50dp"
+                android:layout_weight="1"
+                android:enabled="true"
+                android:text="@string/action0"
+                android:background="@drawable/button_light"/>
+
+            <Button
                 android:id="@+id/button_action1"
                 android:layout_width="0dp"
                 android:layout_weight="1"
@@ -43,21 +53,7 @@
                 android:layout_margin="50dp"
                 android:enabled="true"
                 android:text="@string/action1"
-                android:textOn="@string/action1"
-                android:textOff="@string/action1"
-                />
-
-            <ToggleButton
-                android:id="@+id/button_action2"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="60dp"
-                android:layout_margin="50dp"
-                android:enabled="true"
-                android:text="@string/action2"
-                android:textOn="@string/action2"
-                android:textOff="@string/action2"
-                />
+                android:background="@drawable/button_dark"/>
 
         </LinearLayout>
 
@@ -68,7 +64,17 @@
             android:layout_height="wrap_content"
             >
 
-            <ToggleButton
+            <Button
+                android:id="@+id/button_action2"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="60dp"
+                android:layout_margin="50dp"
+                android:enabled="true"
+                android:text="@string/action2"
+                android:background="@drawable/button_dark"/>
+
+            <Button
                 android:id="@+id/button_action3"
                 android:layout_width="0dp"
                 android:layout_weight="1"
@@ -76,21 +82,8 @@
                 android:layout_margin="50dp"
                 android:enabled="true"
                 android:text="@string/action3"
-                android:textOn="@string/action3"
-                android:textOff="@string/action3"
-                />
+                android:background="@drawable/button_dark"/>
 
-            <ToggleButton
-                android:id="@+id/button_action4"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="60dp"
-                android:layout_margin="50dp"
-                android:enabled="true"
-                android:text="@string/action4"
-                android:textOn="@string/action4"
-                android:textOff="@string/action4"
-                />
 
         </LinearLayout>
 

@@ -2,7 +2,6 @@ package me.cyber.nukleos.dagger
 
 import android.util.Log
 import io.reactivex.subjects.BehaviorSubject
-import me.cyber.nukleos.Action
 import me.cyber.nukleos.IMotors
 import me.cyber.nukleos.motors.MotorsControlStrategy
 import me.cyber.nukleos.sensors.LastKnownSensorManager

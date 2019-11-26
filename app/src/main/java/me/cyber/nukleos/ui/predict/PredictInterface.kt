@@ -19,5 +19,6 @@ interface PredictInterface {
 
     abstract class Presenter(override val view: BaseView) : BasePresenter<BaseView>(view) {
         abstract fun onPredictSwitched(on: Boolean, predictOnline: Boolean)
+        abstract fun onActionPressed(iAction: Int)
     }
 }
