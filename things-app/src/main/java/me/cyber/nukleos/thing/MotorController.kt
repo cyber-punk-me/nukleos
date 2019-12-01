@@ -4,10 +4,13 @@ import android.util.Log
 import com.google.android.things.contrib.driver.pwmservo.Servo
 import com.zugaldia.robocar.hardware.adafruit2348.AdafruitMotorHat
 import me.cyber.nukleos.IMotors
+import me.cyber.nukleos.MotorMessage
+import java.util.concurrent.Executors
 import kotlin.math.absoluteValue
 
 class MotorController : IMotors {
 
+    private val commandExecutor = Executors.newSingleThreadExecutor()
     //ada motors are indexed from 1; 0th element is empty
     private val motorsSpeeds = ByteArray(IMotors.MOTORS_COUNT)
 
@@ -23,6 +26,12 @@ class MotorController : IMotors {
     override fun getConnectionStatus() = IMotors.Status.CONNECTED
 
     override fun getName(): String = "ADA MOTORS"
+
+    override fun executeMotorMessage(motorMessage: MotorMessage) {
+        commandExecutor.execute{
+            motorMessage.execute(this)
+        }
+    }
 
     /**
      * @param iMotor

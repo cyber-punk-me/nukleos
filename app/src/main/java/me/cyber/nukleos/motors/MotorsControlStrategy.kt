@@ -27,7 +27,7 @@ class MotorsControlStrategy {
     private fun battleMode(motors: IMotors) {
         Log.d(PeripheryManager.TAG, "battle")
         motors.executeMotorMessage(MotorMessage("battle",
-                OPEN_SERVOS + BATTLE_LIGHTS)
+                OPEN_SERVOS + RED)
         )
     }
 
@@ -39,9 +39,9 @@ class MotorsControlStrategy {
     }
 
     private fun hackerMode(motors: IMotors) {
-        Log.d(PeripheryManager.TAG, "standby")
-        motors.executeMotorMessage(MotorMessage("standby",
-                CLOSE_SERVOS + HACKER_LIGHTS)
+        Log.d(PeripheryManager.TAG, "hacker")
+        motors.executeMotorMessage(MotorMessage("hacker",
+                CLOSE_SERVOS + GREEN)
         )
     }
 
@@ -49,6 +49,19 @@ class MotorsControlStrategy {
         const val TAG = "MotorsControlStrategy"
 
         const val LIGHT_0 = 0.toByte()
+
+        val RED = Action.Motor(byteArrayOf(LIGHT_0, LIGHT_0, LIGHT_0, LIGHT_0,
+                (-120).toByte(), (0).toByte(), (0).toByte(), LIGHT_0))
+
+        val GREEN = Action.Motor(byteArrayOf(LIGHT_0, LIGHT_0, LIGHT_0, LIGHT_0,
+                (0).toByte(), (-120).toByte(), (0).toByte(), LIGHT_0))
+
+        val BLUE = Action.Motor(byteArrayOf(LIGHT_0, LIGHT_0, LIGHT_0, LIGHT_0,
+                (0).toByte(), (0).toByte(), (-5).toByte(), LIGHT_0))
+
+        val ALL_LIGHTS = Action.Motor(byteArrayOf(LIGHT_0, LIGHT_0, LIGHT_0, LIGHT_0,
+                //r,g,b
+                (60).toByte(), (60).toByte(), (-5).toByte(), LIGHT_0))
 
         val OPEN_SERVOS = listOf(Action.Servo(1, IMotors.TOP_SERVO_OPEN.toFloat()),
                 Action.Wait(200),
@@ -58,15 +71,6 @@ class MotorsControlStrategy {
                 Action.Wait(200),
                 Action.Servo(1, IMotors.TOP_SERVO_CLOSE.toFloat()))
 
-        val ALL_LIGHTS = Action.Motor(byteArrayOf(LIGHT_0, LIGHT_0, LIGHT_0, LIGHT_0,
-                //r,g,b
-                45.toByte(), 30.toByte(), 40.toByte(), LIGHT_0))
-
-        val BATTLE_LIGHTS = Action.Motor(byteArrayOf(LIGHT_0, LIGHT_0, LIGHT_0, LIGHT_0,
-                45.toByte(), LIGHT_0, LIGHT_0, LIGHT_0))
-
-        val HACKER_LIGHTS = Action.Motor(byteArrayOf(LIGHT_0, LIGHT_0, LIGHT_0, LIGHT_0,
-                LIGHT_0, 30.toByte(), LIGHT_0, LIGHT_0))
     }
 
 }
