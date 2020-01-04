@@ -2,6 +2,7 @@ package me.cyber.nukleos.ui.training
 
 import me.cyber.nukleos.BasePresenter
 import me.cyber.nukleos.BaseView
+import me.cyber.nukleos.api.ModelMeta
 
 interface TrainingInterface {
 
@@ -21,7 +22,7 @@ interface TrainingInterface {
         fun setDataType(selectedType: Int)
         fun notifyDataSent()
         fun notifyDataFailed()
-        fun notifyTrainModelStarted()
+        fun notifyTrainModelStarted(modelMeta: ModelMeta)
         fun notifyTrainModelFailed()
     }
 
