@@ -33,7 +33,7 @@ class RetrofitApi(private val mUrl: String, private val observeScheduler: Schedu
 
     private val mRequest by lazy { mRetrofit.create(IRetrofitRequests::class.java) }
 
-    fun postData(dataId: UUID, rawData: String, extension: String) = Single.create { emitter: SingleEmitter<Meta> ->
+    fun postData(dataId: UUID, rawData: String, extension: String) = Single.create { emitter: SingleEmitter<DataMeta> ->
         mRequest.postData(dataId, RequestBody.create(MediaType.parse("text/plain"), rawData), extension)
                 .subscribeOn(Schedulers.io())
                 .observeOn(observeScheduler)
@@ -44,8 +44,8 @@ class RetrofitApi(private val mUrl: String, private val observeScheduler: Schedu
                 })
     }
 
-    fun trainModel(dataId: UUID, scriptId: UUID) = Single.create { emitter: SingleEmitter<Meta> ->
-        mRequest.postModel(Model(dataId, scriptId))
+    fun trainModel(dataId: UUID, scriptId: UUID) = Single.create { emitter: SingleEmitter<ModelMeta> ->
+        mRequest.postModel(TrainModelReq(dataId, scriptId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(observeScheduler)
                 .subscribe({

@@ -71,7 +71,7 @@ class NeuralApiTest {
             val feeder = SensorDataFeeder()
             feeder.listenOnce(object : SensorListener {
                 override fun onSensorData(sensorName: String, data: List<FloatArray>) {
-                    api.postData(trainDataUUID, convertData(data, dataClass), "csv").subscribe({
+                    api.postData(trainDataUUID, convertData(data, dataClass), ".csv").subscribe({
                         println(it)
                     }, {
                         println(it)

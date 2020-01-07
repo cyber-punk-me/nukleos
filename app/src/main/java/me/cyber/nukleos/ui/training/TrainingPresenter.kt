@@ -79,7 +79,7 @@ class TrainingPresenter(override val view: TrainingInterface.View, private val m
     }
 
     private fun sendData(data: String, learningSessId: UUID) = with(view) {
-        mPostDataSubscription = mApi.postData(learningSessId, data, "csv")
+        mPostDataSubscription = mApi.postData(learningSessId, data, ".csv")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
@@ -105,7 +105,7 @@ class TrainingPresenter(override val view: TrainingInterface.View, private val m
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     view.goToState(TrainingInterface.State.IDLE)
-                    view.notifyTrainModelStarted()
+                    view.notifyTrainModelStarted(it)
                 }, {
                     view.goToState(TrainingInterface.State.IDLE)
                     view.notifyTrainModelFailed()

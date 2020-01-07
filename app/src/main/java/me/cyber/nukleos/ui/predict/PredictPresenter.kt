@@ -112,6 +112,10 @@ class PredictPresenter(override val view: PredictInterface.View, private val mPe
         view.notifyPredictEnabled(predictEnabled)
     }
 
+    override fun onActionPressed(iAction: Int) {
+        mPeripheryManager.onMotionUpdated(iAction)
+    }
+
     override fun destroy() {
         predictEnabled = false
         view.notifyPredictEnabled(predictEnabled)

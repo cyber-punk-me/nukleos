@@ -10,6 +10,7 @@ import android.widget.AdapterView
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.layout_train.*
 import me.cyber.nukleos.BaseFragment
+import me.cyber.nukleos.api.ModelMeta
 import me.cyber.nukleos.sensors.myosensor.MYO_CHANNELS
 import me.cyber.nukleos.sensors.myosensor.MYO_MAX_VALUE
 import me.cyber.nukleos.sensors.myosensor.MYO_MIN_VALUE
@@ -90,7 +91,7 @@ class TrainingFragment : BaseFragment<TrainingInterface.Presenter>(), TrainingIn
         calibrate_button.setOnClickListener { trainingPresenter.onCalibratePressed() }
     }
 
-    override fun notifyTrainModelStarted() = "Model training started.".showShortToast()
+    override fun notifyTrainModelStarted(modelMeta: ModelMeta) = "Model training started : $modelMeta".showShortToast()
     override fun notifyTrainModelFailed() = "Model training failed.".showShortToast()
     override fun notifyDataSent() = "Data sent.".showShortToast()
     override fun notifyDataFailed() = "Data transfer failed.".showShortToast()
